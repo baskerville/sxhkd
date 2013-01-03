@@ -1,0 +1,22 @@
+MonBrightnessDown
+    backlight -1
+
+MonBrightnessUp
+    backlight +1
+
+AudioPrev
+    mpc -q prev
+
+AudioNext
+    mpc -q next
+
+super + LaunchA
+    scrot
+
+super + shift + @LaunchA
+    scrot -s
+
+super + shift + equal
+    mosaic "$HOME/image"
+
+# vim: set ft=conf:
