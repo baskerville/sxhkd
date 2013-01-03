@@ -39,7 +39,7 @@ clean:
 
 install:
 	@echo "installing executable files to $(DESTDIR)$(BINPREFIX)"
-	@install -D -m 755 sxhkd $(DESTDIR)$(BINPREFIX)/xshkd
+	@install -D -m 755 sxhkd $(DESTDIR)$(BINPREFIX)/sxhkd
 
 uninstall:
 	@echo "removing executable files from $(DESTDIR)$(BINPREFIX)"
