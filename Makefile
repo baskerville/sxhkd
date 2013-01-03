@@ -7,7 +7,6 @@ LDFLAGS = $(LIBS)
 
 PREFIX    ?= /usr/local
 BINPREFIX = $(PREFIX)/bin
-MANPREFIX = $(PREFIX)/share/man
 
 SRC = sxhkd.c keys.c helpers.c
 OBJ = $(SRC:.c=.o)
@@ -41,13 +40,9 @@ clean:
 install:
 	@echo "installing executable files to $(DESTDIR)$(BINPREFIX)"
 	@install -D -m 755 sxhkd $(DESTDIR)$(BINPREFIX)/xshkd
-	@echo "installing manual page to $(DESTDIR)$(MANPREFIX)/man1"
-	@install -D -m 644 sxhkd.1 $(DESTDIR)$(MANPREFIX)/man1/xshkd.1
 
 uninstall:
 	@echo "removing executable files from $(DESTDIR)$(BINPREFIX)"
 	@rm -f $(DESTDIR)$(BINPREFIX)/sxhkd
-	@echo "removing manual page from $(DESTDIR)$(MANPREFIX)/man1"
-	@rm -f $(DESTDIR)$(MANPREFIX)/man1/sxhkd.1
 
 .PHONY: all debug options clean install uninstall
