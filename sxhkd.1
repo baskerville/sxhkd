@@ -1,0 +1,75 @@
+.TH sxhkd 1 sxhkd
+.SH NAME
+Simple X HotKey Daemon.
+.SH SYNOPSIS
+.SY sxhkd
+.RI [ OPTIONS ]
+.YS
+.SH DESCRIPTION
+.PP
+sxhkd is a simple X hotkey daemon.
+.SH OPTIONS
+.TP
+.BI -h
+Print the synopsis to standard output and exit.
+.TP
+.BI -v
+Print the version information to standard output and exit.
+.TP
+.BI -c " CONFIG_FILE"
+Read the configuration from the given file.
+.SH CONFIGURATION
+.PP
+Each line of the configuration file is interpreted as so:
+.IP \(bu 2
+If it starts with
+.IR # ,
+it is ignored.
+.IP \(bu 2
+If it starts with one or more white space characters, it is read as a command.
+.IP \(bu 2
+Otherwise, it is parsed as a hotkey: each key name is separated by spaces and/or
+.IR +
+characters.
+.SS General Syntax:
+.EX
+    [MODIFIER + ]*[@]KEYSYM
+        COMMAND
+.EE
+.PP
+Where 
+.I MODIFIER
+is one of the following names:
+.IR super , " hyper", " meta", " alt", " control", " ctrl", " shift", " mode_switch", " lock", " mod1", " mod2", " mod3", " mod4", " mod5" .
+.PP
+If 
+.I @
+is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
+.PP
+The keysym names are those your will get from 
+.BR xev (1)
+(minus the prefix if any).
+.PP
+What is actually executed is 
+.IR "/bin/sh -c COMMAND" ,
+which means you can use environment variables in 
+.IR COMMAND .
+.PP
+If
+.B sxhkd
+receives a 
+.I SIGUSR1
+signal, it will reload its configuration file.
+.PP
+If no configuration file is specified through the
+.I -c
+option, the following is used: 
+.IR $XDG_CONFIG_HOME/sxhkd/sxhkdrc .
+.SH AUTHOR
+.MT baskerville@lavabit.com
+Bastien Dejean
+.ME
+.SH LINKS
+.UR https://github.com/baskerville/sxhkd
+Homepage
+.UE
