@@ -22,6 +22,7 @@ Each line of the configuration file is interpreted as so:
 - Otherwise, it is parsed as a hotkey: each key name is separated by spaces and/or `+` characters.
 
 General syntax:
+
     [MODIFIER + ]*[@]KEYSYM
         COMMAND
 
