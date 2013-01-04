@@ -19,4 +19,7 @@ super + shift + @LaunchA
 super + shift + equal
     mosaic "$HOME/image"
 
+button8
+    bspc toggle_visibility
+
 # vim: set ft=conf:

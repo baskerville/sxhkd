@@ -13,6 +13,7 @@
 typedef struct hotkey_t hotkey_t;
 struct hotkey_t {
     xcb_keysym_t keysym;
+    xcb_button_t button;
     uint16_t modfield;
     xcb_event_mask_t event_mask;
     char command[MAXLEN];

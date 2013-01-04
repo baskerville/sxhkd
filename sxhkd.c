@@ -70,6 +70,7 @@ void load_config(void)
 
     char line[MAXLEN];
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
+    xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     xcb_event_mask_t event_mask = XCB_KEY_PRESS;
 
@@ -77,8 +78,10 @@ void load_config(void)
         if (strlen(line) < 2 || line[0] == '#') {
             continue;
         } else if (isspace(line[0])) {
-            if (keysym == XCB_NO_SYMBOL)
+            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE)
                 continue;
+            if (button != XCB_NONE)
+                event_mask = key_to_mouse(event_mask);
             unsigned int i = strlen(line) - 1;
             while (i > 0 && isspace(line[i]))
                 line[i--] = '\0';
@@ -87,9 +90,10 @@ void load_config(void)
                 i++;
             if (i < strlen(line)) {
                 char *command = line + i;
-                generate_hotkeys(keysym, modfield, event_mask, command);
+                generate_hotkeys(keysym, button, modfield, event_mask, command);
             }
             keysym = XCB_NO_SYMBOL;
+            button = XCB_NONE;
             modfield = 0;
             event_mask = XCB_KEY_PRESS;
         } else {
@@ -101,7 +105,7 @@ void load_config(void)
                     event_mask = XCB_KEY_RELEASE;
                     name++;
                 }
-                if (!parse_modmask(name, &modfield) && !parse_keysym(name, &keysym))
+                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button))
                     warn("Unrecognized key name: '%s'.\n", name);
             } while ((name = strtok(NULL, TOK_SEP)) != NULL);
         }
@@ -126,26 +130,39 @@ void mapping_notify(xcb_generic_event_t *evt)
     }
 }
 
-void key_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
+void key_button_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
 {
-    xcb_keycode_t keycode = XCB_NO_SYMBOL;
+    xcb_keysym_t keysym = XCB_NO_SYMBOL;
+    xcb_keycode_t keycode = XCB_NONE;
+    xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     uint16_t lockfield = num_lock | caps_lock | scroll_lock;
     if (event_mask == XCB_KEY_PRESS) {
         xcb_key_press_event_t *e = (xcb_key_press_event_t *) evt;
         keycode = e->detail;
         modfield = e->state;
+        keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
         PRINTF("key press %u %u\n", keycode, modfield);
-    } else {
+    } else if (event_mask == XCB_KEY_RELEASE) {
         xcb_key_release_event_t *e = (xcb_key_release_event_t *) evt;
         keycode = e->detail;
         modfield = e->state;
+        keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
         PRINTF("key release %u %u\n", keycode, modfield);
+    } else if (event_mask == XCB_BUTTON_PRESS) {
+        xcb_button_press_event_t *e = (xcb_button_press_event_t *) evt;
+        button = e->detail;
+        modfield = e->state;
+        PRINTF("button press %u %u\n", button, modfield);
+    } else if (event_mask == XCB_BUTTON_RELEASE) {
+        xcb_button_release_event_t *e = (xcb_button_release_event_t *) evt;
+        button = e->detail;
+        modfield = e->state;
+        PRINTF("button release %u %u\n", button, modfield);
     }
-    xcb_keysym_t keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
-    if (keysym != XCB_NO_SYMBOL) {
-        modfield &= ~lockfield;
-        hotkey_t *hk = find_hotkey(keysym, modfield, event_mask);
+    modfield &= ~lockfield;
+    if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
+        hotkey_t *hk = find_hotkey(keysym, button, modfield, event_mask);
         if (hk != NULL) {
             char *cmd[] = {SHELL, "-c", hk->command, NULL};
             spawn(cmd);
@@ -204,7 +221,9 @@ int main(int argc, char *argv[])
                 switch (event_mask) {
                     case XCB_KEY_PRESS:
                     case XCB_KEY_RELEASE:
-                        key_event(evt, event_mask);
+                    case XCB_BUTTON_PRESS:
+                    case XCB_BUTTON_RELEASE:
+                        key_button_event(evt, event_mask);
                         break;
                     case XCB_MAPPING_NOTIFY:
                         mapping_notify(evt);

@@ -32,6 +32,8 @@ If `@` is added at the beginning of the keysym, the command will be run on key r
 
 The keysym names are those your will get from `xev` (minus the prefix if any).
 
+Mouse hotkeys can be defined by using one of the following special keysym names: `button1`, `button2`, `button3`, ..., `button24`.
+
 What is actually executed is `/bin/sh -c COMMAND`, which means you can use environment variables in `COMMAND`.
 
 If *sxhkd* receives a `SIGUSR1` signal, it will reload its configuration file.

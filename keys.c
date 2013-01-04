@@ -2345,39 +2345,48 @@ void grab(void)
 {
     PUTS("grab");
     for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next) {
-        xcb_keycode_t *keycodes = keycodes_from_keysym(hk->keysym);
-        if (keycodes != NULL)
-            for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++)
-                if (hk->keysym == xcb_key_symbols_get_keysym(symbols, *kc, 0)) {
-                    PRINTF("keycode for %u is %u\n", hk->keysym, *kc);
-                    grab_key(*kc, hk->modfield);
-                }
-        free(keycodes);
+        if (hk->button == XCB_NONE) {
+            xcb_keycode_t *keycodes = keycodes_from_keysym(hk->keysym);
+            if (keycodes != NULL)
+                for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++)
+                    if (hk->keysym == xcb_key_symbols_get_keysym(symbols, *kc, 0)) {
+                        PRINTF("keycode for %u is %u\n", hk->keysym, *kc);
+                        grab_key_button(*kc, hk->button, hk->modfield);
+                    }
+            free(keycodes);
+        } else {
+            grab_key_button(XCB_NONE, hk->button, hk->modfield);
+        }
     }
 }
 
-void grab_key(xcb_keycode_t keycode, uint16_t modfield)
+void grab_key_button(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield)
 {
-    grab_key_checked(keycode, modfield);
+    grab_key_button_checked(keycode, button, modfield);
     for (uint8_t i = 0; i < 8; i++) {
         uint16_t lockfield = (i & 1 ? num_lock : 0) | (i & 2 ? caps_lock : 0) | (i & 4 ? scroll_lock : 0);
-        grab_key_checked(keycode, modfield | lockfield);
+        grab_key_button_checked(keycode, button, modfield | lockfield);
     }
 }
 
-void grab_key_checked(xcb_keycode_t keycode, uint16_t modfield)
+void grab_key_button_checked(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield)
 {
     xcb_generic_error_t *err;
-    err = xcb_request_check(dpy, xcb_grab_key_checked(dpy, false, root, modfield, keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC));
+    if (button == XCB_NONE)
+        err = xcb_request_check(dpy, xcb_grab_key_checked(dpy, false, root, modfield, keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC));
+    else
+        err = xcb_request_check(dpy, xcb_grab_button_checked(dpy, false, root, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, button, modfield));
+    unsigned int value = (button == XCB_NONE ? keycode : button);
+    char *type = (button == XCB_NONE ? "key" : "button"); 
     if (err != NULL) {
-        warn("Could not grab keycode %u with modfield %u: ", keycode, modfield);
+        warn("Could not grab %s %u with modfield %u: ", type, value, modfield);
         if (err->error_code == XCB_ACCESS)
-            warn("the key combination is already grabbed.\n");
+            warn("the combination is already grabbed.\n");
         else
             warn("error no %u encountered.\n", err->error_code);
         free(err);
     } else {
-        PRINTF("grab key %u %u\n", keycode, modfield);
+        PRINTF("grab %s %u %u\n", type, value, modfield);
     }
 }
 
@@ -2385,6 +2394,7 @@ void ungrab(void)
 {
     PUTS("ungrab");
     xcb_ungrab_key(dpy, XCB_GRAB_ANY, root, XCB_BUTTON_MASK_ANY);
+    xcb_ungrab_button(dpy, XCB_BUTTON_INDEX_ANY, root, XCB_MOD_MASK_ANY);
 }
 
 int16_t modfield_from_keysym(xcb_keysym_t keysym)
@@ -2445,7 +2455,7 @@ xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t keysym)
     return result;
 }
 
-bool parse_keysym(char *name, xcb_keysym_t *keysym)
+bool parse_key(char *name, xcb_keysym_t *keysym)
 {
     for (unsigned int i = 0; i < LENGTH(nks_dict); i++) {
         keysym_dict_t nks = nks_dict[i];
@@ -2457,7 +2467,13 @@ bool parse_keysym(char *name, xcb_keysym_t *keysym)
     return false;
 }
 
-bool parse_modmask(char *name, uint16_t *modfield)
+bool parse_button(char *name, xcb_button_t *butidx)
+{
+    /* X handles up to 24 buttons */
+    return (sscanf(name, "button%hhu", butidx) == 1);
+}
+
+bool parse_modifier(char *name, uint16_t *modfield)
 {
     if (strcmp(name, "shift") == 0) {
         *modfield |= XCB_MOD_MASK_SHIFT;
@@ -2502,6 +2518,15 @@ bool parse_modmask(char *name, uint16_t *modfield)
     return false;
 }
 
+xcb_event_mask_t key_to_mouse(xcb_event_mask_t event_mask)
+{
+    if (event_mask == XCB_KEY_PRESS)
+        return XCB_BUTTON_PRESS;
+    else if (event_mask == XCB_KEY_RELEASE)
+        return XCB_BUTTON_RELEASE;
+    return event_mask;
+}
+
 void get_lock_fields(void)
 {
     num_lock = modfield_from_keysym(XK_Num_Lock);
@@ -2510,31 +2535,37 @@ void get_lock_fields(void)
     PRINTF("lock fields %u %u %u\n", num_lock, caps_lock, scroll_lock);
 }
 
-void generate_hotkeys(xcb_keysym_t keysym, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
+void generate_hotkeys(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
 {
-    xcb_keycode_t *keycodes = keycodes_from_keysym(keysym);
-    if (keycodes != NULL)
-        for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++) {
-            xcb_keysym_t natural_keysym = xcb_key_symbols_get_keysym(symbols, *kc, 0);
-            for (unsigned char col = 0; col < KEYSYMS_PER_KEYCODE; col++) {
-                xcb_keysym_t ks = xcb_key_symbols_get_keysym(symbols, *kc, col);
-                if (ks == keysym) {
-                    uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? modfield_from_keysym(XK_Mode_switch) : 0);
-                    uint16_t explicit_modfield = modfield | implicit_modfield;
-                    hotkey_t *hk = make_hotkey(natural_keysym, explicit_modfield, event_mask, command);
-                    add_hotkey(hk);
-                    PRINTF("hotkey %u %u %u %s\n", natural_keysym, explicit_modfield, event_mask, command);
-                    break;
+    if (button == XCB_NONE) {
+        xcb_keycode_t *keycodes = keycodes_from_keysym(keysym);
+        if (keycodes != NULL)
+            for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++) {
+                xcb_keysym_t natural_keysym = xcb_key_symbols_get_keysym(symbols, *kc, 0);
+                for (unsigned char col = 0; col < KEYSYMS_PER_KEYCODE; col++) {
+                    xcb_keysym_t ks = xcb_key_symbols_get_keysym(symbols, *kc, col);
+                    if (ks == keysym) {
+                        uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? modfield_from_keysym(XK_Mode_switch) : 0);
+                        uint16_t explicit_modfield = modfield | implicit_modfield;
+                        hotkey_t *hk = make_hotkey(natural_keysym, button, explicit_modfield, event_mask, command);
+                        add_hotkey(hk);
+                        break;
+                    }
                 }
             }
-        }
-    free(keycodes);
+        free(keycodes);
+    } else {
+        hotkey_t *hk = make_hotkey(keysym, button, modfield, event_mask, command);
+        add_hotkey(hk);
+    }
 }
 
-hotkey_t *make_hotkey(xcb_keysym_t keysym, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
+hotkey_t *make_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
 {
+    PRINTF("hotkey %u %u %u %u %s\n", keysym, button, modfield, event_mask, command);
     hotkey_t *hk = malloc(sizeof(hotkey_t));
     hk->keysym = keysym;
+    hk->button = button;
     hk->modfield = modfield;
     hk->event_mask = event_mask;
     strncpy(hk->command, command, sizeof(hk->command));
@@ -2542,10 +2573,10 @@ hotkey_t *make_hotkey(xcb_keysym_t keysym, uint16_t modfield, xcb_event_mask_t e
     return hk;
 }
 
-hotkey_t *find_hotkey(xcb_keysym_t keysym, uint16_t modfield, xcb_event_mask_t event_mask)
+hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask)
 {
     for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next)
-        if (hk->keysym == keysym && hk->modfield == modfield && hk->event_mask == event_mask)
+        if (hk->keysym == keysym && hk->button == button && hk->modfield == modfield && hk->event_mask == event_mask)
             return hk;
     return NULL;
 }
