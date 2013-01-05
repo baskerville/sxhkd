@@ -1,14 +1,8 @@
-MonBrightnessDown
-    backlight -1
+MonBrightness{Down,Up}
+    backlight {-1,+1}
 
-MonBrightnessUp
-    backlight +1
-
-AudioPrev
-    mpc -q prev
-
-AudioNext
-    mpc -q next
+Audio{Prev,Next}
+    mpc -q {prev,next}
 
 super + LaunchA
     scrot
@@ -16,13 +10,16 @@ super + LaunchA
 super + shift + @LaunchA
     scrot -s
 
-super + shift + equal
-    mosaic "$HOME/image"
-
 button8
     bspc toggle_visibility
 
+super + shift + equal
+    mosaic "$HOME/image"
+
 super + {h,j,k,l}
     bspc focus {left,down,up,right}
+
+super + alt + {0-9}
+    mpc -q seek {0-9}0%
 
 # vim: set ft=conf:

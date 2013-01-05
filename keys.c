@@ -2576,15 +2576,35 @@ void unfold_hotkeys(char *folded_keysym, uint16_t modfield, xcb_event_mask_t eve
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_button_t button = XCB_NONE;
     char *ks_ptr, *cmd_ptr;
-    /* char ks_range_a = 0, ks_range_b = 0, cmd_range_a = 0, cmd_range_b = 0; */
+    char ks_a = 1, ks_z = 0, cmd_a = 1, cmd_z = 0;
+    char *ks_item = strtok_r(keysym_sequence, SEQ_SEP, &ks_ptr);
+    char *cmd_item = strtok_r(command_sequence, SEQ_SEP, &cmd_ptr);
 
-    for (char *ks_item = strtok_r(keysym_sequence, SEQ_SEP, &ks_ptr), *cmd_item = strtok_r(command_sequence, SEQ_SEP, &cmd_ptr); ks_item != NULL && cmd_item != NULL; ks_item = strtok_r(NULL, SEQ_SEP, &ks_ptr), cmd_item = strtok_r(NULL, SEQ_SEP, &cmd_ptr)) {
-        snprintf(unfolded_command, sizeof(unfolded_command), "%s%s%s", command_prefix, cmd_item, command_suffix);
-        snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%s%s", keysym_prefix, ks_item, keysym_suffix);
+    while ((ks_item != NULL || ks_a <= ks_z) && (cmd_item != NULL || cmd_a <= cmd_z)) {
+        if (ks_a > ks_z && sscanf(ks_item, "%c-%c", &ks_a, &ks_z) == 2 && ks_a >= ks_z)
+            ks_a = 1, ks_z = 0;
+        if (cmd_a > cmd_z && sscanf(cmd_item, "%c-%c", &cmd_a, &cmd_z) == 2 && cmd_a >= cmd_z)
+            cmd_a = 1, cmd_z = 0;
+        if (ks_a <= ks_z)
+            snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%c%s", keysym_prefix, ks_a, keysym_suffix);
+        else
+            snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%s%s", keysym_prefix, ks_item, keysym_suffix);
+        if (cmd_a <= cmd_z)
+            snprintf(unfolded_command, sizeof(unfolded_command), "%s%c%s", command_prefix, cmd_a, command_suffix);
+        else
+            snprintf(unfolded_command, sizeof(unfolded_command), "%s%s%s", command_prefix, cmd_item, command_suffix);
         if (parse_key(unfolded_keysym, &keysym) || parse_button(unfolded_keysym, &button))
             generate_hotkeys(keysym, button, modfield, event_mask, unfolded_command);
         else
             warn("Unknown sequence keysym: '%s'.\n", ks_item);
+        if (ks_a >= ks_z)
+            ks_item = strtok_r(NULL, SEQ_SEP, &ks_ptr), ks_a = 1, ks_z = 0;
+        else
+            ks_a++;
+        if (cmd_a >= cmd_z)
+            cmd_item = strtok_r(NULL, SEQ_SEP, &cmd_ptr), cmd_a = 1, cmd_z = 0;
+        else
+            cmd_a++;
     }
 }
 
