@@ -2518,11 +2518,11 @@ bool parse_modifier(char *name, uint16_t *modfield)
     return false;
 }
 
-bool parse_sequence(char *name, char *seq)
+bool parse_fold(char *name, char *folded_keysym)
 {
-    if (name[0] == SEQ_BEGIN && name[strlen(name) - 1] == SEQ_END) {
-        strncpy(seq, name + 1, strlen(name) - 2);
-        seq[strlen(name) - 2] = '\0';
+    if (strchr(name, SEQ_BEGIN) != NULL && strrchr(name, SEQ_END) != NULL) {
+        strncpy(folded_keysym, name, strlen(name));
+        folded_keysym[strlen(name)] = '\0';
         return true;
     }
     return false;
@@ -2545,30 +2545,43 @@ void get_lock_fields(void)
     PRINTF("lock fields %u %u %u\n", num_lock, caps_lock, scroll_lock);
 }
 
-void unfold_hotkeys(char *keysym_seq, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
+bool extract_sequence(char *string, char *prefix, char *sequence, char *suffix)
 {
-    char *begin = strchr(command, SEQ_BEGIN);
-    char *end = strrchr(command, SEQ_END);
-    if (begin == NULL || end == NULL || ((end - begin - 1) < SEQ_MIN_LEN)) {
-        warn("Invalid sequence for command '%s'.\n", command);
-        return;
-    }
-    char *ks_ptr, *cmd_ptr;
-    char unfolded_command[MAXLEN];
-    char command_seq[MAXLEN];
+    char *begin = strchr(string, SEQ_BEGIN);
+    char *end = strrchr(string, SEQ_END);
+    if (begin == NULL || end == NULL || ((end - begin - 1) < SEQ_MIN_LEN))
+        return false;
+    strncpy(sequence, begin + 1, end - begin - 1);
+    strncpy(prefix, string, begin - string);
+    strncpy(suffix, end + 1, strlen(string) - (1 + end - string));
+    sequence[end - begin - 1] = '\0';
+    prefix[begin - string] = '\0';
+    suffix[strlen(string) - (1 + end - string)] = '\0';
+    return true;
+}
+
+void unfold_hotkeys(char *folded_keysym, uint16_t modfield, xcb_event_mask_t event_mask, char *folded_command)
+{
+    char keysym_sequence[MAXLEN];
+    char keysym_prefix[MAXLEN];
+    char keysym_suffix[MAXLEN];
+    char command_sequence[MAXLEN];
     char command_prefix[MAXLEN];
     char command_suffix[MAXLEN];
-    strncpy(command_seq, begin + 1, end - begin - 1);
-    strncpy(command_prefix, command, begin - command);
-    strncpy(command_suffix, end + 1, strlen(command) - (1 + end - command));
-    command_seq[end - begin - 1] = '\0';
-    command_prefix[begin - command] = '\0';
-    command_suffix[strlen(command) - (1 + end - command)] = '\0';
+    if (!extract_sequence(folded_keysym, keysym_prefix, keysym_sequence, keysym_suffix) || !extract_sequence(folded_command, command_prefix, command_sequence, command_suffix)) {
+        warn("Couldn't extract sequence from '%s' or '%s'.\n", folded_keysym, folded_command);
+        return;
+    }
+    char unfolded_keysym[MAXLEN], unfolded_command[MAXLEN];
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_button_t button = XCB_NONE;
-    for (char *ks_item = strtok_r(keysym_seq, SEQ_SEP, &ks_ptr), *cmd_item = strtok_r(command_seq, SEQ_SEP, &cmd_ptr); ks_item != NULL && cmd_item != NULL; ks_item = strtok_r(NULL, SEQ_SEP, &ks_ptr), cmd_item = strtok_r(NULL, SEQ_SEP, &cmd_ptr)) {
+    char *ks_ptr, *cmd_ptr;
+    /* char ks_range_a = 0, ks_range_b = 0, cmd_range_a = 0, cmd_range_b = 0; */
+
+    for (char *ks_item = strtok_r(keysym_sequence, SEQ_SEP, &ks_ptr), *cmd_item = strtok_r(command_sequence, SEQ_SEP, &cmd_ptr); ks_item != NULL && cmd_item != NULL; ks_item = strtok_r(NULL, SEQ_SEP, &ks_ptr), cmd_item = strtok_r(NULL, SEQ_SEP, &cmd_ptr)) {
         snprintf(unfolded_command, sizeof(unfolded_command), "%s%s%s", command_prefix, cmd_item, command_suffix);
-        if (parse_key(ks_item, &keysym) || parse_button(ks_item, &button))
+        snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%s%s", keysym_prefix, ks_item, keysym_suffix);
+        if (parse_key(unfolded_keysym, &keysym) || parse_button(unfolded_keysym, &button))
             generate_hotkeys(keysym, button, modfield, event_mask, unfolded_command);
         else
             warn("Unknown sequence keysym: '%s'.\n", ks_item);

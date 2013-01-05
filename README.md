@@ -34,7 +34,7 @@ The keysym names are those your will get from `xev` (minus the prefix if any).
 
 Mouse hotkeys can be defined by using one of the following special keysym names: `button1`, `button2`, `button3`, ..., `button24`.
 
-`KEYSYM` can also be a sequence of the form `{KEYSYM_1,KEYSYM_2,...,KEYSYM_N}`, in which case, `COMMAND` must also contain a sequence with *N* elements: the pairing of the two sequences generates *N* hotkeys.
+`KEYSYM` can contain a sequence of the form `{STRING_1,STRING_2,...,STRING_N}`, in which case, `COMMAND` must also contain a sequence with *N* elements: the pairing of the two sequences generates *N* hotkeys.
 
 What is actually executed is `/bin/sh -c COMMAND`, which means you can use environment variables in `COMMAND`.
 

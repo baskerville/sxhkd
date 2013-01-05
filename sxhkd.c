@@ -73,13 +73,13 @@ void load_config(void)
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     xcb_event_mask_t event_mask = XCB_KEY_PRESS;
-    char keysym_seq[MAXLEN] = {'\0'};
+    char folded_keysym[MAXLEN] = {'\0'};
 
     while (fgets(line, sizeof(line), cfg) != NULL) {
         if (strlen(line) < 2 || line[0] == START_COMMENT) {
             continue;
         } else if (isspace(line[0])) {
-            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE && strlen(keysym_seq) == 0)
+            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE && strlen(folded_keysym) == 0)
                 continue;
             unsigned int i = strlen(line) - 1;
             while (i > 0 && isspace(line[i]))
@@ -89,16 +89,16 @@ void load_config(void)
                 i++;
             if (i < strlen(line)) {
                 char *command = line + i;
-                if (strlen(keysym_seq) == 0)
+                if (strlen(folded_keysym) == 0)
                     generate_hotkeys(keysym, button, modfield, event_mask, command);
                 else
-                    unfold_hotkeys(keysym_seq, modfield, event_mask, command);
+                    unfold_hotkeys(folded_keysym, modfield, event_mask, command);
             }
             keysym = XCB_NO_SYMBOL;
             button = XCB_NONE;
             modfield = 0;
             event_mask = XCB_KEY_PRESS;
-            keysym_seq[0] = '\0';
+            folded_keysym[0] = '\0';
         } else {
             char *name = strtok(line, TOK_SEP);
             if (name == NULL)
@@ -108,7 +108,7 @@ void load_config(void)
                     event_mask = XCB_KEY_RELEASE;
                     name++;
                 }
-                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !parse_sequence(name, keysym_seq)) {
+                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !parse_fold(name, folded_keysym)) {
                     warn("Unrecognized key name: '%s'.\n", name);
                 }
             } while ((name = strtok(NULL, TOK_SEP)) != NULL);
