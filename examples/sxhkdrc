@@ -22,4 +22,7 @@ super + shift + equal
 button8
     bspc toggle_visibility
 
+super + {h,j,k,l}
+    bspc focus {left,down,up,right}
+
 # vim: set ft=conf:

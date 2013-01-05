@@ -2535,6 +2535,36 @@ void get_lock_fields(void)
     PRINTF("lock fields %u %u %u\n", num_lock, caps_lock, scroll_lock);
 }
 
+void unfold_hotkeys(char *keysym_seq, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
+{
+    char *begin = strchr(command, SEQ_BEGIN[0]);
+    char *end = strrchr(command, SEQ_END[0]);
+    if (begin == NULL || end == NULL || ((end - begin - 1) < SEQ_MIN_LEN)) {
+        warn("Invalid sequence for command '%s'.\n", command);
+        return;
+    }
+    char *ks_ptr, *cmd_ptr;
+    char unfolded_command[MAXLEN];
+    char command_seq[MAXLEN];
+    char command_prefix[MAXLEN];
+    char command_suffix[MAXLEN];
+    strncpy(command_seq, begin + 1, end - begin - 1);
+    strncpy(command_prefix, command, begin - command);
+    strncpy(command_suffix, end + 1, strlen(command) - (1 + end - command));
+    command_seq[end - begin - 1] = '\0';
+    command_prefix[begin - command] = '\0';
+    command_suffix[strlen(command) - (1 + end - command)] = '\0';
+    xcb_keysym_t keysym = XCB_NO_SYMBOL;
+    xcb_button_t button = XCB_NONE;
+    for (char *ks_item = strtok_r(keysym_seq, SEQ_SEP, &ks_ptr), *cmd_item = strtok_r(command_seq, SEQ_SEP, &cmd_ptr); ks_item != NULL && cmd_item != NULL; ks_item = strtok_r(NULL, SEQ_SEP, &ks_ptr), cmd_item = strtok_r(NULL, SEQ_SEP, &cmd_ptr)) {
+        snprintf(unfolded_command, sizeof(unfolded_command), "%s%s%s", command_prefix, cmd_item, command_suffix);
+        if (parse_key(ks_item, &keysym) || parse_button(ks_item, &button))
+            generate_hotkeys(keysym, button, modfield, event_mask, unfolded_command);
+        else
+            warn("Unknown sequence keysym: '%s'.\n", ks_item);
+    }
+}
+
 void generate_hotkeys(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
 {
     if (button == XCB_NONE) {
@@ -2567,7 +2597,10 @@ hotkey_t *make_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
     hk->keysym = keysym;
     hk->button = button;
     hk->modfield = modfield;
-    hk->event_mask = event_mask;
+    if (button != XCB_NONE)
+        hk->event_mask = key_to_mouse(event_mask);
+    else
+        hk->event_mask = event_mask;
     strncpy(hk->command, command, sizeof(hk->command));
     hk->next = NULL;
     return hk;

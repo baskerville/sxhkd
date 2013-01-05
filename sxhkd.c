@@ -73,15 +73,14 @@ void load_config(void)
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     xcb_event_mask_t event_mask = XCB_KEY_PRESS;
+    char keysym_seq[MAXLEN] = {'\0'};
 
     while (fgets(line, sizeof(line), cfg) != NULL) {
-        if (strlen(line) < 2 || line[0] == '#') {
+        if (strlen(line) < 2 || line[0] == START_COMMENT) {
             continue;
         } else if (isspace(line[0])) {
-            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE)
+            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE && strlen(keysym_seq) == 0)
                 continue;
-            if (button != XCB_NONE)
-                event_mask = key_to_mouse(event_mask);
             unsigned int i = strlen(line) - 1;
             while (i > 0 && isspace(line[i]))
                 line[i--] = '\0';
@@ -90,23 +89,28 @@ void load_config(void)
                 i++;
             if (i < strlen(line)) {
                 char *command = line + i;
-                generate_hotkeys(keysym, button, modfield, event_mask, command);
+                if (strlen(keysym_seq) == 0)
+                    generate_hotkeys(keysym, button, modfield, event_mask, command);
+                else
+                    unfold_hotkeys(keysym_seq, modfield, event_mask, command);
             }
             keysym = XCB_NO_SYMBOL;
             button = XCB_NONE;
             modfield = 0;
             event_mask = XCB_KEY_PRESS;
+            keysym_seq[0] = '\0';
         } else {
             char *name = strtok(line, TOK_SEP);
             if (name == NULL)
                 continue;
             do {
-                if (name[0] == '@') {
+                if (name[0] == RELEASE_PREFIX) {
                     event_mask = XCB_KEY_RELEASE;
                     name++;
                 }
-                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button))
+                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !(sscanf(name, SEQ_BEGIN"%s"SEQ_END, keysym_seq) == 1)) {
                     warn("Unrecognized key name: '%s'.\n", name);
+                }
             } while ((name = strtok(NULL, TOK_SEP)) != NULL);
         }
     }

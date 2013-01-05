@@ -2,7 +2,7 @@ VERSION = 0.1
 
 CC      = gcc
 LIBS    = -lm -lxcb -lxcb-keysyms
-CFLAGS  = -std=c99 -pedantic -Wall -Wextra -DVERSION=\"$(VERSION)\"
+CFLAGS  = -std=c99 -pedantic -Wall -Wextra -D_POSIX_SOURCE -DVERSION=\"$(VERSION)\"
 LDFLAGS = $(LIBS)
 
 PREFIX    ?= /usr/local
@@ -28,7 +28,7 @@ options:
 
 .c.o:
 	@echo "CC $<"
-	@$(CC) $(CFLAGS) -DVERSION=\"$(VERSION)\" -c -o $@ $<
+	@$(CC) $(CFLAGS) -c -o $@ $<
 
 sxhkd: $(OBJ)
 	@echo CC -o $@
