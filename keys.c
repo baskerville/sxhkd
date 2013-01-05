@@ -2581,9 +2581,9 @@ void unfold_hotkeys(char *folded_keysym, uint16_t modfield, xcb_event_mask_t eve
     char *cmd_item = strtok_r(command_sequence, SEQ_SEP, &cmd_ptr);
 
     while ((ks_item != NULL || ks_a <= ks_z) && (cmd_item != NULL || cmd_a <= cmd_z)) {
-        if (ks_a > ks_z && sscanf(ks_item, "%c-%c", &ks_a, &ks_z) == 2 && ks_a >= ks_z)
+        if (ks_a > ks_z && strlen(ks_item) == 3 && sscanf(ks_item, "%c-%c", &ks_a, &ks_z) == 2 && ks_a >= ks_z)
             ks_a = 1, ks_z = 0;
-        if (cmd_a > cmd_z && sscanf(cmd_item, "%c-%c", &cmd_a, &cmd_z) == 2 && cmd_a >= cmd_z)
+        if (cmd_a > cmd_z && strlen(cmd_item) == 3 && sscanf(cmd_item, "%c-%c", &cmd_a, &cmd_z) == 2 && cmd_a >= cmd_z)
             cmd_a = 1, cmd_z = 0;
         if (ks_a <= ks_z)
             snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%c%s", keysym_prefix, ks_a, keysym_suffix);
