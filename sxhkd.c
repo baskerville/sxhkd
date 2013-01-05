@@ -164,7 +164,7 @@ void key_button_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
         modfield = e->state;
         PRINTF("button release %u %u\n", button, modfield);
     }
-    modfield &= ~lockfield;
+    modfield &= ~lockfield & MOD_STATE_FIELD;
     if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
         hotkey_t *hk = find_hotkey(keysym, button, modfield, event_mask);
         if (hk != NULL) {

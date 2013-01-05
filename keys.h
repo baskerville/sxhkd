@@ -4,6 +4,7 @@
 #include "sxhkd.h"
 
 #define KEYSYMS_PER_KEYCODE  4
+#define MOD_STATE_FIELD      255
 #define NUM_MOD              8
 #define SEQ_MIN_LEN          3
 #define RELEASE_PREFIX       '@'
