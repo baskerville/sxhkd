@@ -2518,6 +2518,16 @@ bool parse_modifier(char *name, uint16_t *modfield)
     return false;
 }
 
+bool parse_sequence(char *name, char *seq)
+{
+    if (name[0] == SEQ_BEGIN && name[strlen(name) - 1] == SEQ_END) {
+        strncpy(seq, name + 1, strlen(name) - 2);
+        seq[strlen(name) - 2] = '\0';
+        return true;
+    }
+    return false;
+}
+
 xcb_event_mask_t key_to_mouse(xcb_event_mask_t event_mask)
 {
     if (event_mask == XCB_KEY_PRESS)
@@ -2537,8 +2547,8 @@ void get_lock_fields(void)
 
 void unfold_hotkeys(char *keysym_seq, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
 {
-    char *begin = strchr(command, SEQ_BEGIN[0]);
-    char *end = strrchr(command, SEQ_END[0]);
+    char *begin = strchr(command, SEQ_BEGIN);
+    char *end = strrchr(command, SEQ_END);
     if (begin == NULL || end == NULL || ((end - begin - 1) < SEQ_MIN_LEN)) {
         warn("Invalid sequence for command '%s'.\n", command);
         return;

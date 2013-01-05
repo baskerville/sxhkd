@@ -108,7 +108,7 @@ void load_config(void)
                     event_mask = XCB_KEY_RELEASE;
                     name++;
                 }
-                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !(sscanf(name, SEQ_BEGIN"%s"SEQ_END, keysym_seq) == 1)) {
+                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !parse_sequence(name, keysym_seq)) {
                     warn("Unrecognized key name: '%s'.\n", name);
                 }
             } while ((name = strtok(NULL, TOK_SEP)) != NULL);
