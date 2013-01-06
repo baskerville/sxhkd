@@ -50,23 +50,28 @@ void cleanup(void)
     }
 }
 
-void load_config(void)
+void reload_all(void)
 {
-    PUTS("load configuration");
-    if (hotkeys != NULL) {
-        cleanup();
-        hotkeys = NULL;
-    }
+    PUTS("reload all");
+    signal(SIGUSR1, hold);
+    cleanup();
+    hotkeys = NULL;
+    load_config(config_file);
+    for (int i = 0; i < num_extra_confs; i++)
+        load_config(extra_confs[i]);
+    ungrab();
+    grab();
+    reload = false;
+}
 
-    char path[MAXLEN];
-    if (config_file == NULL)
-        snprintf(path, sizeof(path), "%s/%s", getenv("XDG_CONFIG_HOME"), CONFIG_PATH);
-    else
-        strncpy(path, config_file, sizeof(path));
+void load_config(char *config_file)
+{
+    PRINTF("load configuration '%s'\n", config_file);
 
-    FILE *cfg = fopen(path, "r");
+
+    FILE *cfg = fopen(config_file, "r");
     if (cfg == NULL)
-        err("Can't open configuration file.\n");
+        err("Can't open configuration file: '%s'.\n", config_file);
 
     char line[MAXLEN];
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
@@ -177,7 +182,7 @@ void key_button_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
 int main(int argc, char *argv[])
 {
     char opt;
-    config_file = NULL;
+    config_path = NULL;
 
     while ((opt = getopt(argc, argv, "vhc:")) != -1) {
         switch (opt) {
@@ -186,13 +191,26 @@ int main(int argc, char *argv[])
                 exit(EXIT_SUCCESS);
                 break;
             case 'h':
-                printf("sxhkd [-h|-v|-c CONFIG_FILE]\n");
+                printf("sxhkd [-h|-v|-c CONFIG_FILE] [EXTRA_CONFIG ...]\n");
                 exit(EXIT_SUCCESS);
                 break;
             case 'c':
-                config_file = optarg;
+                config_path = optarg;
                 break;
         }
+    }
+
+    num_extra_confs = argc - optind;
+    extra_confs = argv + optind;
+
+    if (config_path == NULL) {
+        char *config_home = getenv(CONFIG_HOME_ENV);
+        if (config_home == NULL)
+            err("The following environment variable is not defined: '%s'.\n", CONFIG_HOME_ENV); 
+        else
+            snprintf(config_file, sizeof(config_file), "%s/%s", config_home, CONFIG_PATH);
+    } else {
+        strncpy(config_file, config_path, sizeof(config_file));
     }
 
     signal(SIGINT, hold);
@@ -202,7 +220,9 @@ int main(int argc, char *argv[])
 
     setup();
     get_lock_fields();
-    load_config();
+    load_config(config_file);
+    for (int i = 0; i < num_extra_confs; i++)
+        load_config(extra_confs[i]);
     grab();
 
     xcb_generic_event_t *evt;
@@ -240,14 +260,8 @@ int main(int argc, char *argv[])
             }
         }
 
-        if (reload) {
-            PUTS("reload configuration");
-            signal(SIGUSR1, hold);
-            load_config();
-            ungrab();
-            grab();
-            reload = false;
-        }
+        if (reload)
+            reload_all();
         
         if (xcb_connection_has_error(dpy)) {
             warn("One of the previous requests failed.\n");
