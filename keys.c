@@ -2362,7 +2362,6 @@ void grab(void)
 
 void grab_key_button(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield)
 {
-    grab_key_button_checked(keycode, button, modfield);
     for (uint8_t i = 0; i < 8; i++) {
         uint16_t lockfield = (i & 1 ? num_lock : 0) | (i & 2 ? caps_lock : 0) | (i & 4 ? scroll_lock : 0);
         grab_key_button_checked(keycode, button, modfield | lockfield);
