@@ -36,6 +36,8 @@ void setup(void)
     /* if (reply == NULL) */
     /*     warn("couldn't set detectable auto repeat\n"); */
     /* free(reply); */
+    if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
+        err("The '%s' environment variable is not defined.\n", SHELL_ENV);
     symbols = xcb_key_symbols_alloc(dpy);
     hotkeys = NULL;
 }
@@ -173,7 +175,7 @@ void key_button_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
     if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
         hotkey_t *hk = find_hotkey(keysym, button, modfield, event_mask);
         if (hk != NULL) {
-            char *cmd[] = {SHELL, "-c", hk->command, NULL};
+            char *cmd[] = {shell, "-c", hk->command, NULL};
             spawn(cmd);
         }
     }

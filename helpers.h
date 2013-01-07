@@ -2,7 +2,6 @@
 #define _HELPERS_H
 
 #define LENGTH(x)         (sizeof(x) / sizeof(*x))
-#define SHELL             "/bin/sh"
 #define MAXLEN            256
 
 #ifdef DEBUG

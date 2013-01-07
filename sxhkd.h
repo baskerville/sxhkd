@@ -7,6 +7,8 @@
 #include "helpers.h"
 
 #define CONFIG_HOME_ENV  "XDG_CONFIG_HOME"
+#define SXHKD_SHELL_ENV  "SXHKD_SHELL"
+#define SHELL_ENV        "SHELL"
 #define CONFIG_PATH      "sxhkd/sxhkdrc"
 #define TOK_SEP          "+ \n"
 #define NUM_MOD          8
@@ -29,6 +31,7 @@ typedef struct {
 xcb_connection_t *dpy;
 xcb_window_t root;
 xcb_key_symbols_t *symbols;
+char *shell;
 hotkey_t *hotkeys;
 
 char config_file[MAXLEN];

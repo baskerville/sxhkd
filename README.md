@@ -38,7 +38,9 @@ Mouse hotkeys can be defined by using one of the following special keysym names:
 
 In addition, the sequences can contain ranges of the form `A-Z` where *A* and *Z* are alphanumeric characters.
 
-What is actually executed is `/bin/sh -c COMMAND`, which means you can use environment variables in `COMMAND`.
+What is actually executed is `SHELL -c COMMAND`, which means you can use environment variables in `COMMAND`.
+
+`SHELL` will be the content of the first defined environment variable in the following list: `SXHKD_SHELL`, `SHELL`.
 
 If *sxhkd* receives a `SIGUSR1` signal, it will reload its configuration file.
 

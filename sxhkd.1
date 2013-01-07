@@ -41,7 +41,7 @@ General Syntax:
 Where 
 .I MODIFIER
 is one of the following names:
-.IR super , " hyper", " meta", " alt", " control", " ctrl", " shift", " mode_switch", " lock", " mod1", " mod2", " mod3", " mod4", " mod5" .
+.BR super , " hyper", " meta", " alt", " control", " ctrl", " shift", " mode_switch", " lock", " mod1", " mod2", " mod3", " mod4", " mod5" .
 .PP
 If 
 .I @
@@ -52,7 +52,7 @@ The keysym names are those your will get from
 (minus the prefix if any).
 .PP
 Mouse hotkeys can be defined by using one of the following special keysym names:
-.IR button1 ", " button2 ", " button3 ", ..., " button24 .
+.BR button1 ", " button2 ", " button3 ", ..., " button24 .
 .PP
 .I KEYSYM
 can contain a sequence of the form
@@ -72,9 +72,14 @@ where
 are alphanumeric characters.
 .PP
 What is actually executed is 
-.IR "/bin/sh -c COMMAND" ,
+.IB SHELL " -c "
+.IR COMMAND ,
 which means you can use environment variables in 
 .IR COMMAND .
+.PP
+.I SHELL
+will be the content of the first defined environment variable in the following list:
+.BR SXHKD_SHELL ", " SHELL .
 .PP
 If
 .B sxhkd
@@ -83,7 +88,7 @@ receives a
 signal, it will reload its configuration file.
 .PP
 If no configuration file is specified through the
-.I -c
+.B -c
 option, the following is used: 
 .IR $XDG_CONFIG_HOME/sxhkd/sxhkdrc .
 .SH AUTHOR
