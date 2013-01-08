@@ -23,12 +23,14 @@ Each line of the configuration file is interpreted as so:
 
 General syntax:
 
-    [MODIFIER + ]*[@]KEYSYM
+    [MODIFIER + ]*[@|!]KEYSYM
         COMMAND
 
 Where `MODIFIER` is one of the following names: `super`, `hyper`, `meta`, `alt`, `control`, `ctrl`, `shift`, `mode_switch`, `lock`, `mod1`, `mod2`, `mod3`, `mod4`, `mod5`.
 
 If `@` is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
+
+If `!` is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the *x* and *y* coordinates of the pointer relative to the root window referential.
 
 The keysym names are those your will get from `xev` (minus the prefix if any).
 

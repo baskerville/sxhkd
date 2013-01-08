@@ -34,7 +34,7 @@ characters.
 .PP
 General Syntax:
 .EX
-    [MODIFIER + ]*[@]KEYSYM
+    [MODIFIER + ]*[@|!]KEYSYM
         COMMAND
 .EE
 .PP
@@ -46,6 +46,12 @@ is one of the following names:
 If 
 .I @
 is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
+.PP
+If 
+.I !
+is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the
+.BR x " and " y
+coordinates of the pointer relative to the root window referential.
 .PP
 The keysym names are those your will get from 
 .BR xev (1)

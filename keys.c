@@ -2374,7 +2374,7 @@ void grab_key_button_checked(xcb_keycode_t keycode, xcb_button_t button, uint16_
     if (button == XCB_NONE)
         err = xcb_request_check(dpy, xcb_grab_key_checked(dpy, false, root, modfield, keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC));
     else
-        err = xcb_request_check(dpy, xcb_grab_button_checked(dpy, false, root, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, button, modfield));
+        err = xcb_request_check(dpy, xcb_grab_button_checked(dpy, false, root, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, button, modfield));
     unsigned int value = (button == XCB_NONE ? keycode : button);
     char *type = (button == XCB_NONE ? "key" : "button"); 
     if (err != NULL) {
@@ -2527,13 +2527,13 @@ bool parse_fold(char *name, char *folded_keysym)
     return false;
 }
 
-xcb_event_mask_t key_to_mouse(xcb_event_mask_t event_mask)
+uint8_t key_to_button(uint8_t event_type)
 {
-    if (event_mask == XCB_KEY_PRESS)
+    if (event_type == XCB_KEY_PRESS)
         return XCB_BUTTON_PRESS;
-    else if (event_mask == XCB_KEY_RELEASE)
+    else if (event_type == XCB_KEY_RELEASE)
         return XCB_BUTTON_RELEASE;
-    return event_mask;
+    return event_type;
 }
 
 void get_lock_fields(void)
@@ -2559,7 +2559,7 @@ bool extract_sequence(char *string, char *prefix, char *sequence, char *suffix)
     return true;
 }
 
-void unfold_hotkeys(char *folded_keysym, uint16_t modfield, xcb_event_mask_t event_mask, char *folded_command)
+void unfold_hotkeys(char *folded_keysym, uint16_t modfield, uint8_t event_type, char *folded_command)
 {
     char keysym_sequence[MAXLEN];
     char keysym_prefix[MAXLEN];
@@ -2593,7 +2593,7 @@ void unfold_hotkeys(char *folded_keysym, uint16_t modfield, xcb_event_mask_t eve
         else
             snprintf(unfolded_command, sizeof(unfolded_command), "%s%s%s", command_prefix, cmd_item, command_suffix);
         if (parse_key(unfolded_keysym, &keysym) || parse_button(unfolded_keysym, &button))
-            generate_hotkeys(keysym, button, modfield, event_mask, unfolded_command);
+            generate_hotkeys(keysym, button, modfield, event_type, unfolded_command);
         else
             warn("Unknown sequence keysym: '%s'.\n", ks_item);
         if (ks_a >= ks_z)
@@ -2607,7 +2607,7 @@ void unfold_hotkeys(char *folded_keysym, uint16_t modfield, xcb_event_mask_t eve
     }
 }
 
-void generate_hotkeys(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
+void generate_hotkeys(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, char *command)
 {
     if (button == XCB_NONE) {
         xcb_keycode_t *keycodes = keycodes_from_keysym(keysym);
@@ -2619,7 +2619,7 @@ void generate_hotkeys(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                     if (ks == keysym) {
                         uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? modfield_from_keysym(XK_Mode_switch) : 0);
                         uint16_t explicit_modfield = modfield | implicit_modfield;
-                        hotkey_t *hk = make_hotkey(natural_keysym, button, explicit_modfield, event_mask, command);
+                        hotkey_t *hk = make_hotkey(natural_keysym, button, explicit_modfield, event_type, command);
                         add_hotkey(hk);
                         break;
                     }
@@ -2627,31 +2627,31 @@ void generate_hotkeys(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
             }
         free(keycodes);
     } else {
-        hotkey_t *hk = make_hotkey(keysym, button, modfield, event_mask, command);
+        hotkey_t *hk = make_hotkey(keysym, button, modfield, event_type, command);
         add_hotkey(hk);
     }
 }
 
-hotkey_t *make_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask, char *command)
+hotkey_t *make_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, char *command)
 {
-    PRINTF("hotkey %u %u %u %u %s\n", keysym, button, modfield, event_mask, command);
+    PRINTF("hotkey %u %u %u %u %s\n", keysym, button, modfield, event_type, command);
     hotkey_t *hk = malloc(sizeof(hotkey_t));
     hk->keysym = keysym;
     hk->button = button;
     hk->modfield = modfield;
     if (button != XCB_NONE)
-        hk->event_mask = key_to_mouse(event_mask);
+        hk->event_type = key_to_button(event_type);
     else
-        hk->event_mask = event_mask;
+        hk->event_type = event_type;
     strncpy(hk->command, command, sizeof(hk->command));
     hk->next = NULL;
     return hk;
 }
 
-hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, xcb_event_mask_t event_mask)
+hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type)
 {
     for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next)
-        if (hk->keysym == keysym && hk->button == button && hk->modfield == modfield && hk->event_mask == event_mask)
+        if (hk->keysym == keysym && hk->button == button && hk->modfield == modfield && hk->event_type == event_type)
             return hk;
     return NULL;
 }

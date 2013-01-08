@@ -16,5 +16,6 @@ void warn(char *, ...);
 __attribute__((noreturn))
 void err(char *, ...);
 void spawn(char *[]);
+void run(char *);
 
 #endif

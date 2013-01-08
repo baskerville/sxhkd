@@ -79,7 +79,7 @@ void load_config(char *config_file)
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
-    xcb_event_mask_t event_mask = XCB_KEY_PRESS;
+    uint8_t event_type = XCB_KEY_PRESS;
     char folded_keysym[MAXLEN] = {'\0'};
 
     while (fgets(line, sizeof(line), cfg) != NULL) {
@@ -97,14 +97,14 @@ void load_config(char *config_file)
             if (i < strlen(line)) {
                 char *command = line + i;
                 if (strlen(folded_keysym) == 0)
-                    generate_hotkeys(keysym, button, modfield, event_mask, command);
+                    generate_hotkeys(keysym, button, modfield, event_type, command);
                 else
-                    unfold_hotkeys(folded_keysym, modfield, event_mask, command);
+                    unfold_hotkeys(folded_keysym, modfield, event_type, command);
             }
             keysym = XCB_NO_SYMBOL;
             button = XCB_NONE;
             modfield = 0;
-            event_mask = XCB_KEY_PRESS;
+            event_type = XCB_KEY_PRESS;
             folded_keysym[0] = '\0';
         } else {
             char *name = strtok(line, TOK_SEP);
@@ -112,7 +112,10 @@ void load_config(char *config_file)
                 continue;
             do {
                 if (name[0] == RELEASE_PREFIX) {
-                    event_mask = XCB_KEY_RELEASE;
+                    event_type = XCB_KEY_RELEASE;
+                    name++;
+                } else if (name[0] == MOTION_PREFIX) {
+                    event_type = XCB_MOTION_NOTIFY;
                     name++;
                 }
                 if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !parse_fold(name, folded_keysym)) {
@@ -141,31 +144,31 @@ void mapping_notify(xcb_generic_event_t *evt)
     }
 }
 
-void key_button_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
+void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 {
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_keycode_t keycode = XCB_NONE;
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     uint16_t lockfield = num_lock | caps_lock | scroll_lock;
-    if (event_mask == XCB_KEY_PRESS) {
+    if (event_type == XCB_KEY_PRESS) {
         xcb_key_press_event_t *e = (xcb_key_press_event_t *) evt;
         keycode = e->detail;
         modfield = e->state;
         keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
         PRINTF("key press %u %u\n", keycode, modfield);
-    } else if (event_mask == XCB_KEY_RELEASE) {
+    } else if (event_type == XCB_KEY_RELEASE) {
         xcb_key_release_event_t *e = (xcb_key_release_event_t *) evt;
         keycode = e->detail;
         modfield = e->state;
         keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
         PRINTF("key release %u %u\n", keycode, modfield);
-    } else if (event_mask == XCB_BUTTON_PRESS) {
+    } else if (event_type == XCB_BUTTON_PRESS) {
         xcb_button_press_event_t *e = (xcb_button_press_event_t *) evt;
         button = e->detail;
         modfield = e->state;
         PRINTF("button press %u %u\n", button, modfield);
-    } else if (event_mask == XCB_BUTTON_RELEASE) {
+    } else if (event_type == XCB_BUTTON_RELEASE) {
         xcb_button_release_event_t *e = (xcb_button_release_event_t *) evt;
         button = e->detail;
         modfield = e->state;
@@ -173,11 +176,29 @@ void key_button_event(xcb_generic_event_t *evt, xcb_event_mask_t event_mask)
     }
     modfield &= ~lockfield & MOD_STATE_FIELD;
     if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
-        hotkey_t *hk = find_hotkey(keysym, button, modfield, event_mask);
-        if (hk != NULL) {
-            char *cmd[] = {shell, "-c", hk->command, NULL};
-            spawn(cmd);
-        }
+        hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type);
+        if (hk != NULL)
+            run(hk->command);
+    }
+}
+
+void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
+{
+    xcb_motion_notify_event_t *e = (xcb_motion_notify_event_t *) evt;
+    /* PRINTF("motion notify %X %X %u\n", e->child, e->detail, e->state); */
+    uint16_t lockfield = num_lock | caps_lock | scroll_lock;
+    uint16_t buttonfield = e->state >> 8;
+    uint16_t modfield = e->state & ~lockfield & MOD_STATE_FIELD;
+    xcb_button_t button = 1;
+    while (~buttonfield & 1) {
+        buttonfield = buttonfield >> 1;
+        button++;
+    }
+    hotkey_t *hk = find_hotkey(XCB_NO_SYMBOL, button, modfield, event_type);
+    if (hk != NULL) {
+        char command[MAXLEN];
+        snprintf(command, sizeof(command), hk->command, e->root_x, e->root_y);
+        run(command);
     }
 }
 
@@ -243,19 +264,22 @@ int main(int argc, char *argv[])
 
         if (select(fd + 1, &descriptors, NULL, NULL, NULL) > 0) {
             while ((evt = xcb_poll_for_event(dpy)) != NULL) {
-                uint8_t event_mask = XCB_EVENT_RESPONSE_TYPE(evt);
-                switch (event_mask) {
+                uint8_t event_type = XCB_EVENT_RESPONSE_TYPE(evt);
+                switch (event_type) {
                     case XCB_KEY_PRESS:
                     case XCB_KEY_RELEASE:
                     case XCB_BUTTON_PRESS:
                     case XCB_BUTTON_RELEASE:
-                        key_button_event(evt, event_mask);
+                        key_button_event(evt, event_type);
+                        break;
+                    case XCB_MOTION_NOTIFY:
+                        motion_notify(evt, event_type);
                         break;
                     case XCB_MAPPING_NOTIFY:
                         mapping_notify(evt);
                         break;
                     default:
-                        PRINTF("unknown event %u\n", event_mask);
+                        PRINTF("unknown event %u\n", event_type);
                         break;
                 }
                 free(evt);

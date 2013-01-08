@@ -40,3 +40,9 @@ void spawn(char *cmd[])
     }
     wait(NULL);
 }
+
+void run(char *command)
+{
+    char *cmd[] = {shell, "-c", command, NULL};
+    spawn(cmd);
+}

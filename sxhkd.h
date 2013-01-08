@@ -18,7 +18,7 @@ struct hotkey_t {
     xcb_keysym_t keysym;
     xcb_button_t button;
     uint16_t modfield;
-    xcb_event_mask_t event_mask;
+    uint8_t event_type;
     char command[MAXLEN];
     hotkey_t *next;
 };
@@ -51,6 +51,7 @@ void cleanup(void);
 void reload_all(void);
 void load_config(char *config_file);
 void mapping_notify(xcb_generic_event_t *);
-void key_event(xcb_generic_event_t *, xcb_event_mask_t);
+void key_event(xcb_generic_event_t *, uint8_t);
+void motion_notify(xcb_generic_event_t *, uint8_t);
 
 #endif
