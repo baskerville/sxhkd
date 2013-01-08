@@ -2651,7 +2651,7 @@ hotkey_t *make_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type)
 {
     for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next)
-        if (hk->keysym == keysym && hk->button == button && hk->modfield == modfield && hk->event_type == event_type)
+        if (hk->event_type == event_type && hk->keysym == keysym && hk->button == button && hk->modfield == modfield)
             return hk;
     return NULL;
 }
