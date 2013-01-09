@@ -33,6 +33,10 @@ void spawn(char *cmd[])
             close(xcb_get_file_descriptor(dpy));
         if (fork() == 0) {
             setsid();
+            if (redir_fd != -1) {
+                dup2(redir_fd, STDOUT_FILENO);
+                dup2(redir_fd, STDERR_FILENO);
+            }
             execvp(cmd[0], cmd);
             err("Spawning failed.\n");
         }

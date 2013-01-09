@@ -13,6 +13,7 @@ sxhkd is a simple X hotkey daemon.
 * `-h`: Print the synopsis to standard output and exit.
 * `-v`: Print the version information to standard output and exit.
 * `-c CONFIG_FILE`: Read the main configuration from the given file.
+* `-r REDIR_FILE`: Redirect the commands output to the given file.
 
 ## Configuration
 

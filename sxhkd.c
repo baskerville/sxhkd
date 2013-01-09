@@ -3,9 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/select.h>
+#include <fcntl.h>
 #include <ctype.h>
 #include <getopt.h>
 #include <signal.h>
@@ -197,15 +199,20 @@ int main(int argc, char *argv[])
     char opt;
     config_path = NULL;
 
-    while ((opt = getopt(argc, argv, "vhc:")) != -1) {
+    while ((opt = getopt(argc, argv, "vhc:r:")) != -1) {
         switch (opt) {
             case 'v':
                 printf("%s\n", VERSION);
                 exit(EXIT_SUCCESS);
                 break;
             case 'h':
-                printf("sxhkd [-h|-v|-c CONFIG_FILE] [EXTRA_CONFIG ...]\n");
+                printf("sxhkd [-h|-v|-c CONFIG_FILE|-r REDIR_FILE] [EXTRA_CONFIG ...]\n");
                 exit(EXIT_SUCCESS);
+                break;
+            case 'r':
+                redir_fd = open(optarg, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                if (redir_fd == -1)
+                    warn("Failed to open the command redirection file.\n");
                 break;
             case 'c':
                 config_path = optarg;
@@ -285,6 +292,8 @@ int main(int argc, char *argv[])
         }
     }
 
+    if (redir_fd != -1)
+        close(redir_fd);
     ungrab();
     cleanup();
     xcb_key_symbols_free(symbols);

@@ -38,6 +38,7 @@ char config_file[MAXLEN];
 char *config_path;
 char **extra_confs;
 int num_extra_confs;
+int redir_fd;
 
 bool running, reload;
 
