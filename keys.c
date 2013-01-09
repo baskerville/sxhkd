@@ -2620,7 +2620,7 @@ void unfold_hotkeys(char *folded_hotkey, char *folded_command)
             generate_hotkeys(keysym, button, modfield, event_type, unfolded_command);
 
 #define POSTGEN(elt, ra, rz, ptr) \
-        if (ra > rz) \
+        if (ra >= rz) \
             elt = strtok_r(NULL, SEQ_SEP, &ptr), ra = 1, rz = 0; \
         else \
             ra++;
