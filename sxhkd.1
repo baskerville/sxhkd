@@ -51,7 +51,8 @@ If
 .I !
 is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the
 .BR x " and " y
-coordinates of the pointer relative to the root window referential.
+coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are:
+.BR button1 ",…, " button5 ).
 .PP
 The keysym names are those your will get from 
 .BR xev (1)

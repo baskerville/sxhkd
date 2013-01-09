@@ -180,7 +180,7 @@ void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
     uint16_t buttonfield = e->state >> 8;
     uint16_t modfield = e->state & ~lockfield & MOD_STATE_FIELD;
     xcb_button_t button = 1;
-    while (~buttonfield & 1) {
+    while (~buttonfield & 1 && button < 5) {
         buttonfield = buttonfield >> 1;
         button++;
     }
