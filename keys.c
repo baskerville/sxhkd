@@ -2619,6 +2619,11 @@ void unfold_hotkeys(char *folded_hotkey, char *folded_command)
         if (parse_hotkey(unfolded_hotkey, &keysym, &button, &modfield, &event_type))
             generate_hotkeys(keysym, button, modfield, event_type, unfolded_command);
 
+        keysym = XCB_NO_SYMBOL;
+        button = XCB_NONE;
+        modfield = 0;
+        event_type = XCB_KEY_PRESS;
+
 #define POSTGEN(elt, ra, rz, ptr) \
         if (ra >= rz) \
             elt = strtok_r(NULL, SEQ_SEP, &ptr), ra = 1, rz = 0; \
