@@ -80,13 +80,13 @@ void load_config(char *config_file)
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     uint8_t event_type = XCB_KEY_PRESS;
-    char folded_keysym[MAXLEN] = {'\0'};
+    char folded_hotkey[MAXLEN] = {'\0'};
 
     while (fgets(line, sizeof(line), cfg) != NULL) {
         if (strlen(line) < 2 || line[0] == START_COMMENT) {
             continue;
         } else if (isspace(line[0])) {
-            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE && strlen(folded_keysym) == 0)
+            if (keysym == XCB_NO_SYMBOL && button == XCB_NONE && strlen(folded_hotkey) == 0)
                 continue;
             unsigned int i = strlen(line) - 1;
             while (i > 0 && isspace(line[i]))
@@ -96,32 +96,22 @@ void load_config(char *config_file)
                 i++;
             if (i < strlen(line)) {
                 char *command = line + i;
-                if (strlen(folded_keysym) == 0)
+                if (strlen(folded_hotkey) == 0)
                     generate_hotkeys(keysym, button, modfield, event_type, command);
                 else
-                    unfold_hotkeys(folded_keysym, modfield, event_type, command);
+                    unfold_hotkeys(folded_hotkey, command);
             }
             keysym = XCB_NO_SYMBOL;
             button = XCB_NONE;
             modfield = 0;
             event_type = XCB_KEY_PRESS;
-            folded_keysym[0] = '\0';
+            folded_hotkey[0] = '\0';
         } else {
-            char *name = strtok(line, TOK_SEP);
-            if (name == NULL)
-                continue;
-            do {
-                if (name[0] == RELEASE_PREFIX) {
-                    event_type = XCB_KEY_RELEASE;
-                    name++;
-                } else if (name[0] == MOTION_PREFIX) {
-                    event_type = XCB_MOTION_NOTIFY;
-                    name++;
-                }
-                if (!parse_modifier(name, &modfield) && !parse_key(name, &keysym) && !parse_button(name, &button) && !parse_fold(name, folded_keysym)) {
-                    warn("Unrecognized key name: '%s'.\n", name);
-                }
-            } while ((name = strtok(NULL, TOK_SEP)) != NULL);
+            unsigned int i = strlen(line) - 1;
+            while (i > 0 && isspace(line[i]))
+                line[i--] = '\0';
+            if (!parse_fold(line, folded_hotkey))
+                parse_hotkey(line, &keysym, &button, &modfield, &event_type);
         }
     }
 

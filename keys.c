@@ -2454,6 +2454,29 @@ xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t keysym)
     return result;
 }
 
+bool parse_hotkey(char *string, xcb_keysym_t *keysym, xcb_button_t *button, uint16_t *modfield, uint8_t *event_type) {
+    char backup[MAXLEN];
+    strncpy(backup, string, sizeof(backup));
+    backup[strlen(string)] = '\0';
+    for (char *name = strtok(string, TOK_SEP); name != NULL; name = strtok(NULL, TOK_SEP)) {
+        if (name[0] == RELEASE_PREFIX) {
+            *event_type = XCB_KEY_RELEASE;
+            name++;
+        } else if (name[0] == MOTION_PREFIX) {
+            *event_type = XCB_MOTION_NOTIFY;
+            name++;
+        }
+        if (!parse_modifier(name, modfield) && !parse_key(name, keysym) && !parse_button(name, button)) {
+            warn("Unrecognized key name: '%s'.\n", name);
+        }
+    }
+    if (*keysym == XCB_NO_SYMBOL && *button == XCB_NONE) {
+        warn("Invalid hotkey: '%s'.\n", backup);
+        return false;
+    }
+    return true;
+}
+
 bool parse_key(char *name, xcb_keysym_t *keysym)
 {
     for (unsigned int i = 0; i < LENGTH(nks_dict); i++) {
@@ -2517,11 +2540,11 @@ bool parse_modifier(char *name, uint16_t *modfield)
     return false;
 }
 
-bool parse_fold(char *name, char *folded_keysym)
+bool parse_fold(char *string, char *folded_string)
 {
-    if (strchr(name, SEQ_BEGIN) != NULL && strrchr(name, SEQ_END) != NULL) {
-        strncpy(folded_keysym, name, strlen(name));
-        folded_keysym[strlen(name)] = '\0';
+    if (strchr(string, SEQ_BEGIN) != NULL && strrchr(string, SEQ_END) != NULL) {
+        strncpy(folded_string, string, strlen(string));
+        folded_string[strlen(string)] = '\0';
         return true;
     }
     return false;
@@ -2559,51 +2582,51 @@ bool extract_sequence(char *string, char *prefix, char *sequence, char *suffix)
     return true;
 }
 
-void unfold_hotkeys(char *folded_keysym, uint16_t modfield, uint8_t event_type, char *folded_command)
+void unfold_hotkeys(char *folded_hotkey, char *folded_command)
 {
-    char keysym_sequence[MAXLEN];
-    char keysym_prefix[MAXLEN];
-    char keysym_suffix[MAXLEN];
+    char hotkey_sequence[MAXLEN];
+    char hotkey_prefix[MAXLEN];
+    char hotkey_suffix[MAXLEN];
     char command_sequence[MAXLEN];
     char command_prefix[MAXLEN];
     char command_suffix[MAXLEN];
-    if (!extract_sequence(folded_keysym, keysym_prefix, keysym_sequence, keysym_suffix) || !extract_sequence(folded_command, command_prefix, command_sequence, command_suffix)) {
-        warn("Couldn't extract sequence from '%s' or '%s'.\n", folded_keysym, folded_command);
+    if (!extract_sequence(folded_hotkey, hotkey_prefix, hotkey_sequence, hotkey_suffix) || !extract_sequence(folded_command, command_prefix, command_sequence, command_suffix)) {
+        warn("Couldn't extract sequence from '%s' or '%s'.\n", folded_hotkey, folded_command);
         return;
     }
-    char unfolded_keysym[MAXLEN], unfolded_command[MAXLEN];
+    char unfolded_hotkey[MAXLEN], unfolded_command[MAXLEN];
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_button_t button = XCB_NONE;
-    char *ks_ptr, *cmd_ptr;
-    char ks_a = 1, ks_z = 0, cmd_a = 1, cmd_z = 0;
-    char *ks_item = strtok_r(keysym_sequence, SEQ_SEP, &ks_ptr);
+    uint16_t modfield = 0;
+    uint8_t event_type = XCB_KEY_PRESS;
+    char *hk_ptr, *cmd_ptr;
+    char hk_a = 1, hk_z = 0, cmd_a = 1, cmd_z = 0;
+    char *hk_item = strtok_r(hotkey_sequence, SEQ_SEP, &hk_ptr);
     char *cmd_item = strtok_r(command_sequence, SEQ_SEP, &cmd_ptr);
 
-    while ((ks_item != NULL || ks_a <= ks_z) && (cmd_item != NULL || cmd_a <= cmd_z)) {
-        if (ks_a > ks_z && strlen(ks_item) == 3 && sscanf(ks_item, "%c-%c", &ks_a, &ks_z) == 2 && ks_a >= ks_z)
-            ks_a = 1, ks_z = 0;
-        if (cmd_a > cmd_z && strlen(cmd_item) == 3 && sscanf(cmd_item, "%c-%c", &cmd_a, &cmd_z) == 2 && cmd_a >= cmd_z)
-            cmd_a = 1, cmd_z = 0;
-        if (ks_a <= ks_z)
-            snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%c%s", keysym_prefix, ks_a, keysym_suffix);
-        else
-            snprintf(unfolded_keysym, sizeof(unfolded_keysym), "%s%s%s", keysym_prefix, ks_item, keysym_suffix);
-        if (cmd_a <= cmd_z)
-            snprintf(unfolded_command, sizeof(unfolded_command), "%s%c%s", command_prefix, cmd_a, command_suffix);
-        else
-            snprintf(unfolded_command, sizeof(unfolded_command), "%s%s%s", command_prefix, cmd_item, command_suffix);
-        if (parse_key(unfolded_keysym, &keysym) || parse_button(unfolded_keysym, &button))
+    while ((hk_item != NULL || hk_a <= hk_z) && (cmd_item != NULL || cmd_a <= cmd_z)) {
+#define PREGEN(elt, ra, rz, prefix, suffix, unf) \
+        if (ra > rz && strlen(elt) == 3 && sscanf(elt, "%c-%c", &ra, &rz) == 2 && ra >= rz) \
+            ra = 1, rz = 0; \
+        if (ra <= rz) \
+            snprintf(unf, sizeof(unf), "%s%c%s", prefix, ra, suffix); \
+        else \
+            snprintf(unf, sizeof(unf), "%s%s%s", prefix, elt, suffix);
+        PREGEN(hk_item, hk_a, hk_z, hotkey_prefix, hotkey_suffix, unfolded_hotkey);
+        PREGEN(cmd_item, cmd_a, cmd_z, command_prefix, command_suffix, unfolded_command);
+#undef PREGEN
+
+        if (parse_hotkey(unfolded_hotkey, &keysym, &button, &modfield, &event_type))
             generate_hotkeys(keysym, button, modfield, event_type, unfolded_command);
-        else
-            warn("Unknown sequence keysym: '%s'.\n", ks_item);
-        if (ks_a >= ks_z)
-            ks_item = strtok_r(NULL, SEQ_SEP, &ks_ptr), ks_a = 1, ks_z = 0;
-        else
-            ks_a++;
-        if (cmd_a >= cmd_z)
-            cmd_item = strtok_r(NULL, SEQ_SEP, &cmd_ptr), cmd_a = 1, cmd_z = 0;
-        else
-            cmd_a++;
+
+#define POSTGEN(elt, ra, rz, ptr) \
+        if (ra > rz) \
+            elt = strtok_r(NULL, SEQ_SEP, &ptr), ra = 1, rz = 0; \
+        else \
+            ra++;
+        POSTGEN(hk_item, hk_a, hk_z, hk_ptr);
+        POSTGEN(cmd_item, cmd_a, cmd_z, cmd_ptr);
+#undef POSTGEN
     }
 }
 
