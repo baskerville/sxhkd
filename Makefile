@@ -2,7 +2,7 @@ VERSION = 0.1
 
 CC      = gcc
 LIBS    = -lm -lxcb -lxcb-keysyms
-CFLAGS  = -std=c99 -pedantic -Wall -Wextra -D_POSIX_SOURCE -DVERSION=\"$(VERSION)\"
+CFLAGS  = -std=c99 -pedantic -Wall -Wextra -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
 LDFLAGS = $(LIBS)
 
 PREFIX    ?= /usr/local
