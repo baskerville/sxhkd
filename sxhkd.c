@@ -13,7 +13,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include "helpers.h"
-#include "keys.h"
+#include "hotkeys.h"
 #include "sxhkd.h"
 
 void hold(int sig)

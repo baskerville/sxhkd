@@ -3,11 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "keys.h"
+#include "hotkeys.h"
 #include "helpers.h"
 #include "sxhkd.h"
 
-keysym_dict_t nks_dict[] = {
+keysym_dict_t nks_dict[] = {/*{{{*/
 #define NKS(x)  { #x, XK_ ## x }
     NKS(VoidSymbol),
 #ifdef XK_MISCELLANY
@@ -2339,7 +2339,7 @@ keysym_dict_t nks_dict[] = {
     NKS(LogWindowTree),
     NKS(LogGrabInfo),
 #undef NKS
-};
+};/*}}}*/
 
 void grab(void)
 {

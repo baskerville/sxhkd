@@ -1,5 +1,5 @@
-#ifndef _KEYS_H
-#define _KEYS_H
+#ifndef _HOTKEYS_H
+#define _HOTKEYS_H
 
 #include "sxhkd.h"
 
