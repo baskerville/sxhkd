@@ -49,6 +49,35 @@ If *sxhkd* receives a `SIGUSR1` signal, it will reload its configuration file.
 
 If no configuration file is specified through the `-c` option, the following is used: `$XDG_CONFIG_HOME/sxhkd/sxhkdrc`.
 
+## Example Configuration
+
+    Audio{Prev,Next}
+        mpc -q {prev,next}
+
+    super + shift + @LaunchA
+        scrot -s -e 'image_viewer $f'
+
+    super + shift + equal
+        mosaic "$HOME/image"
+
+    super + {h,j,k,l}
+        bspc focus {left,down,up,right}
+
+    super + alt + {0-9}
+        mpc -q seek {0-9}0%
+
+    super + {alt,ctrl,alt + ctrl} + Eject
+        sudo systemctl {suspend,reboot,poweroff}
+
+    super + button{1,2,3}
+        bspc grab_pointer {move,focus,resize}
+
+    super + !button{1,3}
+        bspc {track_pointer,track_pointer} %i %i
+
+    super + @button{1,3}
+        bspc {ungrab_pointer,ungrab_pointer}
+
 ## Installation
 
     make
