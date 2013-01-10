@@ -2362,10 +2362,21 @@ void grab(void)
 
 void grab_key_button(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield)
 {
-    for (uint8_t i = 0; i < 8; i++) {
-        uint16_t lockfield = (i & 1 ? num_lock : 0) | (i & 2 ? caps_lock : 0) | (i & 4 ? scroll_lock : 0);
-        grab_key_button_checked(keycode, button, modfield | lockfield);
-    }
+    grab_key_button_checked(keycode, button, modfield);
+    if (num_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | num_lock);
+    if (caps_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | caps_lock);
+    if (scroll_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | scroll_lock);
+    if (num_lock != 0 && caps_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | num_lock | caps_lock);
+    if (caps_lock != 0 && scroll_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | caps_lock | scroll_lock);
+    if (num_lock != 0 && scroll_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | num_lock | scroll_lock);
+    if (num_lock != 0 && caps_lock != 0 && scroll_lock != 0)
+        grab_key_button_checked(keycode, button, modfield | num_lock | caps_lock | scroll_lock);
 }
 
 void grab_key_button_checked(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield)
