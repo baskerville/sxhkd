@@ -51,10 +51,10 @@ If no configuration file is specified through the `-c` option, the following is 
 
 ## Example Configuration
 
-    Audio{Prev,Next}
+    XF86Audio{Prev,Next}
         mpc -q {prev,next}
 
-    super + shift + @LaunchA
+    super + shift + @XF86LaunchA
         scrot -s -e 'image_viewer $f'
 
     super + shift + equal
@@ -66,7 +66,7 @@ If no configuration file is specified through the `-c` option, the following is 
     super + alt + {0-9}
         mpc -q seek {0-9}0%
 
-    super + {alt,ctrl,alt + ctrl} + Eject
+    super + {alt,ctrl,alt + ctrl} + XF86Eject
         sudo systemctl {suspend,reboot,poweroff}
 
     super + button{1,2,3}
