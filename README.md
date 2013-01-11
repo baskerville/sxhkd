@@ -33,7 +33,7 @@ If `@` is added at the beginning of the keysym, the command will be run on key r
 
 If `!` is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the *x* and *y* coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: `button1`, ..., `button5`).
 
-The keysym names are those your will get from `xev` (minus the prefix if any).
+The keysym names are those your will get from `xev`.
 
 Mouse hotkeys can be defined by using one of the following special keysym names: `button1`, `button2`, `button3`, ..., `button24`.
 

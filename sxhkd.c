@@ -239,6 +239,7 @@ int main(int argc, char *argv[])
     signal(SIGUSR1, hold);
 
     setup();
+    get_standard_keysyms();
     get_lock_fields();
     load_config(config_file);
     for (int i = 0; i < num_extra_confs; i++)

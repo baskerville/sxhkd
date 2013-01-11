@@ -15,6 +15,9 @@
 #define SEQ_BEGIN            '{'
 #define SEQ_END              '}'
 
+xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
+             Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
+
 void grab(void);
 void grab_key_button(xcb_keycode_t, xcb_button_t, uint16_t);
 void grab_key_button_checked(xcb_keycode_t, xcb_button_t, uint16_t);
@@ -22,11 +25,12 @@ void ungrab(void);
 int16_t modfield_from_keysym(xcb_keysym_t);
 xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t);
 bool parse_hotkey(char *, xcb_keysym_t *, xcb_button_t *, uint16_t *, uint8_t *);
-bool parse_key(char *, xcb_keysym_t *);
+bool parse_keysym(char *, xcb_keysym_t *);
 bool parse_button(char *, xcb_button_t *);
 bool parse_modifier(char *, uint16_t *);
 bool parse_fold(char *, char *);
 uint8_t key_to_button(uint8_t);
+void get_standard_keysyms(void);
 void get_lock_fields(void);
 void unfold_hotkeys(char *, char *);
 void generate_hotkeys(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, char *);
