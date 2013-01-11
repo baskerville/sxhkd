@@ -2,8 +2,9 @@ VERSION = 0.1
 
 CC      = gcc
 LIBS    = -lm -lxcb -lxcb-keysyms
-CFLAGS  = -std=c99 -pedantic -Wall -Wextra -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
-LDFLAGS = $(LIBS)
+CFLAGS  = -std=c99 -pedantic -Wall -Wextra -I$(PREFIX)
+CFLAGS  += -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
+LDFLAGS = -L$(PREFIX)
 
 PREFIX    ?= /usr/local
 BINPREFIX = $(PREFIX)/bin
@@ -32,7 +33,7 @@ options:
 
 sxhkd: $(OBJ)
 	@echo CC -o $@
-	@$(CC) -o $@ $(OBJ) $(LDFLAGS)
+	@$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 
 clean:
 	@echo "cleaning"
@@ -40,9 +41,13 @@ clean:
 
 install:
 	@echo "installing executable files to $(DESTDIR)$(BINPREFIX)"
-	@install -D -m 755 sxhkd $(DESTDIR)$(BINPREFIX)/sxhkd
+	@mkdir -p "$(DESTDIR)$(BINPREFIX)"
+	@cp -t "$(DESTDIR)$(BINPREFIX)" sxhkd
+	@chmod 755 "$(DESTDIR)$(BINPREFIX)/sxhkd"
 	@echo "installing manual page to $(DESTDIR)$(MANPREFIX)/man1"
-	@install -D -m 644 sxhkd.1 $(DESTDIR)$(MANPREFIX)/man1/sxhkd.1
+	@mkdir -p "$(DESTDIR)$(MANPREFIX)/man1"
+	@cp -t "$(DESTDIR)$(MANPREFIX)/man1" sxhkd.1
+	@chmod 644 "$(DESTDIR)$(MANPREFIX)/man1/sxhkd.1"
 
 uninstall:
 	@echo "removing executable files from $(DESTDIR)$(BINPREFIX)"
