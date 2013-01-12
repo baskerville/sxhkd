@@ -42,11 +42,11 @@ clean:
 install:
 	@echo "installing executable files to $(DESTDIR)$(BINPREFIX)"
 	@mkdir -p "$(DESTDIR)$(BINPREFIX)"
-	@cp -t "$(DESTDIR)$(BINPREFIX)" sxhkd
+	@cp sxhkd "$(DESTDIR)$(BINPREFIX)"
 	@chmod 755 "$(DESTDIR)$(BINPREFIX)/sxhkd"
 	@echo "installing manual page to $(DESTDIR)$(MANPREFIX)/man1"
 	@mkdir -p "$(DESTDIR)$(MANPREFIX)/man1"
-	@cp -t "$(DESTDIR)$(MANPREFIX)/man1" sxhkd.1
+	@cp sxhkd.1 "$(DESTDIR)$(MANPREFIX)/man1"
 	@chmod 644 "$(DESTDIR)$(MANPREFIX)/man1/sxhkd.1"
 
 uninstall:
