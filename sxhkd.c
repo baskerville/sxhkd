@@ -33,11 +33,6 @@ void setup(void)
     if (screen == NULL)
         err("Can't acquire screen.\n");
     root = screen->root;
-    /* Makes key repeat events only send key press events */
-    /* xcb_xkb_per_client_flags_reply_t *reply = xcb_xkb_per_client_flags_reply(dpy, xcb_xkb_per_client_flags(dpy, XCB_XKB_ID_USE_CORE_KBD, XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, XCB_XKB_PER_CLIENT_FLAG_DETECTABLE_AUTO_REPEAT, 0, 0, 0), NULL); */
-    /* if (reply == NULL) */
-    /*     warn("couldn't set detectable auto repeat\n"); */
-    /* free(reply); */
     if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
         err("The '%s' environment variable is not defined.\n", SHELL_ENV);
     symbols = xcb_key_symbols_alloc(dpy);
@@ -54,10 +49,9 @@ void cleanup(void)
     }
 }
 
-void reload_all(void)
+void reload_cmd(void)
 {
-    PUTS("reload all");
-    signal(SIGUSR1, hold);
+    PUTS("reload");
     cleanup();
     hotkeys = NULL;
     load_config(config_file);
@@ -65,7 +59,6 @@ void reload_all(void)
         load_config(extra_confs[i]);
     ungrab();
     grab();
-    reload = false;
 }
 
 void load_config(char *config_file)
@@ -118,22 +111,6 @@ void load_config(char *config_file)
     }
 
     fclose(cfg);
-}
-
-void mapping_notify(xcb_generic_event_t *evt)
-{
-    if (!running || reload)
-        return;
-    xcb_mapping_notify_event_t *e = (xcb_mapping_notify_event_t *) evt;
-    PRINTF("mapping notify %u %u\n", e->request, e->count);
-    if (e->request == XCB_MAPPING_KEYBOARD || e->request == XCB_MAPPING_MODIFIER) {
-        /* PUTS("refreshing everything"); */
-        /* xcb_refresh_keyboard_mapping(symbols, e); */
-        /* get_lock_fields(); */
-        /* load_config(); */
-        /* ungrab(); */
-        /* grab(); */
-    }
 }
 
 void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
@@ -273,22 +250,22 @@ int main(int argc, char *argv[])
                     case XCB_MOTION_NOTIFY:
                         motion_notify(evt, event_type);
                         break;
-                    case XCB_MAPPING_NOTIFY:
-                        mapping_notify(evt);
-                        break;
                     default:
-                        PRINTF("unknown event %u\n", event_type);
+                        PRINTF("received event %u\n", event_type);
                         break;
                 }
                 free(evt);
             }
         }
 
-        if (reload)
-            reload_all();
+        if (reload) {
+            signal(SIGUSR1, hold);
+            reload_cmd();
+            reload = false;
+        }
         
         if (xcb_connection_has_error(dpy)) {
-            warn("One of the previous requests failed.\n");
+            warn("The server has closed the connection.\n");
             running = false;
         }
     }

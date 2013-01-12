@@ -49,7 +49,7 @@ uint16_t scroll_lock;
 void hold(int);
 void setup(void);
 void cleanup(void);
-void reload_all(void);
+void reload_cmd(void);
 void load_config(char *config_file);
 void mapping_notify(xcb_generic_event_t *);
 void key_event(xcb_generic_event_t *, uint8_t);
