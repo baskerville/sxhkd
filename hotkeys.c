@@ -2158,6 +2158,7 @@ keysym_dict_t nks_dict[] = {/*{{{*/
     {"Sinh_luu2"                   , 0x1000df3}  ,
     {"Sinh_kunddaliya"             , 0x1000df4}  ,
 #endif
+#ifdef XK_XFREE86
     {"XF86ModeLock"                    , 0x1008FF01} ,
     {"XF86MonBrightnessUp"             , 0x1008FF02} ,
     {"XF86MonBrightnessDown"           , 0x1008FF03} ,
@@ -2334,6 +2335,7 @@ keysym_dict_t nks_dict[] = {/*{{{*/
     {"XF86Prev_VMode"                  , 0x1008FE23} ,
     {"XF86LogWindowTree"               , 0x1008FE24} ,
     {"XF86LogGrabInfo"                 , 0x1008FE25} ,
+#endif
 };/*}}}*/
 
 void grab(void)

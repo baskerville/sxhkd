@@ -3,6 +3,7 @@
 
 #define XK_MISCELLANY
 #define XK_XKB_KEYS
+#define XK_XFREE86
 #define XK_LATIN1
 #define XK_LATIN2
 #define XK_LATIN3
