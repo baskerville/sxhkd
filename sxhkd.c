@@ -202,10 +202,10 @@ int main(int argc, char *argv[])
 
     if (config_path == NULL) {
         char *config_home = getenv(CONFIG_HOME_ENV);
-        if (config_home == NULL)
-            err("The following environment variable is not defined: '%s'.\n", CONFIG_HOME_ENV); 
-        else
+        if (config_home != NULL)
             snprintf(config_file, sizeof(config_file), "%s/%s", config_home, CONFIG_PATH);
+        else
+            snprintf(config_file, sizeof(config_file), "%s/%s/%s", getenv("HOME"), ".config", CONFIG_PATH);
     } else {
         strncpy(config_file, config_path, sizeof(config_file));
     }
