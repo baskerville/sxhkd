@@ -263,7 +263,7 @@ int main(int argc, char *argv[])
             reload_cmd();
             reload = false;
         }
-        
+
         if (xcb_connection_has_error(dpy)) {
             warn("The server has closed the connection.\n");
             running = false;
