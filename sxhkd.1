@@ -41,23 +41,23 @@ General Syntax:
         COMMAND
 .EE
 .PP
-Where 
+Where
 .I MODIFIER
 is one of the following names:
 .BR super , " hyper", " meta", " alt", " control", " ctrl", " shift", " mode_switch", " lock", " mod1", " mod2", " mod3", " mod4", " mod5" .
 .PP
-If 
+If
 .I @
 is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
 .PP
-If 
+If
 .I !
 is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the
 .BR x " and " y
 coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are:
 .BR button1 ",…, " button5 ).
 .PP
-The keysym names are those your will get from 
+The keysym names are those your will get from
 .BR xev (1).
 .PP
 Mouse hotkeys can be defined by using one of the following special keysym names:
@@ -77,10 +77,10 @@ where
 .IR A " and " Z
 are alphanumeric characters.
 .PP
-What is actually executed is 
+What is actually executed is
 .IB SHELL " -c "
 .IR COMMAND ,
-which means you can use environment variables in 
+which means you can use environment variables in
 .IR COMMAND .
 .PP
 .I SHELL
@@ -89,13 +89,13 @@ will be the content of the first defined environment variable in the following l
 .PP
 If
 .B sxhkd
-receives a 
+receives a
 .I SIGUSR1
 signal, it will reload its configuration file.
 .PP
 If no configuration file is specified through the
 .B -c
-option, the following is used: 
+option, the following is used:
 .IR $XDG_CONFIG_HOME/sxhkd/sxhkdrc .
 .SH AUTHOR
 .MT baskerville@lavabit.com

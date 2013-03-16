@@ -2384,7 +2384,7 @@ void grab_key_button_checked(xcb_keycode_t keycode, xcb_button_t button, uint16_
     else
         err = xcb_request_check(dpy, xcb_grab_button_checked(dpy, false, root, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, button, modfield));
     unsigned int value = (button == XCB_NONE ? keycode : button);
-    char *type = (button == XCB_NONE ? "key" : "button"); 
+    char *type = (button == XCB_NONE ? "key" : "button");
     if (err != NULL) {
         warn("Could not grab %s %u with modfield %u: ", type, value, modfield);
         if (err->error_code == XCB_ACCESS)
