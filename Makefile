@@ -11,7 +11,6 @@ BINPREFIX = $(PREFIX)/bin
 MANPREFIX = $(PREFIX)/share/man
 
 SRC = sxhkd.c hotkeys.c helpers.c
-HDR = $(SRC:.c=.h) locales.h
 OBJ = $(SRC:.c=.o)
 
 all: CFLAGS += -Os
@@ -21,9 +20,11 @@ all: sxhkd
 debug: CFLAGS += -O0 -g -DDEBUG
 debug: sxhkd
 
-$(OBJ): $(SRC) $(HDR) Makefile
+include Incgraph
 
-.c.o:
+$(OBJ): Makefile
+
+%.o: %.c
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 sxhkd: $(OBJ)
