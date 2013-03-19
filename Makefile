@@ -20,7 +20,7 @@ all: sxhkd
 debug: CFLAGS += -O0 -g -DDEBUG
 debug: sxhkd
 
-include Incgraph
+include Sourcedeps
 
 $(OBJ): Makefile
 

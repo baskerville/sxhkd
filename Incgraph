@@ -1,3 +1,0 @@
-helpers.o: helpers.c helpers.h
-hotkeys.o: hotkeys.c helpers.h locales.h
-sxhkd.o: sxhkd.c helpers.h
