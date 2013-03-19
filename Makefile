@@ -24,7 +24,7 @@ include Incgraph
 
 $(OBJ): Makefile
 
-%.o: %.c
+.c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
 sxhkd: $(OBJ)
