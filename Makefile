@@ -11,49 +11,37 @@ BINPREFIX = $(PREFIX)/bin
 MANPREFIX = $(PREFIX)/share/man
 
 SRC = sxhkd.c hotkeys.c helpers.c
+HDR = $(SRC:.c=.h) locales.h
 OBJ = $(SRC:.c=.o)
 
 all: CFLAGS += -Os
 all: LDFLAGS += -s
-all: options sxhkd
+all: sxhkd
 
 debug: CFLAGS += -O0 -g -DDEBUG
-debug: options sxhkd
+debug: sxhkd
 
-options:
-	@echo "sxhkd build options:"
-	@echo "CC      = $(CC)"
-	@echo "CFLAGS  = $(CFLAGS)"
-	@echo "LDFLAGS = $(LDFLAGS)"
-	@echo "LIBS    = $(LIBS)"
-	@echo "PREFIX  = $(PREFIX)"
+$(OBJ): $(SRC) $(HDR) Makefile
 
 .c.o:
-	@echo "CC $<"
-	@$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 sxhkd: $(OBJ)
-	@echo CC -o $@
-	@$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
-
-clean:
-	@echo "cleaning"
-	@rm -f $(OBJ) sxhkd
+	$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 
 install:
-	@echo "installing executable files to $(DESTDIR)$(BINPREFIX)"
-	@mkdir -p "$(DESTDIR)$(BINPREFIX)"
-	@cp sxhkd "$(DESTDIR)$(BINPREFIX)"
-	@chmod 755 "$(DESTDIR)$(BINPREFIX)/sxhkd"
-	@echo "installing manual page to $(DESTDIR)$(MANPREFIX)/man1"
-	@mkdir -p "$(DESTDIR)$(MANPREFIX)/man1"
-	@cp sxhkd.1 "$(DESTDIR)$(MANPREFIX)/man1"
-	@chmod 644 "$(DESTDIR)$(MANPREFIX)/man1/sxhkd.1"
+	mkdir -p "$(DESTDIR)$(BINPREFIX)"
+	cp sxhkd "$(DESTDIR)$(BINPREFIX)"
+	chmod 755 "$(DESTDIR)$(BINPREFIX)/sxhkd"
+	mkdir -p "$(DESTDIR)$(MANPREFIX)/man1"
+	cp sxhkd.1 "$(DESTDIR)$(MANPREFIX)/man1"
+	chmod 644 "$(DESTDIR)$(MANPREFIX)/man1/sxhkd.1"
 
 uninstall:
-	@echo "removing executable files from $(DESTDIR)$(BINPREFIX)"
-	@rm -f $(DESTDIR)$(BINPREFIX)/sxhkd
-	@echo "removing manual page from $(DESTDIR)$(MANPREFIX)/man1"
-	@rm -f $(DESTDIR)$(MANPREFIX)/man1/sxhkd.1
+	rm -f $(DESTDIR)$(BINPREFIX)/sxhkd
+	rm -f $(DESTDIR)$(MANPREFIX)/man1/sxhkd.1
 
-.PHONY: all debug options clean install uninstall
+clean:
+	rm -f $(OBJ) sxhkd
+
+.PHONY: all debug clean install uninstall
