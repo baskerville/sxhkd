@@ -75,6 +75,7 @@ void load_config(char *config_file)
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     uint8_t event_type = XCB_KEY_PRESS;
+    bool replay_event = false;
     char folded_hotkey[MAXLEN] = {'\0'};
 
     while (fgets(line, sizeof(line), cfg) != NULL) {
@@ -92,7 +93,7 @@ void load_config(char *config_file)
             if (i < strlen(line)) {
                 char *command = line + i;
                 if (strlen(folded_hotkey) == 0)
-                    generate_hotkeys(keysym, button, modfield, event_type, command);
+                    generate_hotkeys(keysym, button, modfield, event_type, replay_event, command);
                 else
                     unfold_hotkeys(folded_hotkey, command);
             }
@@ -100,13 +101,14 @@ void load_config(char *config_file)
             button = XCB_NONE;
             modfield = 0;
             event_type = XCB_KEY_PRESS;
+            replay_event = false;
             folded_hotkey[0] = '\0';
         } else {
             unsigned int i = strlen(line) - 1;
             while (i > 0 && isspace(line[i]))
                 line[i--] = '\0';
             if (!parse_fold(line, folded_hotkey))
-                parse_hotkey(line, &keysym, &button, &modfield, &event_type);
+                parse_hotkey(line, &keysym, &button, &modfield, &event_type, &replay_event);
         }
     }
 
@@ -118,6 +120,7 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_keycode_t keycode = XCB_NONE;
     xcb_button_t button = XCB_NONE;
+    bool replay_event = false;
     uint16_t modfield = 0;
     uint16_t lockfield = num_lock | caps_lock | scroll_lock;
     if (event_type == XCB_KEY_PRESS) {
@@ -146,9 +149,28 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
     modfield &= ~lockfield & MOD_STATE_FIELD;
     if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
         hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type);
-        if (hk != NULL)
+        if (hk != NULL) {
             run(hk->command);
+            replay_event = hk->replay_event;
+        }
     }
+    switch (event_type) {
+        case XCB_BUTTON_PRESS:
+        case XCB_BUTTON_RELEASE:
+            if (replay_event)
+                xcb_allow_events(dpy, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
+            else
+                xcb_allow_events(dpy, XCB_ALLOW_ASYNC_POINTER, XCB_CURRENT_TIME);
+            break;
+        case XCB_KEY_PRESS:
+        case XCB_KEY_RELEASE:
+            if (replay_event)
+                xcb_allow_events(dpy, XCB_ALLOW_REPLAY_KEYBOARD, XCB_CURRENT_TIME);
+            else
+                xcb_allow_events(dpy, XCB_ALLOW_ASYNC_KEYBOARD, XCB_CURRENT_TIME);
+            break;
+    }
+    xcb_flush(dpy);
 }
 
 void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)

@@ -9,6 +9,7 @@
 #define SEQ_MIN_LEN          3
 #define RELEASE_PREFIX       '@'
 #define MOTION_PREFIX        '!'
+#define REPLAY_PREFIX        ':'
 #define START_COMMENT        '#'
 #define TOK_SEP              "+ \n"
 #define SEQ_SEP              ","
@@ -24,7 +25,7 @@ void grab_key_button_checked(xcb_keycode_t, xcb_button_t, uint16_t);
 void ungrab(void);
 int16_t modfield_from_keysym(xcb_keysym_t);
 xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t);
-bool parse_hotkey(char *, xcb_keysym_t *, xcb_button_t *, uint16_t *, uint8_t *);
+bool parse_hotkey(char *, xcb_keysym_t *, xcb_button_t *, uint16_t *, uint8_t *, bool *);
 bool parse_keysym(char *, xcb_keysym_t *);
 bool parse_button(char *, xcb_button_t *);
 bool parse_modifier(char *, uint16_t *);
@@ -33,8 +34,8 @@ uint8_t key_to_button(uint8_t);
 void get_standard_keysyms(void);
 void get_lock_fields(void);
 void unfold_hotkeys(char *, char *);
-void generate_hotkeys(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, char *);
-hotkey_t *make_hotkey(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, char *);
+void generate_hotkeys(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool, char *);
+hotkey_t *make_hotkey(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool, char *);
 hotkey_t *find_hotkey(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t);
 void add_hotkey(hotkey_t *);
 

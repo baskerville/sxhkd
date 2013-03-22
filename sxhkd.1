@@ -57,6 +57,10 @@ is added at the beginning of the keysym, the command will be run on motion notif
 coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are:
 .BR button1 ",…, " button5 ).
 .PP
+If
+.I :
+is added at the beginning of the keysym, the captured event will be replayed for the other clients.
+.PP
 The keysym names are those your will get from
 .BR xev (1).
 .PP

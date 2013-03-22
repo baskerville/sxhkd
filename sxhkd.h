@@ -19,6 +19,7 @@ struct hotkey_t {
     xcb_button_t button;
     uint16_t modfield;
     uint8_t event_type;
+    bool replay_event;
     char command[MAXLEN];
     hotkey_t *next;
 };
