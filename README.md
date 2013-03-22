@@ -24,7 +24,7 @@ Each line of the configuration file is interpreted as so:
 
 General syntax:
 
-    [MODIFIER + ]*[@|!]KEYSYM
+    [MODIFIER + ]*[@|!|:]KEYSYM
         COMMAND
 
 Where `MODIFIER` is one of the following names: `super`, `hyper`, `meta`, `alt`, `control`, `ctrl`, `shift`, `mode_switch`, `lock`, `mod1`, `mod2`, `mod3`, `mod4`, `mod5`.
@@ -56,11 +56,11 @@ If no configuration file is specified through the `-c` option, the following is 
     XF86Audio{Prev,Next}
         mpc -q {prev,next}
 
-    super + shift + @XF86LaunchA
+    @XF86LaunchA
         scrot -s -e 'image_viewer $f'
 
     super + shift + equal
-        mosaic "$HOME/image"
+        sxiv -rt "$HOME/image"
 
     super + {h,j,k,l}
         bspc focus {left,down,up,right}
@@ -71,14 +71,18 @@ If no configuration file is specified through the `-c` option, the following is 
     super + {alt,ctrl,alt + ctrl} + XF86Eject
         sudo systemctl {suspend,reboot,poweroff}
 
+    :button1
+        bspc grab_pointer focus
+
     super + button{1,2,3}
-        bspc grab_pointer {move,focus,resize}
+        bspc grab_pointer {move,resize_side,resize_corner}
 
-    super + !button{1,3}
-        bspc {track_pointer,track_pointer} %i %i
+    super + !button{1,2,3}
+        bspc {track_pointer,track_pointer,track_pointer} %i %i
 
-    super + @button{1,3}
-        bspc {ungrab_pointer,ungrab_pointer}
+    super + @button{1,2,3}
+        bspc {ungrab_pointer,ungrab_pointer,ungrab_pointer}
+
 
 ## Installation
 
