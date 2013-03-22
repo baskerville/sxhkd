@@ -62,6 +62,9 @@ If no configuration file is specified through the `-c` option, the following is 
     super + shift + equal
         sxiv -rt "$HOME/image"
 
+    XF86LaunchB
+        xdotool selectwindow | xsel -bi
+
     super + {h,j,k,l}
         bspc focus {left,down,up,right}
 
