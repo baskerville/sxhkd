@@ -1,0 +1,4 @@
+- Multi-line commands.
+- Disymmetric sequences.
+- Handle magic chars inhibition via backslash.
+- Chained bindings?
