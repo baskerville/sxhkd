@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <string.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/wait.h>
@@ -49,4 +51,27 @@ void run(char *command)
 {
     char *cmd[] = {shell, "-c", command, NULL};
     spawn(cmd);
+}
+
+char *lgraph(char *s)
+{
+    size_t len = strlen(s);
+    unsigned int i = 0;
+    while (i < len && !isgraph(s[i]))
+        i++;
+    if (i < len)
+        return (s + i);
+    else
+        return NULL;
+}
+
+char *rgraph(char *s)
+{
+    int i = strlen(s) - 1;
+    while (i >= 0 && !isgraph(s[i]))
+        i--;
+    if (i >= 0)
+        return (s + i);
+    else
+        return NULL;
 }

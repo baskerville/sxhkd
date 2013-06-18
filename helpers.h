@@ -17,5 +17,7 @@ __attribute__((noreturn))
 void err(char *, ...);
 void spawn(char *[]);
 void run(char *);
+char *lgraph(char *);
+char *rgraph(char *);
 
 #endif
