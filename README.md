@@ -38,7 +38,7 @@ The keysym names are given by the output of `xev`.
 
 Hotkeys and commands can be spread across multiple lines by ending each partial line with a backslash character.
 
-When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only by executed after receiving each chord of the chain in consecutive order.
+When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only be executed after receiving each chord of the chain in consecutive order.
 
 If `@` is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
 
