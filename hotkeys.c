@@ -2721,7 +2721,7 @@ void process_hotkey(char *hotkey_string, char *command_string)
 
         strncpy(hotkey, hk_loop ? unfolded_hotkey : hotkey_string, sizeof(hotkey));
         strncpy(command, cm_loop ? unfolded_command : command_string, sizeof(command));
-        PRINTF("    %s\n        %s\n", hotkey, command);
+        PRINTF("%s: %s\n", hotkey, command);
         chain_t *chain = make_chain();
         if (parse_chain(hotkey, chain)) {
             hotkey_t *hk = make_hotkey(chain, command);
