@@ -32,11 +32,9 @@ sxhkd: $(OBJ)
 
 install:
 	mkdir -p "$(DESTDIR)$(BINPREFIX)"
-	cp sxhkd "$(DESTDIR)$(BINPREFIX)"
-	chmod 755 "$(DESTDIR)$(BINPREFIX)/sxhkd"
+	cp -p sxhkd "$(DESTDIR)$(BINPREFIX)"
 	mkdir -p "$(DESTDIR)$(MANPREFIX)/man1"
-	cp sxhkd.1 "$(DESTDIR)$(MANPREFIX)/man1"
-	chmod 644 "$(DESTDIR)$(MANPREFIX)/man1/sxhkd.1"
+	cp -p sxhkd.1 "$(DESTDIR)$(MANPREFIX)/man1"
 
 uninstall:
 	rm -f $(DESTDIR)$(BINPREFIX)/sxhkd
