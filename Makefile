@@ -10,7 +10,7 @@ PREFIX    ?= /usr/local
 BINPREFIX = $(PREFIX)/bin
 MANPREFIX = $(PREFIX)/share/man
 
-SRC = sxhkd.c hotkeys.c helpers.c
+SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
 all: CFLAGS += -Os

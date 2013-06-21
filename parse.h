@@ -1,12 +1,8 @@
-#ifndef _HOTKEYS_H
-#define _HOTKEYS_H
+#ifndef _PARSE_H
+#define _PARSE_H
 
 #include "sxhkd.h"
 
-#define KEYSYMS_PER_KEYCODE  4
-#define MOD_STATE_FIELD      255
-#define NUM_MOD              8
-#define SEQ_MIN_LEN          3
 #define RELEASE_PREFIX       '@'
 #define MOTION_PREFIX        '!'
 #define REPLAY_PREFIX        ':'
@@ -19,24 +15,19 @@
 #define SEQ_END              '}'
 #define SEQ_SEP              ','
 
-typedef struct {
-    char *name;
-    xcb_keysym_t keysym;
-} keysym_dict_t;
+typedef struct chunk_t chunk_t;
+struct chunk_t {
+    char text[MAXLEN];
+    char *advance;
+    bool sequence;
+    chunk_t *next;
+};
 
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
              Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
 
-void grab(void);
-void grab_chord(chord_t *);
-void grab_key_button(xcb_keycode_t, xcb_button_t, uint16_t);
-void grab_key_button_checked(xcb_keycode_t, xcb_button_t, uint16_t);
-void ungrab(void);
-int16_t modfield_from_keysym(xcb_keysym_t);
-xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t);
-chord_t *make_chord(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool);
-chain_t *make_chain(void);
-void add_chord(chain_t *, chord_t *);
+void load_config(char *);
+void parse_event(xcb_generic_event_t *, uint8_t, xcb_keysym_t *, xcb_button_t *, uint16_t *);
 void process_hotkey(char *, char *);
 char *gettok(char *, char *, char);
 bool extract_sequence(char *, char *, char *, char *);
@@ -48,10 +39,7 @@ bool parse_fold(char *, char *);
 uint8_t key_to_button(uint8_t);
 void get_standard_keysyms(void);
 void get_lock_fields(void);
-bool match_chord(chord_t *, uint8_t, xcb_keysym_t, xcb_button_t, uint16_t);
-hotkey_t *find_hotkey(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool *);
-hotkey_t *make_hotkey(chain_t *, char *);
-void abort_chain(void);
-void add_hotkey(hotkey_t *);
+int16_t modfield_from_keysym(xcb_keysym_t);
+xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t);
 
 #endif
