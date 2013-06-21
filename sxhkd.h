@@ -40,9 +40,8 @@ struct hotkey_t {
 xcb_connection_t *dpy;
 xcb_window_t root;
 xcb_key_symbols_t *symbols;
-char *shell;
-hotkey_t *hotkeys;
 
+char *shell;
 char config_file[MAXLEN];
 char *config_path;
 char **extra_confs;
@@ -50,6 +49,7 @@ int num_extra_confs;
 int redir_fd;
 int timeout;
 
+hotkey_t *hotkeys, *hotkeys_tail;
 bool running, reload, bell, chained;
 
 uint16_t num_lock;

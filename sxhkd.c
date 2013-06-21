@@ -38,7 +38,7 @@ void setup(void)
     if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
         err("The '%s' environment variable is not defined.\n", SHELL_ENV);
     symbols = xcb_key_symbols_alloc(dpy);
-    hotkeys = NULL;
+    hotkeys = hotkeys_tail = NULL;
 }
 
 void cleanup(void)
@@ -51,6 +51,7 @@ void cleanup(void)
         free(hk);
         hk = tmp;
     }
+    hotkeys = hotkeys_tail = NULL;
 }
 
 void destroy_chain(chain_t *chain)
@@ -73,7 +74,6 @@ void reload_cmd(void)
 {
     PUTS("reload");
     cleanup();
-    hotkeys = NULL;
     load_config(config_file);
     for (int i = 0; i < num_extra_confs; i++)
         load_config(extra_confs[i]);

@@ -2872,6 +2872,10 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 
 void add_hotkey(hotkey_t *hk)
 {
-    hk->next = hotkeys;
-    hotkeys = hk;
+    if (hotkeys == NULL) {
+        hotkeys = hotkeys_tail = hk;
+    } else {
+        hotkeys_tail->next = hk;
+        hotkeys_tail = hk;
+    }
 }
