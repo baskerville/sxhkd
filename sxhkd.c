@@ -88,14 +88,14 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
             if (replay_event)
                 xcb_allow_events(dpy, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
             else
-                xcb_allow_events(dpy, XCB_ALLOW_ASYNC_POINTER, XCB_CURRENT_TIME);
+                xcb_allow_events(dpy, XCB_ALLOW_SYNC_POINTER, XCB_CURRENT_TIME);
             break;
         case XCB_KEY_PRESS:
         case XCB_KEY_RELEASE:
             if (replay_event)
                 xcb_allow_events(dpy, XCB_ALLOW_REPLAY_KEYBOARD, XCB_CURRENT_TIME);
             else
-                xcb_allow_events(dpy, XCB_ALLOW_ASYNC_KEYBOARD, XCB_CURRENT_TIME);
+                xcb_allow_events(dpy, XCB_ALLOW_SYNC_KEYBOARD, XCB_CURRENT_TIME);
             break;
     }
     xcb_flush(dpy);

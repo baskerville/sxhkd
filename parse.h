@@ -13,13 +13,16 @@
 #define SYM_SEP              "+ "
 #define SEQ_BEGIN            '{'
 #define SEQ_END              '}'
-#define SEQ_SEP              ','
+#define SEQ_SEP              ","
 
 typedef struct chunk_t chunk_t;
 struct chunk_t {
     char text[MAXLEN];
+    char item[MAXLEN];
     char *advance;
     bool sequence;
+    char range_cur;
+    char range_max;
     chunk_t *next;
 };
 
@@ -29,8 +32,11 @@ xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
 void load_config(char *);
 void parse_event(xcb_generic_event_t *, uint8_t, xcb_keysym_t *, xcb_button_t *, uint16_t *);
 void process_hotkey(char *, char *);
-char *gettok(char *, char *, char);
-bool extract_sequence(char *, char *, char *, char *);
+void render_next(chunk_t *, char *);
+chunk_t *extract_chunks(char *);
+char *get_token(char *, char *, char *);
+chunk_t *make_chunk(void);
+void destroy_chunks(chunk_t *);
 bool parse_chain(char *, chain_t *);
 bool parse_keysym(char *, xcb_keysym_t *);
 bool parse_button(char *, xcb_button_t *);

@@ -48,7 +48,7 @@ If `:` is added at the beginning of the keysym, the captured event will be repla
 
 Mouse hotkeys can be defined by using one of the following special keysym names: `button1`, `button2`, `button3`, …, `button24`.
 
-The hotkey and the command may contain a sequence of the form `{STRING_1,…,STRING_N}`.
+The hotkey and the command may contain sequences of the form `{STRING_1,…,STRING_N}`.
 
 In addition, the sequences can contain ranges of the form `A-Z` where *A* and *Z* are alphanumeric characters.
 
@@ -98,6 +98,8 @@ If no configuration file is specified via the `-c` option, the following is used
     super + o ; {e,w,m}
         {gvim,firefox,thunderbird}
 
+    super + alt + control + {h,j,k,l} ; {0-9}
+        bspc fence_ratio {left,down,up,right} 0.{0-9}
 
 ## Installation
 

@@ -2415,36 +2415,17 @@ void process_hotkey(char *hotkey_string, char *command_string)
 {
     char hotkey[MAXLEN] = {0};
     char command[MAXLEN] = {0};
-    char hotkey_sequence[MAXLEN] = {0};
-    char hotkey_prefix[MAXLEN] = {0};
-    char hotkey_suffix[MAXLEN] = {0};
-    char command_sequence[MAXLEN] = {0};
-    char command_prefix[MAXLEN] = {0};
-    char command_suffix[MAXLEN] = {0};
-    char hk_item[MAXLEN] = {0};
-    char cm_item[MAXLEN] = {0};
-    bool hk_loop = extract_sequence(hotkey_string, hotkey_prefix, hotkey_sequence, hotkey_suffix);
-    bool cm_loop = extract_sequence(command_string, command_prefix, command_sequence, command_suffix);
-    char unfolded_hotkey[MAXLEN], unfolded_command[MAXLEN];
-    char *hk_ptr, *cm_ptr;
-    char hk_a = 1, hk_z = 0, cm_a = 1, cm_z = 0;
-    hk_ptr = gettok(hk_item, hotkey_sequence, SEQ_SEP);
-    cm_ptr = gettok(cm_item, command_sequence, SEQ_SEP);
+    chunk_t *hk_chunks = extract_chunks(hotkey_string);
+    chunk_t *cm_chunks = extract_chunks(command_string);
+    if (hk_chunks == NULL)
+        strncpy(hotkey, hotkey_string, sizeof(hotkey));
+    if (cm_chunks == NULL)
+        strncpy(command, command_string, sizeof(command));
+    render_next(hk_chunks, hotkey);
+    render_next(cm_chunks, command);
 
-    while ((!hk_loop || hk_item[0] != '\0' || hk_a <= hk_z) && (!cm_loop || cm_item[0] != '\0' || cm_a <= cm_z)) {
-#define PREPROC(itm, ra, rz, prefix, suffix, unf) \
-        if (ra > rz && strlen(itm) == 3 && sscanf(itm, "%c-%c", &ra, &rz) == 2 && ra >= rz) \
-            ra = 1, rz = 0; \
-        if (ra <= rz) \
-            snprintf(unf, sizeof(unf), "%s%c%s", prefix, ra, suffix); \
-        else \
-            snprintf(unf, sizeof(unf), "%s%s%s", prefix, itm, suffix);
-        PREPROC(hk_item, hk_a, hk_z, hotkey_prefix, hotkey_suffix, unfolded_hotkey)
-        PREPROC(cm_item, cm_a, cm_z, command_prefix, command_suffix, unfolded_command)
-#undef PREPROC
+    while ((hk_chunks == NULL || hotkey[0] != '\0') && (cm_chunks == NULL || command[0] != '\0')) {
 
-        strncpy(hotkey, hk_loop ? unfolded_hotkey : hotkey_string, sizeof(hotkey));
-        strncpy(command, cm_loop ? unfolded_command : command_string, sizeof(command));
         PRINTF("%s: %s\n", hotkey, command);
         chain_t *chain = make_chain();
         if (parse_chain(hotkey, chain)) {
@@ -2454,21 +2435,19 @@ void process_hotkey(char *hotkey_string, char *command_string)
             free(chain);
         }
 
-        if (!hk_loop && !cm_loop)
+        if (hk_chunks == NULL && cm_chunks == NULL)
             break;
 
-#define POSTPROC(itm, ra, rz, ptr) \
-        if (ra >= rz) \
-            ptr = gettok(itm, ptr, SEQ_SEP), ra = 1, rz = 0; \
-        else \
-            ra++;
-        POSTPROC(hk_item, hk_a, hk_z, hk_ptr)
-        POSTPROC(cm_item, cm_a, cm_z, cm_ptr)
-#undef POSTPROC
+        render_next(hk_chunks, hotkey);
+        render_next(cm_chunks, command);
     }
+    if (hk_chunks != NULL)
+        destroy_chunks(hk_chunks);
+    if (cm_chunks != NULL)
+        destroy_chunks(cm_chunks);
 }
 
-char *gettok(char *dst, char *src, char c)
+char *get_token(char *dst, char *src, char *sep)
 {
     size_t len = strlen(src);
     unsigned int i = 0, j = 0;
@@ -2480,10 +2459,15 @@ char *gettok(char *dst, char *src, char c)
             inhibit = false;
         } else if (src[i] == MAGIC_INHIBIT) {
             inhibit = true;
-            if (src[i+1] != MAGIC_INHIBIT && src[i+1] != c)
+            if (src[i+1] != MAGIC_INHIBIT && strchr(sep, src[i+1]) == NULL)
                 dst[j++] = src[i];
-        } else if (src[i] == c) {
-            found = true;
+        } else if (strchr(sep, src[i]) != NULL) {
+            if (j > 0)
+                found = true;
+            do {
+                i++;
+            } while (i < len && strchr(sep, src[i]) != NULL);
+            i--;
         } else {
             dst[j++] = src[i];
         }
@@ -2493,70 +2477,158 @@ char *gettok(char *dst, char *src, char c)
     return src + i;
 }
 
-bool extract_sequence(char *s, char *prefix, char *sequence, char *suffix)
+void render_next(chunk_t *chunks, char *dest)
 {
-    char *cur = prefix;
+    if (chunks == NULL)
+        return;
+    int i = 0;
+    bool incr = false;
+    for (chunk_t *c = chunks; c != NULL; c = c->next) {
+        if (c->sequence) {
+            if (!incr) {
+                if (c->range_cur < c->range_max) {
+                    c->range_cur++;
+                    incr = true;
+                } else {
+                    c->range_cur = 1, c->range_max = 0;
+                }
+            }
+            if (c->advance == NULL) {
+                incr = true;
+                c->advance = get_token(c->item, c->text, SEQ_SEP);
+            } else if (!incr && c->range_cur > c->range_max) {
+                if (c->advance[0] == '\0') {
+                    c->advance = get_token(c->item, c->text, SEQ_SEP);
+                } else {
+                    c->advance = get_token(c->item, c->advance, SEQ_SEP);
+                    incr = true;
+                }
+            }
+            if (c->range_cur > c->range_max && strlen(c->item) == 3)
+                sscanf(c->item, "%c-%c", &c->range_cur, &c->range_max);
+            if (c->range_cur <= c->range_max) {
+                dest[i++] = c->range_cur;
+            } else {
+                strcpy(dest + i, c->item);
+                i += strlen(c->item);
+            }
+        } else {
+            strcpy(dest + i, c->text);
+            i += strlen(c->text);
+        }
+    }
+    dest[i] = '\0';
+    if (!incr)
+        dest[0] = '\0';
+}
+
+chunk_t *extract_chunks(char *s)
+{
     size_t len = strlen(s);
     unsigned int i = 0, j = 0;
     bool inhibit = false;
+    int num_seq = 0;
+    chunk_t *c = make_chunk();
+    chunk_t *head = c;
     while (i < len) {
         if (inhibit) {
-            cur[j++] = s[i];
+            c->text[j++] = s[i];
             inhibit = false;
         } else if (s[i] == MAGIC_INHIBIT) {
             inhibit = true;
-            if ((s[i+1] != MAGIC_INHIBIT || cur == sequence)
+            if ((s[i+1] != MAGIC_INHIBIT || c->sequence)
                     && s[i+1] != SEQ_BEGIN
                     && s[i+1] != SEQ_END)
-                cur[j++] = s[i];
+                c->text[j++] = s[i];
         } else if (s[i] == SEQ_BEGIN) {
-            cur[j] = '\0';
-            j = 0;
-            cur = sequence;
+            if (j > 0) {
+                c->text[j] = '\0';
+                j = 0;
+                chunk_t *next = make_chunk();
+                c->next = next;
+                c = next;
+            }
+            c->sequence = true;
         } else if (s[i] == SEQ_END) {
-            cur[j] = '\0';
-            j = 0;
-            cur = suffix;
+            if (c->sequence)
+                num_seq++;
+            if (j > 0) {
+                c->text[j] = '\0';
+                j = 0;
+                chunk_t *next = make_chunk();
+                c->next = next;
+                c = next;
+            }
+            c->sequence = false;
         } else {
-            cur[j++] = s[i];
+            c->text[j++] = s[i];
         }
         i++;
-        /* printf("i %u j %u\n", i, j); */
     }
-    cur[j] = '\0';
-    return (cur == suffix);
+    c->text[j] = '\0';
+    if (num_seq == 0) {
+        destroy_chunks(head);
+        return NULL;
+    } else {
+        return head;
+    }
+}
+
+chunk_t *make_chunk(void)
+{
+    chunk_t *c = malloc(sizeof(chunk_t));
+    c->sequence = false;
+    c->advance = NULL;
+    c->next = NULL;
+    c->range_cur = 1;
+    c->range_max = 0;
+    return c;
+}
+
+void destroy_chunks(chunk_t *chunk)
+{
+    chunk_t *c = chunk;
+    while (c != NULL) {
+        chunk_t *next = c->next;
+        free(c);
+        c = next;
+    }
 }
 
 bool parse_chain(char *string, chain_t *chain)
 {
+    char chord[MAXLEN] = {0};
+    char name[MAXLEN] = {0};
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     uint8_t event_type = XCB_KEY_PRESS;
     bool replay_event = false;
-    char *outerptr;
-    char *innerptr;
-    for (char *s = strtok_r(string, LNK_SEP, &outerptr); s != NULL; s = strtok_r(NULL, LNK_SEP, &outerptr)) {
-        for (char *name = strtok_r(s, SYM_SEP, &innerptr); name != NULL; name = strtok_r(NULL, SYM_SEP, &innerptr)) {
+    char *outer_advance;
+    char *inner_advance;
+    for (outer_advance = get_token(chord, string, LNK_SEP); chord[0] != '\0'; outer_advance = get_token(chord, outer_advance, LNK_SEP)) {
+        for (inner_advance = get_token(name, chord, SYM_SEP); name[0] != '\0'; inner_advance = get_token(name, inner_advance, SYM_SEP)) {
+            int offset = 0;
             if (name[0] == RELEASE_PREFIX) {
                 event_type = XCB_KEY_RELEASE;
-                name++;
+                offset++;
             } else if (name[0] == MOTION_PREFIX) {
                 event_type = XCB_MOTION_NOTIFY;
-                name++;
+                offset++;
             } else if (name[0] == REPLAY_PREFIX) {
                 replay_event = true;
-                name++;
+                offset++;
             }
-            if (!parse_modifier(name, &modfield) && !parse_keysym(name, &keysym) && !parse_button(name, &button)) {
-                warn("Unknown name: '%s'.\n", name);
+            char *nm = name + offset;
+            if (!parse_modifier(nm, &modfield) && !parse_keysym(nm, &keysym) && !parse_button(nm, &button)) {
+                warn("Unknown name: '%s'.\n", nm);
                 return false;
             }
         }
         if (button != XCB_NONE)
             event_type = key_to_button(event_type);
-        chord_t *chord = make_chord(keysym, button, modfield, event_type, replay_event);
-        add_chord(chain, chord);
+        chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event);
+        add_chord(chain, c);
         keysym = XCB_NO_SYMBOL;
         button = XCB_NONE;
         modfield = 0;
