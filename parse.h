@@ -46,6 +46,7 @@ uint8_t key_to_button(uint8_t);
 void get_standard_keysyms(void);
 void get_lock_fields(void);
 int16_t modfield_from_keysym(xcb_keysym_t);
+int16_t modfield_from_keycode(xcb_keycode_t keycode);
 xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t);
 
 #endif

@@ -2395,7 +2395,7 @@ void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *key
     } else if (event_type == XCB_KEY_RELEASE) {
         xcb_key_release_event_t *e = (xcb_key_release_event_t *) evt;
         xcb_keycode_t keycode = e->detail;
-        *modfield = e->state;
+        *modfield = e->state & ~modfield_from_keycode(keycode);
         *keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
         PRINTF("key release %u %u\n", keycode, *modfield);
     } else if (event_type == XCB_BUTTON_PRESS) {
@@ -2750,27 +2750,35 @@ void get_lock_fields(void)
 int16_t modfield_from_keysym(xcb_keysym_t keysym)
 {
     uint16_t modfield = 0;
-    xcb_keycode_t *keycodes = NULL, *mod_keycodes = NULL;
-    xcb_get_modifier_mapping_reply_t *reply = NULL;
+    xcb_keycode_t *keycodes = NULL;
     if ((keycodes = keycodes_from_keysym(keysym)) != NULL) {
-        if ((reply = xcb_get_modifier_mapping_reply(dpy, xcb_get_modifier_mapping(dpy), NULL)) != NULL) {
-            if ((mod_keycodes = xcb_get_modifier_mapping_keycodes(reply)) != NULL) {
-                unsigned int num_mod = xcb_get_modifier_mapping_keycodes_length(reply) / reply->keycodes_per_modifier;
-                for (unsigned int i = 0; i < num_mod; i++) {
-                    for (unsigned int j = 0; j < reply->keycodes_per_modifier; j++) {
-                        xcb_keycode_t mk = mod_keycodes[i * reply->keycodes_per_modifier + j];
-                        if (mk == XCB_NO_SYMBOL)
-                            continue;
-                        for (xcb_keycode_t *k = keycodes; *k != XCB_NO_SYMBOL; k++)
-                            if (*k == mk)
-                                modfield |= (1 << i);
-                    }
-                }
-
-            }
-        }
+        for (xcb_keycode_t *k = keycodes; *k != XCB_NO_SYMBOL; k++)
+            modfield |= modfield_from_keycode(*k);
     }
     free(keycodes);
+    return modfield;
+}
+
+int16_t modfield_from_keycode(xcb_keycode_t keycode)
+{
+    uint16_t modfield = 0;
+    xcb_keycode_t *mod_keycodes = NULL;
+    xcb_get_modifier_mapping_reply_t *reply = NULL;
+    if ((reply = xcb_get_modifier_mapping_reply(dpy, xcb_get_modifier_mapping(dpy), NULL)) != NULL) {
+        if ((mod_keycodes = xcb_get_modifier_mapping_keycodes(reply)) != NULL) {
+            unsigned int num_mod = xcb_get_modifier_mapping_keycodes_length(reply) / reply->keycodes_per_modifier;
+            for (unsigned int i = 0; i < num_mod; i++) {
+                for (unsigned int j = 0; j < reply->keycodes_per_modifier; j++) {
+                    xcb_keycode_t mkc = mod_keycodes[i * reply->keycodes_per_modifier + j];
+                    if (mkc == XCB_NO_SYMBOL)
+                        continue;
+                    if (keycode == mkc)
+                        modfield |= (1 << i);
+                }
+            }
+
+        }
+    }
     free(reply);
     return modfield;
 }
