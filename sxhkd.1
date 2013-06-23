@@ -89,7 +89,7 @@ keysym names: \f[I]button1\f[], \f[I]button2\f[], \f[I]button3\f[],
 \&..., \f[I]button24\f[].
 .PP
 The hotkey and the command may contain sequences of the form
-\f[B]{\f[I]STRING_1\f[],\f[I]\&...\f[],\f[I]STRING_N\f[]}\f[].
+{\f[I]STRING_1\f[],\f[I]\&...\f[],\f[I]STRING_N\f[]}.
 .PP
 In addition, the sequences can contain ranges of the form
 \f[I]A\f[]\-\f[I]Z\f[] where \f[I]A\f[] and \f[I]Z\f[] are alphanumeric
@@ -108,7 +108,7 @@ If \f[B]sxhkd\f[] receives a \f[I]SIGUSR1\f[] signal, it will reload its
 configuration file.
 .PP
 If no configuration file is specified via the \f[I]\-c\f[] option, the
-following is used: \f[I]$XDG_CONFIG_HOME/sxhkd/sxhkdrc\f[].
+following is used: \f[B]$XDG_CONFIG_HOME/sxhkd/sxhkdrc\f[].
 .SH AUTHOR
 .MT baskerville@lavabit.com
 Bastien Dejean

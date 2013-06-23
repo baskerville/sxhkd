@@ -62,7 +62,7 @@ If **:** is added at the beginning of the keysym, the captured event will be rep
 
 Mouse hotkeys can be defined by using one of the following special keysym names: *button1*, *button2*, *button3*, …, *button24*.
 
-The hotkey and the command may contain sequences of the form **{*STRING\_1*,*…*,*STRING\_N*}**.
+The hotkey and the command may contain sequences of the form {*STRING_1*,*…*,*STRING_N*}.
 
 In addition, the sequences can contain ranges of the form *A*-*Z* where *A* and *Z* are alphanumeric characters.
 
@@ -74,4 +74,4 @@ What is actually executed is **SHELL** *-c* **COMMAND**, which means you can use
 
 If **sxhkd** receives a *SIGUSR1* signal, it will reload its configuration file.
 
-If no configuration file is specified via the *-c* option, the following is used: *$XDG_CONFIG_HOME/sxhkd/sxhkdrc*.
+If no configuration file is specified via the *-c* option, the following is used: **$XDG_CONFIG_HOME/sxhkd/sxhkdrc**.

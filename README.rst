@@ -78,7 +78,7 @@ Mouse hotkeys can be defined by using one of the following special
 keysym names: *button1*, *button2*, *button3*, …, *button24*.
 
 The hotkey and the command may contain sequences of the form
-**{*STRING\_1*,\ *…*,\ *STRING\_N*}**.
+{*STRING\_1*,\ *…*,\ *STRING\_N*}.
 
 In addition, the sequences can contain ranges of the form *A*-*Z* where
 *A* and *Z* are alphanumeric characters.
@@ -95,4 +95,4 @@ If **sxhkd** receives a *SIGUSR1* signal, it will reload its
 configuration file.
 
 If no configuration file is specified via the *-c* option, the following
-is used: *$XDG\_CONFIG\_HOME/sxhkd/sxhkdrc*.
+is used: **$XDG\_CONFIG\_HOME/sxhkd/sxhkdrc**.
