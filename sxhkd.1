@@ -57,12 +57,12 @@ MODIFIER_i\ :=\ MODIFIER_i1\ +\ MODIFIER_i2\ +\ \&...\ +\ MODIFIER_ik
 \f[]
 .fi
 .PP
-The valid modifier names are: \f[C]super\f[], \f[C]hyper\f[],
-\f[C]meta\f[], \f[C]alt\f[], \f[C]control\f[], \f[C]ctrl\f[],
-\f[C]shift\f[], \f[C]mode_switch\f[], \f[C]lock\f[], \f[C]mod1\f[],
-\f[C]mod2\f[], \f[C]mod3\f[], \f[C]mod4\f[] and \f[C]mod5\f[].
+The valid modifier names are: \f[I]super\f[], \f[I]hyper\f[],
+\f[I]meta\f[], \f[I]alt\f[], \f[I]control\f[], \f[I]ctrl\f[],
+\f[I]shift\f[], \f[I]mode_switch\f[], \f[I]lock\f[], \f[I]mod1\f[],
+\f[I]mod2\f[], \f[I]mod3\f[], \f[I]mod4\f[] and \f[I]mod5\f[].
 .PP
-The keysym names are given by the output of \f[C]xev\f[].
+The keysym names are given by the output of \f[B]xev\f[].
 .PP
 Hotkeys and commands can be spread across multiple lines by ending each
 partial line with a backslash character.
@@ -71,92 +71,44 @@ When multiple chords are separated by semicolons, the hotkey is a chord
 chain: the command will only be executed after receiving each chord of
 the chain in consecutive order.
 .PP
-If \f[C]\@\f[] is added at the beginning of the keysym, the command will
+If \f[B]\@\f[] is added at the beginning of the keysym, the command will
 be run on key release events, otherwise on key press events.
 .PP
-If \f[C]!\f[] is added at the beginning of the keysym, the command will
+If \f[B]!\f[] is added at the beginning of the keysym, the command will
 be run on motion notify events and must contain two integer conversion
 specifications which will be replaced by the \f[I]x\f[] and \f[I]y\f[]
 coordinates of the pointer relative to the root window referential (the
 only valid button keysyms for this type of hotkeys are:
-\f[C]button1\f[], \&..., \f[C]button5\f[]).
+\f[I]button1\f[], \&..., \f[I]button5\f[]).
 .PP
-If \f[C]:\f[] is added at the beginning of the keysym, the captured
+If \f[B]:\f[] is added at the beginning of the keysym, the captured
 event will be replayed for the other clients.
 .PP
 Mouse hotkeys can be defined by using one of the following special
-keysym names: \f[C]button1\f[], \f[C]button2\f[], \f[C]button3\f[],
-\&..., \f[C]button24\f[].
+keysym names: \f[I]button1\f[], \f[I]button2\f[], \f[I]button3\f[],
+\&..., \f[I]button24\f[].
 .PP
 The hotkey and the command may contain sequences of the form
-\f[C]{STRING_1,\&...,STRING_N}\f[].
+\f[B]{\f[I]STRING_1\f[],\f[I]\&...\f[],\f[I]STRING_N\f[]}\f[].
 .PP
-In addition, the sequences can contain ranges of the form \f[C]A\-Z\f[]
-where \f[I]A\f[] and \f[I]Z\f[] are alphanumeric characters.
+In addition, the sequences can contain ranges of the form
+\f[I]A\f[]\-\f[I]Z\f[] where \f[I]A\f[] and \f[I]Z\f[] are alphanumeric
+characters.
 .PP
 The underscore character represents an empty sequence element.
 .PP
-What is actually executed is \f[C]SHELL\ \-c\ COMMAND\f[], which means
-you can use environment variables in \f[C]COMMAND\f[].
+What is actually executed is \f[B]SHELL\f[] \f[I]\-c\f[]
+\f[B]COMMAND\f[], which means you can use environment variables in
+\f[B]COMMAND\f[].
 .PP
-\f[C]SHELL\f[] will be the content of the first defined environment
-variable in the following list: \f[C]SXHKD_SHELL\f[], \f[C]SHELL\f[].
+\f[B]SHELL\f[] will be the content of the first defined environment
+variable in the following list: \f[B]SXHKD_SHELL\f[], \f[B]SHELL\f[].
 .PP
-If \f[I]sxhkd\f[] receives a \f[C]SIGUSR1\f[] signal, it will reload its
+If \f[B]sxhkd\f[] receives a \f[I]SIGUSR1\f[] signal, it will reload its
 configuration file.
 .PP
-If no configuration file is specified via the \f[C]\-c\f[] option, the
-following is used: \f[C]$XDG_CONFIG_HOME/sxhkd/sxhkdrc\f[].
-.SH EXAMPLE CONFIGURATION
-.IP
-.nf
-\f[C]
-XF86Audio{Prev,Next}
-\ \ \ \ mpc\ \-q\ {prev,next}
-
-\@XF86LaunchA
-\ \ \ \ scrot\ \-s\ \-e\ \[aq]image_viewer\ $f\[aq]
-
-super\ +\ shift\ +\ equal
-\ \ \ \ sxiv\ \-rt\ "$HOME/image"
-
-XF86LaunchB
-\ \ \ \ xdotool\ selectwindow\ |\ xsel\ \-bi
-
-super\ +\ {h,j,k,l}
-\ \ \ \ bspc\ focus\ {left,down,up,right}
-
-super\ +\ alt\ +\ {0\-9}
-\ \ \ \ mpc\ \-q\ seek\ {0\-9}0%
-
-super\ +\ {alt,ctrl,alt\ +\ ctrl}\ +\ XF86Eject
-\ \ \ \ sudo\ systemctl\ {suspend,reboot,poweroff}
-
-:button1
-\ \ \ \ bspc\ grab_pointer\ focus
-
-super\ +\ button{1\-3}
-\ \ \ \ bspc\ grab_pointer\ {move,resize_side,resize_corner}
-
-super\ +\ !button{1\-3}
-\ \ \ \ bspc\ track_pointer\ %i\ %i
-
-super\ +\ \@button{1\-3}
-\ \ \ \ bspc\ ungrab_pointer
-
-super\ +\ {_,shift\ +\ }{h,j,k,l}
-\ \ \ \ bspc\ {focus,shift}\ {left,down,up,right}
-
-{_,shift\ +\ ,super\ +\ }XF86MonBrightness{Down,Up}
-\ \ \ \ bright\ {\-1,\-10,min,+1,+10,max}
-
-super\ +\ o\ ;\ {e,w,m}
-\ \ \ \ {gvim,firefox,thunderbird}
-
-super\ +\ alt\ +\ control\ +\ {h,j,k,l}\ ;\ {0\-9}
-\ \ \ \ bspc\ fence_ratio\ {left,down,up,right}\ 0.{0\-9}
-\f[]
-.fi
+If no configuration file is specified via the \f[I]\-c\f[] option, the
+following is used: \f[I]$XDG_CONFIG_HOME/sxhkd/sxhkdrc\f[].
 .SH AUTHOR
 .MT baskerville@lavabit.com
 Bastien Dejean
