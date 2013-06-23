@@ -7,8 +7,7 @@
 
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
-    int hits = 0;
-    int num_waiters = 0;
+    int num_active = 0;
 
     for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next) {
         chain_t *c = hk->chain;
@@ -23,35 +22,35 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                 return hk;
             } else {
                 c->state = c->state->next;
-                num_waiters++;
+                num_active++;
             }
-            hits++;
         } else if (chained) {
             if (c->state->event_type == event_type)
                     c->state = c->head;
             else
-                num_waiters++;
+                num_active++;
         }
     }
 
-    if (hits > 0) {
-        chained = true;
-        if (timeout > 0)
-            alarm(timeout);
-    } else if (!chained) {
-        *replay_event = true;
-        for (hotkey_t *hk = hotkeys; *replay_event && hk != NULL; hk = hk->next) {
-            chord_t *c = hk->chain->head;
-            for (chord_t *cc = c; cc != NULL; cc = cc->more)
-                if (cc->keysym == keysym && cc->button == button && cc->modfield == modfield)
-                    *replay_event = false;
+    if (!chained) {
+        if (num_active > 0) {
+            chained = true;
+            if (timeout > 0)
+                alarm(timeout);
+        } else {
+            *replay_event = true;
+            for (hotkey_t *hk = hotkeys; *replay_event && hk != NULL; hk = hk->next) {
+                chord_t *c = hk->chain->head;
+                for (chord_t *cc = c; cc != NULL; cc = cc->more)
+                    if (cc->keysym == keysym && cc->button == button && cc->modfield == modfield)
+                        *replay_event = false;
+            }
         }
-    }
-
-    PRINTF("num waiters %i\n", num_waiters);
-
-    if (chained && num_waiters == 0)
+    } else if (num_active == 0) {
         abort_chain();
+    }
+
+    PRINTF("num active %i\n", num_active);
 
     return NULL;
 }
