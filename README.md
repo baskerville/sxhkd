@@ -52,6 +52,8 @@ The hotkey and the command may contain sequences of the form `{STRING_1,…,STRI
 
 In addition, the sequences can contain ranges of the form `A-Z` where *A* and *Z* are alphanumeric characters.
 
+The underscore character represents an empty sequence element.
+
 What is actually executed is `SHELL -c COMMAND`, which means you can use environment variables in `COMMAND`.
 
 `SHELL` will be the content of the first defined environment variable in the following list: `SXHKD_SHELL`, `SHELL`.
@@ -95,11 +97,19 @@ If no configuration file is specified via the `-c` option, the following is used
     super + @button{1-3}
         bspc ungrab_pointer
 
+    super + {_,shift} + {h,j,k,l}
+        bspc {focus,shift} {left,down,up,right}
+
+    {_,shift,super} + XF86MonBrightness{Down,Up}
+        bright {-1,-10,min,+1,+10,max}
+
     super + o ; {e,w,m}
         {gvim,firefox,thunderbird}
 
     super + alt + control + {h,j,k,l} ; {0-9}
         bspc fence_ratio {left,down,up,right} 0.{0-9}
+
+
 
 ## Installation
 

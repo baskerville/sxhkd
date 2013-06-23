@@ -2509,6 +2509,8 @@ void render_next(chunk_t *chunks, char *dest)
             if (c->range_cur <= c->range_max) {
                 dest[i++] = c->range_cur;
             } else {
+                if (c->item[0] == SEQ_NONE && c->item[1] == '\0')
+                    continue;
                 strcpy(dest + i, c->item);
                 i += strlen(c->item);
             }

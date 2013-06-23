@@ -14,6 +14,7 @@
 #define SEQ_BEGIN            '{'
 #define SEQ_END              '}'
 #define SEQ_SEP              ","
+#define SEQ_NONE             '_'
 
 typedef struct chunk_t chunk_t;
 struct chunk_t {
