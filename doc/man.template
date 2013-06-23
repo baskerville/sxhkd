@@ -1,0 +1,15 @@
+$if(has-tables)$
+.\"t
+$endif$
+.TH "$name$" 1 "$date$" "$title$"
+.SH NAME
+$name$ - Simple X HotKey Daemon
+$body$
+.SH AUTHOR
+.MT baskerville@lavabit.com
+$author$
+.ME
+.SH LINKS
+.UR https://github.com/baskerville/$name$
+Homepage
+.UE

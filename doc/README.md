@@ -1,26 +1,40 @@
-## Description
+% Sxhkd User's Guide
+% Bastien Dejean
+% June 23, 2013
 
-sxhkd is a simple X hotkey daemon.
+# Synopsis
 
-## Usage
+**sxhkd** [*OPTIONS*] [*EXTRA_CONFIG* …]
 
-### Synopsis
+# Description
 
-    sxhkd [OPTIONS] [EXTRA_CONFIG …]
+sxhkd is a simple X hotkey daemon with a powerful and compact configuration syntax.
 
-### Options
+# Options
 
-* `-h`: Print the synopsis to standard output and exit.
-* `-v`: Print the version information to standard output and exit.
-* `-t TIMEOUT`: Timeout in seconds for the recording of chord chains.
-* `-c CONFIG_FILE`: Read the main configuration from the given file.
-* `-r REDIR_FILE`: Redirect the commands output to the given file.
+`-h`
+:    Print the synopsis to standard output and exit.
 
-## Configuration
+`-v`
+:    Print the version information to standard output and exit.
+
+`-t` *TIMEOUT*
+:    Timeout in seconds for the recording of chord chains.
+
+`-c` *CONFIG_FILE*
+:    Read the main configuration from the given file.
+
+`-r` *REDIR_FILE*
+:    Redirect the commands output to the given file.
+
+# Configuration
 
 Each line of the configuration file is interpreted as so:
+
 - If it is empty or starts with `#`, it is ignored.
+
 - If it starts with a space, it is read as a command.
+
 - Otherwise, it is read as a hotkey.
 
 General syntax:
@@ -62,7 +76,7 @@ If *sxhkd* receives a `SIGUSR1` signal, it will reload its configuration file.
 
 If no configuration file is specified via the `-c` option, the following is used: `$XDG_CONFIG_HOME/sxhkd/sxhkdrc`.
 
-## Example Configuration
+# Example Configuration
 
     XF86Audio{Prev,Next}
         mpc -q {prev,next}
@@ -108,15 +122,3 @@ If no configuration file is specified via the `-c` option, the following is used
 
     super + alt + control + {h,j,k,l} ; {0-9}
         bspc fence_ratio {left,down,up,right} 0.{0-9}
-
-
-
-## Installation
-
-    make
-    make install
-
-## Dependencies
-
-- libxcb
-- xcb-util-keysyms

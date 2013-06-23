@@ -1,0 +1,24 @@
+diff -ru a/README.rst b/README.rst
+--- a/README.rst	2013-06-23 21:43:16.071832185 +0200
++++ b/README.rst	2013-06-23 21:42:35.011992319 +0200
+@@ -1,7 +1,7 @@
+ Synopsis
+ ========
+ 
+-**sxhkd** [*OPTIONS*\ ][\*EXTRA\_CONFIG\* …]
++**sxhkd** [*OPTIONS*] [*EXTRA\_CONFIG* …]
+ 
+ Description
+ ===========
+diff -ru a/sxhkd.1 b/sxhkd.1
+--- a/sxhkd.1	2013-06-23 21:43:16.051832263 +0200
++++ b/sxhkd.1	2013-06-23 21:42:35.011992319 +0200
+@@ -3,7 +3,7 @@
+ sxhkd - Simple X HotKey Daemon
+ .SH SYNOPSIS
+ .PP
+-\f[B]sxhkd\f[] [\f[I]OPTIONS\f[]][*EXTRA_CONFIG* \&...]
++\f[B]sxhkd\f[] [\f[I]OPTIONS\f[]] [\f[I]EXTRA_CONFIG\f[] ...]
+ .SH DESCRIPTION
+ .PP
+ sxhkd is a simple X hotkey daemon with a powerful and compact
