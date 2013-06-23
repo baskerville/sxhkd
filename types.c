@@ -8,6 +8,7 @@
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
     int hits = 0;
+    int num_waiters = 0;
 
     for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next) {
         chain_t *c = hk->chain;
@@ -22,10 +23,14 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                 return hk;
             } else {
                 c->state = c->state->next;
+                num_waiters++;
             }
             hits++;
-        } else if (chained && c->state->event_type == event_type) {
-            c->state = c->head;
+        } else if (chained) {
+            if (c->state->event_type == event_type)
+                    c->state = c->head;
+            else
+                num_waiters++;
         }
     }
 
@@ -42,6 +47,11 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                     *replay_event = false;
         }
     }
+
+    PRINTF("num waiters %i\n", num_waiters);
+
+    if (chained && num_waiters == 0)
+        abort_chain();
 
     return NULL;
 }
