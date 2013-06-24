@@ -48,6 +48,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
         }
     } else if (num_active == 0) {
         abort_chain();
+        return find_hotkey(keysym, button, modfield, event_type, replay_event);
     }
 
     PRINTF("num active %i\n", num_active);
