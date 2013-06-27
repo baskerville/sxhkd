@@ -50,14 +50,14 @@ Each line of the configuration file is interpreted as so:
 
 General syntax:
 
----------------------------------------------------------
+----
 HOTKEY
     COMMAND
 
 HOTKEY     := CHORD_1 ; CHORD_2 ; … ; CHORD_n
 CHORD_i    := [MODIFIER_i][@|!|:]KEYSYM_i
 MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + … + MODIFIER_ik
----------------------------------------------------------
+----
 
 The valid modifier names are: _super_, _hyper_, _meta_, _alt_, _control_, _ctrl_, _shift_, _mode_switch_, _lock_, _mod1_, _mod2_, _mod3_, _mod4_ and _mod5_.
 
@@ -88,6 +88,56 @@ What is actually executed is *SHELL* _-c_ *COMMAND*, which means you can use env
 If *sxhkd* receives a _SIGUSR1_ signal, it will reload its configuration file.
 
 If no configuration file is specified via the _-c_ option, the following is used: *$XDG_CONFIG_HOME/sxhkd/sxhkdrc*.
+
+Example Bindings
+----------------
+
+----
+XF86Audio{Prev,Next}
+    mpc -q {prev,next}
+
+@XF86LaunchA
+    scrot -s -e 'image_viewer $f'
+
+super + shift + equal
+    sxiv -rt "$HOME/image"
+
+XF86LaunchB
+    xdotool selectwindow | xsel -bi
+
+super + {h,j,k,l}
+    bspc focus {left,down,up,right}
+
+super + alt + {0-9}
+    mpc -q seek {0-9}0%
+
+super + {alt,ctrl,alt + ctrl} + XF86Eject
+    sudo systemctl {suspend,reboot,poweroff}
+
+:button1
+    bspc grab_pointer focus
+
+super + button{1-3}
+    bspc grab_pointer {move,resize_side,resize_corner}
+
+super + !button{1-3}
+    bspc track_pointer %i %i
+
+super + @button{1-3}
+    bspc ungrab_pointer
+
+super + {_,shift + }{h,j,k,l}
+    bspc {focus,shift} {left,down,up,right}
+
+{_,shift + ,super + }XF86MonBrightness{Down,Up}
+    bright {-1,-10,min,+1,+10,max}
+
+super + o ; {e,w,m}
+    {gvim,firefox,thunderbird}
+
+super + alt + control + {h,j,k,l} ; {0-9}
+    bspc fence_ratio {left,down,up,right} 0.{0-9}
+----
 
 Author
 ------

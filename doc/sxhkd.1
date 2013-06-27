@@ -145,6 +145,60 @@ What is actually executed is \fBSHELL\fR \fI\-c\fR \fBCOMMAND\fR, which means yo
 If \fBsxhkd\fR receives a \fISIGUSR1\fR signal, it will reload its configuration file\&.
 .sp
 If no configuration file is specified via the \fI\-c\fR option, the following is used: \fB$XDG_CONFIG_HOME/sxhkd/sxhkdrc\fR\&.
+.SH "EXAMPLE BINDINGS"
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+XF86Audio{Prev,Next}
+    mpc \-q {prev,next}
+
+@XF86LaunchA
+    scrot \-s \-e \*(Aqimage_viewer $f\*(Aq
+
+super + shift + equal
+    sxiv \-rt "$HOME/image"
+
+XF86LaunchB
+    xdotool selectwindow | xsel \-bi
+
+super + {h,j,k,l}
+    bspc focus {left,down,up,right}
+
+super + alt + {0\-9}
+    mpc \-q seek {0\-9}0%
+
+super + {alt,ctrl,alt + ctrl} + XF86Eject
+    sudo systemctl {suspend,reboot,poweroff}
+
+:button1
+    bspc grab_pointer focus
+
+super + button{1\-3}
+    bspc grab_pointer {move,resize_side,resize_corner}
+
+super + !button{1\-3}
+    bspc track_pointer %i %i
+
+super + @button{1\-3}
+    bspc ungrab_pointer
+
+super + {_,shift + }{h,j,k,l}
+    bspc {focus,shift} {left,down,up,right}
+
+{_,shift + ,super + }XF86MonBrightness{Down,Up}
+    bright {\-1,\-10,min,+1,+10,max}
+
+super + o ; {e,w,m}
+    {gvim,firefox,thunderbird}
+
+super + alt + control + {h,j,k,l} ; {0\-9}
+    bspc fence_ratio {left,down,up,right} 0\&.{0\-9}
+.fi
+.if n \{\
+.RE
+.\}
 .SH "AUTHOR"
 .sp
 Bastien Dejean <baskerville at lavabit\&.com>
