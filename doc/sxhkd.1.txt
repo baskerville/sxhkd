@@ -13,7 +13,7 @@ sxhkd - Simple X HotKey Daemon
 Synopsis
 --------
 
-*sxhkd* [_OPTIONS_][_EXTRA_CONFIG_ …]
+*sxhkd* [_OPTIONS_] [_EXTRA_CONFIG_ …]
 
 Description
 -----------
