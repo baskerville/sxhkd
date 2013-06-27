@@ -1,0 +1,153 @@
+'\" t
+.\"     Title: sxhkd
+.\"    Author: [see the "Author" section]
+.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
+.\"      Date: 06/27/2013
+.\"    Manual: Sxhkd Manual
+.\"    Source: Sxhkd 0.3
+.\"  Language: English
+.\"
+.TH "SXHKD" "1" "06/27/2013" "Sxhkd 0\&.3" "Sxhkd Manual"
+.\" -----------------------------------------------------------------
+.\" * Define some portability stuff
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" http://bugs.debian.org/507673
+.\" http://lists.gnu.org/archive/html/groff/2009-02/msg00013.html
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.ie \n(.g .ds Aq \(aq
+.el       .ds Aq '
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "NAME"
+sxhkd \- Simple X HotKey Daemon
+.SH "SYNOPSIS"
+.sp
+\fBsxhkd\fR [\fIOPTIONS\fR][\fIEXTRA_CONFIG\fR \&...]
+.SH "DESCRIPTION"
+.sp
+sxhkd is a simple X hotkey daemon with a powerful and compact configuration syntax\&.
+.SH "OPTIONS"
+.PP
+\fB\-h\fR
+.RS 4
+Print the synopsis to standard output and exit\&.
+.RE
+.PP
+\fB\-v\fR
+.RS 4
+Print the version information to standard output and exit\&.
+.RE
+.PP
+\fB\-t\fR \fITIMEOUT\fR
+.RS 4
+Timeout in seconds for the recording of chord chains\&.
+.RE
+.PP
+\fB\-c\fR \fICONFIG_FILE\fR
+.RS 4
+Read the main configuration from the given file\&.
+.RE
+.PP
+\fB\-r\fR \fIREDIR_FILE\fR
+.RS 4
+Redirect the commands output to the given file\&.
+.RE
+.SH "CONFIGURATION"
+.sp
+Each line of the configuration file is interpreted as so:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If it is empty or starts with
+#, it is ignored\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+If it starts with a space, it is read as a command\&.
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+Otherwise, it is read as a hotkey\&.
+.RE
+.sp
+General syntax:
+.sp
+.if n \{\
+.RS 4
+.\}
+.nf
+HOTKEY
+    COMMAND
+
+HOTKEY     := CHORD_1 ; CHORD_2 ; \&... ; CHORD_n
+CHORD_i    := [MODIFIER_i][@|!|:]KEYSYM_i
+MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + \&... + MODIFIER_ik
+.fi
+.if n \{\
+.RE
+.\}
+.sp
+The valid modifier names are: \fIsuper\fR, \fIhyper\fR, \fImeta\fR, \fIalt\fR, \fIcontrol\fR, \fIctrl\fR, \fIshift\fR, \fImode_switch\fR, \fIlock\fR, \fImod1\fR, \fImod2\fR, \fImod3\fR, \fImod4\fR and \fImod5\fR\&.
+.sp
+The keysym names are given by the output of \fBxev\fR\&.
+.sp
+Hotkeys and commands can be spread across multiple lines by ending each partial line with a backslash character\&.
+.sp
+When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only be executed after receiving each chord of the chain in consecutive order\&.
+.sp
+If \fB@\fR is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events\&.
+.sp
+If \fB!\fR is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the \fIx\fR and \fIy\fR coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: \fIbutton1\fR, \&..., \fIbutton5\fR)\&.
+.sp
+If \fB:\fR is added at the beginning of the keysym, the captured event will be replayed for the other clients\&.
+.sp
+Mouse hotkeys can be defined by using one of the following special keysym names: \fIbutton1\fR, \fIbutton2\fR, \fIbutton3\fR, \&..., \fIbutton24\fR\&.
+.sp
+The hotkey and the command may contain sequences of the form {\fISTRING_1\fR,\fI\&...\fR,\fISTRING_N\fR}\&.
+.sp
+In addition, the sequences can contain ranges of the form \fIA\fR\-\fIZ\fR where \fIA\fR and \fIZ\fR are alphanumeric characters\&.
+.sp
+The underscore character represents an empty sequence element\&.
+.sp
+What is actually executed is \fBSHELL\fR \fI\-c\fR \fBCOMMAND\fR, which means you can use environment variables in \fBCOMMAND\fR\&.
+.sp
+\fBSHELL\fR will be the content of the first defined environment variable in the following list: \fBSXHKD_SHELL\fR, \fBSHELL\fR\&.
+.sp
+If \fBsxhkd\fR receives a \fISIGUSR1\fR signal, it will reload its configuration file\&.
+.sp
+If no configuration file is specified via the \fI\-c\fR option, the following is used: \fB$XDG_CONFIG_HOME/sxhkd/sxhkdrc\fR\&.
+.SH "AUTHOR"
+.sp
+Bastien Dejean <baskerville at lavabit\&.com>
+.SH "MAILING LIST"
+.sp
+sxhkd at librelist\&.com

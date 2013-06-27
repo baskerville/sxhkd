@@ -1,0 +1,1 @@
+doc/sxhkd.1.txt

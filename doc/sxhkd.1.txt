@@ -1,0 +1,104 @@
+:man source:   Sxhkd
+:man version:  {revnumber}
+:man manual:   Sxhkd Manual
+
+sxhkd(1)
+========
+
+Name
+----
+
+sxhkd - Simple X HotKey Daemon
+
+Synopsis
+--------
+
+*sxhkd* [_OPTIONS_][_EXTRA_CONFIG_ …]
+
+Description
+-----------
+
+sxhkd is a simple X hotkey daemon with a powerful and compact configuration syntax.
+
+Options
+-------
+
+
+*-h*::
+    Print the synopsis to standard output and exit.
+
+*-v*::
+    Print the version information to standard output and exit.
+
+*-t* _TIMEOUT_::
+    Timeout in seconds for the recording of chord chains.
+
+*-c* _CONFIG_FILE_::
+    Read the main configuration from the given file.
+
+*-r* _REDIR_FILE_::
+    Redirect the commands output to the given file.
+
+Configuration
+-------------
+
+Each line of the configuration file is interpreted as so:
+
+* If it is empty or starts with `#`, it is ignored.
+* If it starts with a space, it is read as a command.
+* Otherwise, it is read as a hotkey.
+
+General syntax:
+
+---------------------------------------------------------
+HOTKEY
+    COMMAND
+
+HOTKEY     := CHORD_1 ; CHORD_2 ; … ; CHORD_n
+CHORD_i    := [MODIFIER_i][@|!|:]KEYSYM_i
+MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + … + MODIFIER_ik
+---------------------------------------------------------
+
+The valid modifier names are: _super_, _hyper_, _meta_, _alt_, _control_, _ctrl_, _shift_, _mode_switch_, _lock_, _mod1_, _mod2_, _mod3_, _mod4_ and _mod5_.
+
+The keysym names are given by the output of *xev*.
+
+Hotkeys and commands can be spread across multiple lines by ending each partial line with a backslash character.
+
+When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only be executed after receiving each chord of the chain in consecutive order.
+
+If *@* is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
+
+If *!* is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the _x_ and _y_ coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: _button1_, …, _button5_).
+
+If *:* is added at the beginning of the keysym, the captured event will be replayed for the other clients.
+
+Mouse hotkeys can be defined by using one of the following special keysym names: _button1_, _button2_, _button3_, …, _button24_.
+
+The hotkey and the command may contain sequences of the form \{'STRING_1','…','STRING_N'}.
+
+In addition, the sequences can contain ranges of the form _A_-_Z_ where _A_ and _Z_ are alphanumeric characters.
+
+The underscore character represents an empty sequence element.
+
+What is actually executed is *SHELL* _-c_ *COMMAND*, which means you can use environment variables in *COMMAND*.
+
+*SHELL* will be the content of the first defined environment variable in the following list: *SXHKD_SHELL*, *SHELL*.
+
+If *sxhkd* receives a _SIGUSR1_ signal, it will reload its configuration file.
+
+If no configuration file is specified via the _-c_ option, the following is used: *$XDG_CONFIG_HOME/sxhkd/sxhkdrc*.
+
+Author
+------
+
+Bastien Dejean <baskerville at lavabit.com>
+
+Mailing List
+------------
+
+sxhkd at librelist.com
+
+////
+vim: set ft=asciidoc:
+////
