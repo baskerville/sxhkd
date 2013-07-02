@@ -10,6 +10,7 @@
 
 typedef struct chord_t chord_t;
 struct chord_t {
+    char repr[MAXLEN];
     xcb_keysym_t keysym;
     xcb_button_t button;
     uint16_t modfield;

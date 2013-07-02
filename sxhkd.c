@@ -18,135 +18,37 @@
 #include "grab.h"
 #include "sxhkd.h"
 
-void hold(int sig)
-{
-    if (sig == SIGHUP || sig == SIGINT || sig == SIGTERM)
-        running = false;
-    else if (sig == SIGUSR1)
-        reload = true;
-    else if (sig == SIGALRM)
-        bell = true;
-}
-
-void setup(void)
-{
-    dpy = xcb_connect(NULL, NULL);
-    if (xcb_connection_has_error(dpy))
-        err("Can't open display.\n");
-    xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(dpy)).data;
-    if (screen == NULL)
-        err("Can't acquire screen.\n");
-    root = screen->root;
-    if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
-        err("The '%s' environment variable is not defined.\n", SHELL_ENV);
-    symbols = xcb_key_symbols_alloc(dpy);
-    hotkeys = hotkeys_tail = NULL;
-}
-
-void cleanup(void)
-{
-    PUTS("cleanup");
-    hotkey_t *hk = hotkeys;
-    while (hk != NULL) {
-        hotkey_t *tmp = hk->next;
-        destroy_chain(hk->chain);
-        free(hk);
-        hk = tmp;
-    }
-    hotkeys = hotkeys_tail = NULL;
-}
-
-void reload_cmd(void)
-{
-    PUTS("reload");
-    cleanup();
-    load_config(config_file);
-    for (int i = 0; i < num_extra_confs; i++)
-        load_config(extra_confs[i]);
-    ungrab();
-    grab();
-}
-
-void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
-{
-    xcb_keysym_t keysym = XCB_NO_SYMBOL;
-    xcb_button_t button = XCB_NONE;
-    bool replay_event = false;
-    uint16_t modfield = 0;
-    uint16_t lockfield = num_lock | caps_lock | scroll_lock;
-    parse_event(evt, event_type, &keysym, &button, &modfield);
-    modfield &= ~lockfield & MOD_STATE_FIELD;
-    if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
-        hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
-        if (hk != NULL) {
-            run(hk->command);
-        }
-    }
-    switch (event_type) {
-        case XCB_BUTTON_PRESS:
-        case XCB_BUTTON_RELEASE:
-            if (replay_event)
-                xcb_allow_events(dpy, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
-            else
-                xcb_allow_events(dpy, XCB_ALLOW_SYNC_POINTER, XCB_CURRENT_TIME);
-            break;
-        case XCB_KEY_PRESS:
-        case XCB_KEY_RELEASE:
-            if (replay_event)
-                xcb_allow_events(dpy, XCB_ALLOW_REPLAY_KEYBOARD, XCB_CURRENT_TIME);
-            else
-                xcb_allow_events(dpy, XCB_ALLOW_SYNC_KEYBOARD, XCB_CURRENT_TIME);
-            break;
-    }
-    xcb_flush(dpy);
-}
-
-void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
-{
-    xcb_motion_notify_event_t *e = (xcb_motion_notify_event_t *) evt;
-    /* PRINTF("motion notify %X %X %u\n", e->child, e->detail, e->state); */
-    uint16_t lockfield = num_lock | caps_lock | scroll_lock;
-    uint16_t buttonfield = e->state >> 8;
-    uint16_t modfield = e->state & ~lockfield & MOD_STATE_FIELD;
-    xcb_button_t button = 1;
-    while (~buttonfield & 1 && button < 5) {
-        buttonfield = buttonfield >> 1;
-        button++;
-    }
-    hotkey_t *hk = find_hotkey(XCB_NO_SYMBOL, button, modfield, event_type, NULL);
-    if (hk != NULL) {
-        char command[MAXLEN];
-        snprintf(command, sizeof(command), hk->command, e->root_x, e->root_y);
-        run(command);
-    }
-}
-
 int main(int argc, char *argv[])
 {
     char opt;
+    char *fifo_path = NULL;
+    status_fifo = NULL;
     config_path = NULL;
     timeout = TIMEOUT;
 
-    while ((opt = getopt(argc, argv, "vht:c:r:")) != -1) {
+    while ((opt = getopt(argc, argv, "vht:c:r:s:")) != -1) {
         switch (opt) {
             case 'v':
                 printf("%s\n", VERSION);
                 exit(EXIT_SUCCESS);
                 break;
             case 'h':
-                printf("sxhkd [-h|-v|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE] [EXTRA_CONFIG ...]\n");
+                printf("sxhkd [-h|-v|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO] [EXTRA_CONFIG ...]\n");
                 exit(EXIT_SUCCESS);
                 break;
             case 't':
                 timeout = atoi(optarg);
+                break;
+            case 'c':
+                config_path = optarg;
                 break;
             case 'r':
                 redir_fd = open(optarg, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
                 if (redir_fd == -1)
                     warn("Failed to open the command redirection file.\n");
                 break;
-            case 'c':
-                config_path = optarg;
+            case 's':
+                fifo_path = optarg;
                 break;
         }
     }
@@ -162,6 +64,14 @@ int main(int argc, char *argv[])
             snprintf(config_file, sizeof(config_file), "%s/%s/%s", getenv("HOME"), ".config", CONFIG_PATH);
     } else {
         strncpy(config_file, config_path, sizeof(config_file));
+    }
+
+    if (fifo_path != NULL) {
+        int fifo_fd = open(fifo_path, O_RDWR | O_NONBLOCK);
+        if (fifo_fd != -1)
+            status_fifo = fdopen(fifo_fd, "w");
+        else
+            warn("Couldn't open status fifo.\n");
     }
 
     signal(SIGINT, hold);
@@ -222,6 +132,8 @@ int main(int argc, char *argv[])
         if (bell) {
             signal(SIGALRM, hold);
             abort_chain();
+            if (status_fifo != NULL)
+                put_status(TIMEOUT_PREFIX, "Timeout reached");
             bell = false;
         }
 
@@ -233,9 +145,123 @@ int main(int argc, char *argv[])
 
     if (redir_fd != -1)
         close(redir_fd);
+    if (status_fifo != NULL)
+        fclose(status_fifo);
     ungrab();
     cleanup();
     xcb_key_symbols_free(symbols);
     xcb_disconnect(dpy);
     return EXIT_SUCCESS;
+}
+
+void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
+{
+    xcb_keysym_t keysym = XCB_NO_SYMBOL;
+    xcb_button_t button = XCB_NONE;
+    bool replay_event = false;
+    uint16_t modfield = 0;
+    uint16_t lockfield = num_lock | caps_lock | scroll_lock;
+    parse_event(evt, event_type, &keysym, &button, &modfield);
+    modfield &= ~lockfield & MOD_STATE_FIELD;
+    if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
+        hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
+        if (hk != NULL) {
+            run(hk->command);
+            if (status_fifo != NULL)
+                put_status(COMMAND_PREFIX, hk->command);
+        }
+    }
+    switch (event_type) {
+        case XCB_BUTTON_PRESS:
+        case XCB_BUTTON_RELEASE:
+            if (replay_event)
+                xcb_allow_events(dpy, XCB_ALLOW_REPLAY_POINTER, XCB_CURRENT_TIME);
+            else
+                xcb_allow_events(dpy, XCB_ALLOW_SYNC_POINTER, XCB_CURRENT_TIME);
+            break;
+        case XCB_KEY_PRESS:
+        case XCB_KEY_RELEASE:
+            if (replay_event)
+                xcb_allow_events(dpy, XCB_ALLOW_REPLAY_KEYBOARD, XCB_CURRENT_TIME);
+            else
+                xcb_allow_events(dpy, XCB_ALLOW_SYNC_KEYBOARD, XCB_CURRENT_TIME);
+            break;
+    }
+    xcb_flush(dpy);
+}
+
+void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
+{
+    xcb_motion_notify_event_t *e = (xcb_motion_notify_event_t *) evt;
+    /* PRINTF("motion notify %X %X %u\n", e->child, e->detail, e->state); */
+    uint16_t lockfield = num_lock | caps_lock | scroll_lock;
+    uint16_t buttonfield = e->state >> 8;
+    uint16_t modfield = e->state & ~lockfield & MOD_STATE_FIELD;
+    xcb_button_t button = 1;
+    while (~buttonfield & 1 && button < 5) {
+        buttonfield = buttonfield >> 1;
+        button++;
+    }
+    hotkey_t *hk = find_hotkey(XCB_NO_SYMBOL, button, modfield, event_type, NULL);
+    if (hk != NULL) {
+        char command[MAXLEN];
+        snprintf(command, sizeof(command), hk->command, e->root_x, e->root_y);
+        run(command);
+    }
+}
+
+void setup(void)
+{
+    dpy = xcb_connect(NULL, NULL);
+    if (xcb_connection_has_error(dpy))
+        err("Can't open display.\n");
+    xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(dpy)).data;
+    if (screen == NULL)
+        err("Can't acquire screen.\n");
+    root = screen->root;
+    if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
+        err("The '%s' environment variable is not defined.\n", SHELL_ENV);
+    symbols = xcb_key_symbols_alloc(dpy);
+    hotkeys = hotkeys_tail = NULL;
+    progress[0] = '\0';
+}
+
+void cleanup(void)
+{
+    PUTS("cleanup");
+    hotkey_t *hk = hotkeys;
+    while (hk != NULL) {
+        hotkey_t *tmp = hk->next;
+        destroy_chain(hk->chain);
+        free(hk);
+        hk = tmp;
+    }
+    hotkeys = hotkeys_tail = NULL;
+}
+
+void reload_cmd(void)
+{
+    PUTS("reload");
+    cleanup();
+    load_config(config_file);
+    for (int i = 0; i < num_extra_confs; i++)
+        load_config(extra_confs[i]);
+    ungrab();
+    grab();
+}
+
+void hold(int sig)
+{
+    if (sig == SIGHUP || sig == SIGINT || sig == SIGTERM)
+        running = false;
+    else if (sig == SIGUSR1)
+        reload = true;
+    else if (sig == SIGALRM)
+        bell = true;
+}
+
+void put_status(char c, char *s)
+{
+    fprintf(status_fifo, "%c%s\n", c, s);
+    fflush(status_fifo);
 }

@@ -39,6 +39,9 @@ Options
 *-r* _REDIR_FILE_::
     Redirect the commands output to the given file.
 
+*-s* _STATUS_FIFO_::
+    Output status information to the given FIFO.
+
 Configuration
 -------------
 

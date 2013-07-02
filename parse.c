@@ -2631,6 +2631,10 @@ bool parse_chain(char *string, chain_t *chain)
             event_type = key_to_button(event_type);
         chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event);
         add_chord(chain, c);
+        if (status_fifo != NULL) {
+            strncpy(c->repr, chord, sizeof(c->repr));
+            c->repr[strlen(chord)] = '\0';
+        }
         keysym = XCB_NO_SYMBOL;
         button = XCB_NONE;
         modfield = 0;
