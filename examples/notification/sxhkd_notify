@@ -1,0 +1,21 @@
+#! /bin/sh
+
+[ $# -ne 1 ] && exit 1
+
+status_fifo=$1
+
+{ while read -r line ; do 
+    msg=${line#?}
+    case $line in
+        H*)
+            duration=2
+            ;;
+        C*)
+            duration=4
+            ;;
+        T*)
+            duration=1
+            ;;
+    esac
+    notify-send -t $duration "$msg"
+done } < "$status_fifo"
