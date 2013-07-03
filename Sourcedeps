@@ -2,4 +2,4 @@ grab.o: grab.c grab.h helpers.h parse.h sxhkd.h types.h
 helpers.o: helpers.c helpers.h sxhkd.h types.h
 parse.o: parse.c helpers.h locales.h parse.h sxhkd.h types.h
 sxhkd.o: sxhkd.c grab.h helpers.h parse.h sxhkd.h types.h
-types.o: types.c helpers.h parse.h sxhkd.h types.h
+types.o: types.c grab.h helpers.h parse.h sxhkd.h types.h

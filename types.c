@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include "types.h"
 #include "parse.h"
+#include "grab.h"
 
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
@@ -32,6 +33,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
             } else {
                 c->state = c->state->next;
                 num_active++;
+                grab_chord(c->state);
             }
         } else if (chained) {
             if (c->state->event_type == event_type)
@@ -169,6 +171,8 @@ void abort_chain(void)
     chained = false;
     if (timeout > 0)
         alarm(0);
+    ungrab();
+    grab();
 }
 
 void destroy_chain(chain_t *chain)
