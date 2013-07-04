@@ -48,14 +48,6 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
             chained = true;
             if (timeout > 0)
                 alarm(timeout);
-        } else {
-            *replay_event = true;
-            for (hotkey_t *hk = hotkeys; *replay_event && hk != NULL; hk = hk->next) {
-                chord_t *c = hk->chain->head;
-                for (chord_t *cc = c; cc != NULL; cc = cc->more)
-                    if (cc->keysym == keysym && cc->button == button && cc->modfield == modfield)
-                        *replay_event = false;
-            }
         }
     } else if (num_active == 0) {
         abort_chain();
