@@ -86,8 +86,10 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
                         for (chord_t *c = orig; unique && c != NULL; c = c->more)
                             if (c->modfield == explicit_modfield && c->keysym == natural_keysym)
                                 unique = false;
-                        if (!unique)
+                        if (!unique) {
+                            free(chord);
                             break;
+                        }
                         chord->keysym = natural_keysym;
                         chord->button = button;
                         chord->modfield = explicit_modfield;
