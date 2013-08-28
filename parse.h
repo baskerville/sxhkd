@@ -5,11 +5,12 @@
 
 #define RELEASE_PREFIX       '@'
 #define MOTION_PREFIX        '!'
-#define REPLAY_PREFIX        ':'
+#define REPLAY_PREFIX        '~'
 #define START_COMMENT        '#'
 #define MAGIC_INHIBIT        '\\'
 #define PARTIAL_LINE         '\\'
-#define LNK_SEP              ";"
+#define GRP_SEP              ":"
+#define LNK_SEP              ";" GRP_SEP
 #define SYM_SEP              "+ "
 #define SEQ_BEGIN            '{'
 #define SEQ_END              '}'
@@ -35,7 +36,7 @@ void parse_event(xcb_generic_event_t *, uint8_t, xcb_keysym_t *, xcb_button_t *,
 void process_hotkey(char *, char *);
 void render_next(chunk_t *, char *);
 chunk_t *extract_chunks(char *);
-char *get_token(char *, char *, char *);
+char *get_token(char *, char *, char *, char *);
 chunk_t *make_chunk(void);
 void destroy_chunks(chunk_t *);
 bool parse_chain(char *, chain_t *);

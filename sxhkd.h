@@ -31,7 +31,8 @@ char progress[MAXLEN];
 int timeout;
 
 hotkey_t *hotkeys, *hotkeys_tail;
-bool running, reload, bell, chained;
+bool running, reload, bell, chained, locked;
+chord_t *escape_chord;
 
 uint16_t num_lock;
 uint16_t caps_lock;

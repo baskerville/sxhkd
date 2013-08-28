@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 08/05/2013
+.\"      Date: 08/28/2013
 .\"    Manual: Sxhkd Manual
 .\"    Source: Sxhkd 0.4.2
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "08/05/2013" "Sxhkd 0\&.4\&.2" "Sxhkd Manual"
+.TH "SXHKD" "1" "08/28/2013" "Sxhkd 0\&.4\&.2" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -114,7 +114,7 @@ HOTKEY
     COMMAND
 
 HOTKEY     := CHORD_1 ; CHORD_2 ; \&... ; CHORD_n
-CHORD_i    := [MODIFIER_i][@|!|:]KEYSYM_i
+CHORD_i    := [MODIFIER_i][@|!|~]KEYSYM_i
 MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + \&... + MODIFIER_ik
 .fi
 .if n \{\
@@ -129,11 +129,13 @@ Hotkeys and commands can be spread across multiple lines by ending each partial 
 .sp
 When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only be executed after receiving each chord of the chain in consecutive order\&.
 .sp
+The colon character can be used instead of the semicolon to indicate that the chord chain shall not be aborted when the chain tail is reached\&. In which case, the \fIEscape\fR key can be used to manually abort the chain\&.
+.sp
 If \fB@\fR is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events\&.
 .sp
 If \fB!\fR is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the \fIx\fR and \fIy\fR coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: \fIbutton1\fR, \&..., \fIbutton5\fR)\&.
 .sp
-If \fB:\fR is added at the beginning of the keysym, the captured event will be replayed for the other clients\&.
+If \fB~\fR is added at the beginning of the keysym, the captured event will be replayed for the other clients\&.
 .sp
 Mouse hotkeys can be defined by using one of the following special keysym names: \fIbutton1\fR, \fIbutton2\fR, \fIbutton3\fR, \&..., \fIbutton24\fR\&.
 .sp
@@ -177,7 +179,7 @@ super + alt + {0\-9}
 super + {alt,ctrl,alt + ctrl} + XF86Eject
     sudo systemctl {suspend,reboot,poweroff}
 
-:button1
+~button1
     bspc grab_pointer focus
 
 super + button{1\-3}

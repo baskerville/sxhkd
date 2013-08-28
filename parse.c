@@ -2447,10 +2447,10 @@ void process_hotkey(char *hotkey_string, char *command_string)
         destroy_chunks(cm_chunks);
 }
 
-char *get_token(char *dst, char *src, char *sep)
+char *get_token(char *dst, char *ign, char *src, char *sep)
 {
     size_t len = strlen(src);
-    unsigned int i = 0, j = 0;
+    unsigned int i = 0, j = 0, k = 0;
     bool inhibit = false;
     bool found = false;
     while (i < len && !found) {
@@ -2465,6 +2465,8 @@ char *get_token(char *dst, char *src, char *sep)
             if (j > 0)
                 found = true;
             do {
+                if (ign != NULL)
+                    ign[k++] = src[i];
                 i++;
             } while (i < len && strchr(sep, src[i]) != NULL);
             i--;
@@ -2474,6 +2476,8 @@ char *get_token(char *dst, char *src, char *sep)
         i++;
     }
     dst[j] = '\0';
+    if (ign != NULL)
+        ign[k] = '\0';
     return src + i;
 }
 
@@ -2495,12 +2499,12 @@ void render_next(chunk_t *chunks, char *dest)
             }
             if (c->advance == NULL) {
                 incr = true;
-                c->advance = get_token(c->item, c->text, SEQ_SEP);
+                c->advance = get_token(c->item, NULL, c->text, SEQ_SEP);
             } else if (!incr && c->range_cur > c->range_max) {
                 if (c->advance[0] == '\0') {
-                    c->advance = get_token(c->item, c->text, SEQ_SEP);
+                    c->advance = get_token(c->item, NULL, c->text, SEQ_SEP);
                 } else {
-                    c->advance = get_token(c->item, c->advance, SEQ_SEP);
+                    c->advance = get_token(c->item, NULL, c->advance, SEQ_SEP);
                     incr = true;
                 }
             }
@@ -2601,15 +2605,17 @@ bool parse_chain(char *string, chain_t *chain)
 {
     char chord[MAXLEN] = {0};
     char name[MAXLEN] = {0};
+    char ignored[MAXLEN] = {0};
     xcb_keysym_t keysym = XCB_NO_SYMBOL;
     xcb_button_t button = XCB_NONE;
     uint16_t modfield = 0;
     uint8_t event_type = XCB_KEY_PRESS;
     bool replay_event = false;
+    bool lock_chain = false;
     char *outer_advance;
     char *inner_advance;
-    for (outer_advance = get_token(chord, string, LNK_SEP); chord[0] != '\0'; outer_advance = get_token(chord, outer_advance, LNK_SEP)) {
-        for (inner_advance = get_token(name, chord, SYM_SEP); name[0] != '\0'; inner_advance = get_token(name, inner_advance, SYM_SEP)) {
+    for (outer_advance = get_token(chord, ignored, string, LNK_SEP); chord[0] != '\0'; outer_advance = get_token(chord, ignored, outer_advance, LNK_SEP)) {
+        for (inner_advance = get_token(name, NULL, chord, SYM_SEP); name[0] != '\0'; inner_advance = get_token(name, NULL, inner_advance, SYM_SEP)) {
             int offset = 0;
             if (name[0] == RELEASE_PREFIX) {
                 event_type = XCB_KEY_RELEASE;
@@ -2627,9 +2633,11 @@ bool parse_chain(char *string, chain_t *chain)
                 return false;
             }
         }
+        if (strstr(ignored, GRP_SEP) != NULL)
+            lock_chain = true;
         if (button != XCB_NONE)
             event_type = key_to_button(event_type);
-        chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event);
+        chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event, lock_chain);
         add_chord(chain, c);
         if (status_fifo != NULL) {
             strncpy(c->repr, chord, sizeof(c->repr));
@@ -2640,6 +2648,7 @@ bool parse_chain(char *string, chain_t *chain)
         modfield = 0;
         event_type = XCB_KEY_PRESS;
         replay_event = false;
+        lock_chain = false;
     }
     return true;
 }

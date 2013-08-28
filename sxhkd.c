@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
     setup();
     get_standard_keysyms();
     get_lock_fields();
+    escape_chord = make_chord(ESCAPE_KEYSYM, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
     load_config(config_file);
     for (int i = 0; i < num_extra_confs; i++)
         load_config(extra_confs[i]);
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
 
     fd_set descriptors;
 
-    reload = bell = chained = false;
+    reload = bell = chained = locked = false;
     running = true;
 
     xcb_flush(dpy);
@@ -149,6 +150,7 @@ int main(int argc, char *argv[])
         fclose(status_fifo);
     ungrab();
     cleanup();
+    destroy_chord(escape_chord);
     xcb_key_symbols_free(symbols);
     xcb_disconnect(dpy);
     return EXIT_SUCCESS;
