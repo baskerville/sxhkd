@@ -54,7 +54,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
         abort_chain();
         return find_hotkey(keysym, button, modfield, event_type, replay_event);
     }
-    if (chained && timeout > 0)
+    if (chained && !locked && timeout > 0)
         alarm(timeout);
     PRINTF("num active %i\n", num_active);
 
