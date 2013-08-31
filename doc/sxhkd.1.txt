@@ -111,7 +111,7 @@ XF86LaunchB
     xdotool selectwindow | xsel -bi
 
 super + {h,j,k,l}
-    bspc focus {left,down,up,right}
+    bspc window -f {left,down,up,right}
 
 super + alt + {0-9}
     mpc -q seek {0-9}0%
@@ -120,19 +120,16 @@ super + {alt,ctrl,alt + ctrl} + XF86Eject
     sudo systemctl {suspend,reboot,poweroff}
 
 ~button1
-    bspc grab_pointer focus
+    bspc pointer -g focus
 
 super + button{1-3}
-    bspc grab_pointer {move,resize_side,resize_corner}
+    bspc pointer -g {move,resize_side,resize_corner}
 
 super + !button{1-3}
-    bspc track_pointer %i %i
-
-super + @button{1-3}
-    bspc ungrab_pointer
+    bspc pointer -t %i %i
 
 super + {_,shift + }{h,j,k,l}
-    bspc {focus,shift} {left,down,up,right}
+    bspc window {-f,-s} {left,down,up,right}
 
 {_,shift + ,super + }XF86MonBrightness{Down,Up}
     bright {-1,-10,min,+1,+10,max}
@@ -141,7 +138,7 @@ super + o ; {e,w,m}
     {gvim,firefox,thunderbird}
 
 super + alt + control + {h,j,k,l} ; {0-9}
-    bspc fence_ratio {left,down,up,right} 0.{0-9}
+    bspc window -e {left,down,up,right} 0.{0-9}
 ----
 
 Author
