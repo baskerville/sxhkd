@@ -1,5 +1,5 @@
 NAME    = sxhkd
-VERSION = 0.4.2
+VERSION = 0.4.3
 
 CC      ?= gcc
 LIBS     = -lm -lxcb -lxcb-keysyms
