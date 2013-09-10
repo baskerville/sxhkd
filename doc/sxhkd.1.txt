@@ -8,7 +8,7 @@ sxhkd(1)
 Name
 ----
 
-sxhkd - Simple X HotKey Daemon
+sxhkd - Simple X hotkey daemon
 
 Synopsis
 --------
