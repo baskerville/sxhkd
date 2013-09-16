@@ -24,9 +24,10 @@ int main(int argc, char *argv[])
     char *fifo_path = NULL;
     status_fifo = NULL;
     config_path = NULL;
+    ignore_mapping = false;
     timeout = TIMEOUT;
 
-    while ((opt = getopt(argc, argv, "vht:c:r:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "vhnt:c:r:s:")) != -1) {
         switch (opt) {
             case 'v':
                 printf("%s\n", VERSION);
@@ -35,6 +36,9 @@ int main(int argc, char *argv[])
             case 'h':
                 printf("sxhkd [-h|-v|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO] [EXTRA_CONFIG ...]\n");
                 exit(EXIT_SUCCESS);
+                break;
+            case 'n':
+                ignore_mapping = true;
                 break;
             case 't':
                 timeout = atoi(optarg);
@@ -115,6 +119,9 @@ int main(int argc, char *argv[])
                         break;
                     case XCB_MOTION_NOTIFY:
                         motion_notify(evt, event_type);
+                        break;
+                    case XCB_MAPPING_NOTIFY:
+                        mapping_notify(evt);
                         break;
                     default:
                         PRINTF("received event %u\n", event_type);
@@ -210,6 +217,20 @@ void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
         snprintf(command, sizeof(command), hk->command, e->root_x, e->root_y);
         run(command);
     }
+}
+
+
+void mapping_notify(xcb_generic_event_t *evt)
+{
+    if (ignore_mapping || !running || chained)
+        return;
+    xcb_mapping_notify_event_t *e = (xcb_mapping_notify_event_t *) evt;
+    PRINTF("mapping notify %u %u\n", e->request, e->count);
+    xcb_refresh_keyboard_mapping(symbols, e);
+    destroy_chord(escape_chord);
+    get_lock_fields();
+    reload_cmd();
+    escape_chord = make_chord(ESCAPE_KEYSYM, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
 }
 
 void setup(void)

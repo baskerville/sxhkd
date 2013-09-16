@@ -28,6 +28,7 @@ int num_extra_confs;
 int redir_fd;
 FILE *status_fifo;
 char progress[MAXLEN];
+bool ignore_mapping;
 int timeout;
 
 hotkey_t *hotkeys, *hotkeys_tail;
@@ -40,6 +41,7 @@ uint16_t scroll_lock;
 
 void key_button_event(xcb_generic_event_t *, uint8_t);
 void motion_notify(xcb_generic_event_t *, uint8_t);
+void mapping_notify(xcb_generic_event_t *);
 void setup(void);
 void cleanup(void);
 void reload_cmd(void);

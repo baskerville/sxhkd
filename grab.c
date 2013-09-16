@@ -16,9 +16,8 @@ void grab_chord(chord_t *chord)
             xcb_keycode_t *keycodes = keycodes_from_keysym(c->keysym);
             if (keycodes != NULL)
                 for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++)
-                    if (c->keysym == xcb_key_symbols_get_keysym(symbols, *kc, 0)) {
+                    if (c->keysym == xcb_key_symbols_get_keysym(symbols, *kc, 0))
                         grab_key_button(*kc, c->button, c->modfield);
-                    }
             free(keycodes);
         } else {
             grab_key_button(XCB_NONE, c->button, c->modfield);
