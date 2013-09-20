@@ -2,8 +2,6 @@
 #include <string.h>
 #include <inttypes.h>
 #include <ctype.h>
-#include "locales.h"
-#include "types.h"
 #include "parse.h"
 
 keysym_dict_t nks_dict[] = {/*{{{*/

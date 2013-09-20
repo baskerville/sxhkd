@@ -4,11 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <sys/wait.h>
-#include "helpers.h"
 #include "sxhkd.h"
+#include "helpers.h"
 
 void warn(char *fmt, ...)
 {
