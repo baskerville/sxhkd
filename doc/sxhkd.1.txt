@@ -147,7 +147,7 @@ super + alt + control + {h,j,k,l} ; {0-9}
 Author
 ------
 
-Bastien Dejean <baskerville at lavabit.com>
+Bastien Dejean <nihilhill at gmail.com>
 
 Mailing List
 ------------
