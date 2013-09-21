@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
         else
             snprintf(config_file, sizeof(config_file), "%s/%s/%s", getenv("HOME"), ".config", CONFIG_PATH);
     } else {
-        strncpy(config_file, config_path, sizeof(config_file));
+        snprintf(config_file, sizeof(config_file), "%s", config_path);
     }
 
     if (fifo_path != NULL) {

@@ -2362,9 +2362,9 @@ void load_config(char *config_file)
             *(end + 1) = '\0';
 
             if (isgraph(first))
-                strncpy(chain + offset, start, sizeof(chain) - offset);
+                snprintf(chain + offset, sizeof(chain) - offset, "%s", start);
             else
-                strncpy(command + offset, start, sizeof(command) - offset);
+                snprintf(command + offset, sizeof(command) - offset, "%s", start);
 
             if (*end == PARTIAL_LINE) {
                 offset += end - start;
@@ -2417,9 +2417,9 @@ void process_hotkey(char *hotkey_string, char *command_string)
     chunk_t *hk_chunks = extract_chunks(hotkey_string);
     chunk_t *cm_chunks = extract_chunks(command_string);
     if (hk_chunks == NULL)
-        strncpy(hotkey, hotkey_string, sizeof(hotkey));
+        snprintf(hotkey, sizeof(hotkey), "%s", hotkey_string);
     if (cm_chunks == NULL)
-        strncpy(command, command_string, sizeof(command));
+        snprintf(command, sizeof(command), "%s", command_string);
     render_next(hk_chunks, hotkey);
     render_next(cm_chunks, command);
 
@@ -2638,10 +2638,8 @@ bool parse_chain(char *string, chain_t *chain)
             event_type = key_to_button(event_type);
         chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event, lock_chain);
         add_chord(chain, c);
-        if (status_fifo != NULL) {
-            strncpy(c->repr, chord, sizeof(c->repr));
-            c->repr[strlen(chord)] = '\0';
-        }
+        if (status_fifo != NULL)
+            snprintf(c->repr, sizeof(c->repr), "%s", chord);
         keysym = XCB_NO_SYMBOL;
         button = XCB_NONE;
         modfield = 0;
@@ -2718,8 +2716,7 @@ bool parse_modifier(char *name, uint16_t *modfield)
 bool parse_fold(char *string, char *folded_string)
 {
     if (strchr(string, SEQ_BEGIN) != NULL && strrchr(string, SEQ_END) != NULL) {
-        strncpy(folded_string, string, strlen(string));
-        folded_string[strlen(string)] = '\0';
+        snprintf(folded_string, strlen(string), "%s", string);
         return true;
     }
     return false;

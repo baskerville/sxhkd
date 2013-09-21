@@ -17,7 +17,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
         if (match_chord(c->state, event_type, keysym, button, modfield)) {
             if (status_fifo != NULL && num_active == 0) {
                 if (!chained) {
-                    strncpy(progress, c->state->repr, sizeof(progress));
+                    snprintf(progress, sizeof(progress), "%s", c->state->repr);
                 } else {
                     strncat(progress, LNK_SEP, sizeof(progress) - strlen(progress) - 1);
                     strncat(progress, c->state->repr, sizeof(progress) - strlen(progress) - 1);
@@ -146,7 +146,7 @@ hotkey_t *make_hotkey(chain_t *chain, char *command)
 {
     hotkey_t *hk = malloc(sizeof(hotkey_t));
     hk->chain = chain;
-    strncpy(hk->command, command, sizeof(hk->command));
+    snprintf(hk->command, sizeof(hk->command), "%s", command);
     hk->next = NULL;
     return hk;
 }
