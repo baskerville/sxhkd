@@ -239,21 +239,22 @@ void setup(void)
     if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
         err("The '%s' environment variable is not defined.\n", SHELL_ENV);
     symbols = xcb_key_symbols_alloc(dpy);
-    hotkeys = hotkeys_tail = NULL;
+    hotkeys_head = hotkeys_tail = NULL;
     progress[0] = '\0';
 }
 
 void cleanup(void)
 {
     PUTS("cleanup");
-    hotkey_t *hk = hotkeys;
+    hotkey_t *hk = hotkeys_head;
     while (hk != NULL) {
-        hotkey_t *tmp = hk->next;
+        hotkey_t *next = hk->next;
         destroy_chain(hk->chain);
+        free(hk->cycle);
         free(hk);
-        hk = tmp;
+        hk = next;
     }
-    hotkeys = hotkeys_tail = NULL;
+    hotkeys_head = hotkeys_tail = NULL;
 }
 
 void reload_cmd(void)

@@ -2414,6 +2414,8 @@ void process_hotkey(char *hotkey_string, char *command_string)
 {
     char hotkey[MAXLEN] = {0};
     char command[MAXLEN] = {0};
+    char last_hotkey[MAXLEN] = {0};
+    unsigned char num_same = 0;
     chunk_t *hk_chunks = extract_chunks(hotkey_string);
     chunk_t *cm_chunks = extract_chunks(command_string);
     if (hk_chunks == NULL)
@@ -2430,6 +2432,8 @@ void process_hotkey(char *hotkey_string, char *command_string)
         if (parse_chain(hotkey, chain)) {
             hotkey_t *hk = make_hotkey(chain, command);
             add_hotkey(hk);
+            if (strcmp(hotkey, last_hotkey) == 0)
+                num_same++;
         } else {
             free(chain);
         }
@@ -2437,9 +2441,19 @@ void process_hotkey(char *hotkey_string, char *command_string)
         if (hk_chunks == NULL && cm_chunks == NULL)
             break;
 
+        snprintf(last_hotkey, sizeof(last_hotkey), "%s", hotkey);
+
         render_next(hk_chunks, hotkey);
         render_next(cm_chunks, command);
     }
+
+    if (num_same > 0) {
+        int period = num_same + 1;
+        int delay = num_same;
+        for (hotkey_t *hk = hotkeys_tail; hk != NULL && delay >= 0; hk = hk->prev, delay--)
+            hk->cycle = make_cycle(delay, period);
+    }
+
     if (hk_chunks != NULL)
         destroy_chunks(hk_chunks);
     if (cm_chunks != NULL)

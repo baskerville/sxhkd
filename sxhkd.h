@@ -31,7 +31,7 @@ char progress[MAXLEN];
 bool ignore_mapping;
 int timeout;
 
-hotkey_t *hotkeys, *hotkeys_tail;
+hotkey_t *hotkeys_head, *hotkeys_tail;
 bool running, reload, bell, chained, locked;
 chord_t *escape_chord;
 

@@ -9,8 +9,9 @@
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
     int num_active = 0;
+    hotkey_t *result = NULL;
 
-    for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next) {
+    for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next) {
         chain_t *c = hk->chain;
         if (chained && c->state == c->head)
             continue;
@@ -31,6 +32,13 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                 grab_chord(escape_chord);
             }
             if (c->state == c->tail) {
+                if (hk->cycle != NULL) {
+                    unsigned char delay = hk->cycle->delay;
+                    hk->cycle->delay = (delay == 0 ? hk->cycle->period - 1 : delay - 1);
+                    if (delay == 0)
+                        result = hk;
+                    continue;
+                }
                 if (chained && !locked)
                     abort_chain();
                 return hk;
@@ -46,6 +54,9 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                 num_active++;
         }
     }
+
+    if (result != NULL)
+        return result;
 
     if (!chained) {
         if (num_active > 0)
@@ -142,21 +153,31 @@ chain_t *make_chain(void)
     return chain;
 }
 
+cycle_t *make_cycle(int delay, int period)
+{
+    cycle_t *cycle = malloc(sizeof(cycle_t));
+    cycle->delay = delay;
+    cycle->period = period;
+    return cycle;
+}
+
 hotkey_t *make_hotkey(chain_t *chain, char *command)
 {
     hotkey_t *hk = malloc(sizeof(hotkey_t));
     hk->chain = chain;
     snprintf(hk->command, sizeof(hk->command), "%s", command);
-    hk->next = NULL;
+    hk->cycle = NULL;
+    hk->next = hk->prev = NULL;
     return hk;
 }
 
 void add_hotkey(hotkey_t *hk)
 {
-    if (hotkeys == NULL) {
-        hotkeys = hotkeys_tail = hk;
+    if (hotkeys_head == NULL) {
+        hotkeys_head = hotkeys_tail = hk;
     } else {
         hotkeys_tail->next = hk;
+        hk->prev = hotkeys_tail;
         hotkeys_tail = hk;
     }
 }
@@ -164,7 +185,7 @@ void add_hotkey(hotkey_t *hk)
 void abort_chain(void)
 {
     PUTS("abort chain");
-    for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next)
+    for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next)
         hk->chain->state = hk->chain->head;
     chained = false;
     locked = false;

@@ -28,11 +28,18 @@ typedef struct {
     chord_t *state;
 } chain_t;
 
+typedef struct {
+    int period;
+    int delay;
+} cycle_t;
+
 typedef struct hotkey_t hotkey_t;
 struct hotkey_t {
     chain_t *chain;
     char command[MAXLEN];
+    cycle_t *cycle;
     hotkey_t *next;
+    hotkey_t *prev;
 };
 
 typedef struct {
@@ -45,6 +52,7 @@ xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
 
 chord_t *make_chord(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool, bool);
 chain_t *make_chain(void);
+cycle_t *make_cycle(int, int);
 void add_chord(chain_t *, chord_t *);
 bool match_chord(chord_t *, uint8_t, xcb_keysym_t, xcb_button_t, uint16_t);
 hotkey_t *find_hotkey(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool *);

@@ -4,7 +4,7 @@
 
 void grab(void)
 {
-    for (hotkey_t *hk = hotkeys; hk != NULL; hk = hk->next)
+    for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next)
         grab_chord(hk->chain->head);
 }
 
