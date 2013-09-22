@@ -142,6 +142,9 @@ super + o ; {e,w,m}
 
 super + alt + control + {h,j,k,l} ; {0-9}
     bspc window -e {left,down,up,right} 0.{0-9}
+
+super + alt + p
+    bspc config focus_follows_pointer {true,false}
 ----
 
 Author
