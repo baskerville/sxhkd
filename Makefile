@@ -26,7 +26,7 @@ include Sourcedeps
 $(OBJ): Makefile
 
 .c.o:
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) $(OPTFLAGS) -c -o $@ $<
 
 $(NAME): $(OBJ)
 	$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
