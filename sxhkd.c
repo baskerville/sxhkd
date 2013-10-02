@@ -243,12 +243,15 @@ void mapping_notify(xcb_generic_event_t *evt)
     if (ignore_mapping || !running || chained)
         return;
     xcb_mapping_notify_event_t *e = (xcb_mapping_notify_event_t *) evt;
+    if (e->request == XCB_MAPPING_POINTER)
+        return;
     PRINTF("mapping notify %u %u\n", e->request, e->count);
-    xcb_refresh_keyboard_mapping(symbols, e);
-    destroy_chord(escape_chord);
-    get_lock_fields();
-    reload_cmd();
-    escape_chord = make_chord(ESCAPE_KEYSYM, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
+    if (xcb_refresh_keyboard_mapping(symbols, e) == 1) {
+        destroy_chord(escape_chord);
+        get_lock_fields();
+        reload_cmd();
+        escape_chord = make_chord(ESCAPE_KEYSYM, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
+    }
 }
 
 void setup(void)
