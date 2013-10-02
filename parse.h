@@ -43,8 +43,8 @@
 
 typedef struct chunk_t chunk_t;
 struct chunk_t {
-    char text[MAXLEN];
-    char item[MAXLEN];
+    char text[2 * MAXLEN];
+    char item[2 * MAXLEN];
     char *advance;
     bool sequence;
     char range_cur;

@@ -60,7 +60,7 @@ typedef struct {
 typedef struct hotkey_t hotkey_t;
 struct hotkey_t {
     chain_t *chain;
-    char command[MAXLEN];
+    char command[2 * MAXLEN];
     cycle_t *cycle;
     hotkey_t *next;
     hotkey_t *prev;

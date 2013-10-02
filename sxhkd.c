@@ -231,7 +231,7 @@ void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
     }
     hotkey_t *hk = find_hotkey(XCB_NO_SYMBOL, button, modfield, event_type, NULL);
     if (hk != NULL) {
-        char command[MAXLEN];
+        char command[2 * MAXLEN];
         snprintf(command, sizeof(command), hk->command, e->root_x, e->root_y);
         run(command);
     }

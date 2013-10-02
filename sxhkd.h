@@ -51,7 +51,7 @@ char **extra_confs;
 int num_extra_confs;
 int redir_fd;
 FILE *status_fifo;
-char progress[MAXLEN];
+char progress[3 * MAXLEN];
 bool ignore_mapping;
 int timeout;
 
