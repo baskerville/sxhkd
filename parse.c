@@ -2361,7 +2361,7 @@ keysym_dict_t nks_dict[] = {/*{{{*/
 #endif
 };/*}}}*/
 
-void load_config(char *config_file)
+void load_config(const char *config_file)
 {
     PRINTF("load configuration '%s'\n", config_file);
     FILE *cfg = fopen(config_file, "r");

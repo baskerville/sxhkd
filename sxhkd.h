@@ -70,6 +70,6 @@ void setup(void);
 void cleanup(void);
 void reload_cmd(void);
 void hold(int sig);
-void put_status(char c, char *s);
+void put_status(char c, const char *s);
 
 #endif

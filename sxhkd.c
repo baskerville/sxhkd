@@ -305,7 +305,7 @@ void hold(int sig)
         bell = true;
 }
 
-void put_status(char c, char *s)
+void put_status(char c, const char *s)
 {
     fprintf(status_fifo, "%c%s\n", c, s);
     fflush(status_fifo);
