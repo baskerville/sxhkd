@@ -63,13 +63,13 @@ uint16_t num_lock;
 uint16_t caps_lock;
 uint16_t scroll_lock;
 
-void key_button_event(xcb_generic_event_t *, uint8_t);
-void motion_notify(xcb_generic_event_t *, uint8_t);
-void mapping_notify(xcb_generic_event_t *);
+void key_button_event(xcb_generic_event_t *evt, uint8_t event_type);
+void motion_notify(xcb_generic_event_t *evt, uint8_t event_type);
+void mapping_notify(xcb_generic_event_t *evt);
 void setup(void);
 void cleanup(void);
 void reload_cmd(void);
-void hold(int);
-void put_status(char, char *);
+void hold(int sig);
+void put_status(char c, char *s);
 
 #endif

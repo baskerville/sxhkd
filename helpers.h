@@ -36,12 +36,12 @@
 #  define PRINTF(x,...)   ((void)0)
 #endif
 
-void warn(char *, ...);
+void warn(char *fmt, ...);
 __attribute__((noreturn))
-void err(char *, ...);
-void spawn(char *[]);
-void run(char *);
-char *lgraph(char *);
-char *rgraph(char *);
+void err(char *fmt, ...);
+void spawn(char *cmd[]);
+void run(char *command);
+char *lgraph(char *s);
+char *rgraph(char *s);
 
 #endif

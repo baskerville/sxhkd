@@ -2408,7 +2408,8 @@ void load_config(char *config_file)
     fclose(cfg);
 }
 
-void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *keysym, xcb_button_t *button, uint16_t *modfield) {
+void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *keysym, xcb_button_t *button, uint16_t *modfield)
+{
     if (event_type == XCB_KEY_PRESS) {
         xcb_key_press_event_t *e = (xcb_key_press_event_t *) evt;
         xcb_keycode_t keycode = e->detail;

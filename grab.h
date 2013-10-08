@@ -28,9 +28,9 @@
 #include "sxhkd.h"
 
 void grab(void);
-void grab_chord(chord_t *);
-void grab_key_button(xcb_keycode_t, xcb_button_t, uint16_t);
-void grab_key_button_checked(xcb_keycode_t, xcb_button_t, uint16_t);
+void grab_chord(chord_t *chord);
+void grab_key_button(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield);
+void grab_key_button_checked(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield);
 void ungrab(void);
 
 #endif

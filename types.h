@@ -74,16 +74,16 @@ typedef struct {
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
              Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
 
-chord_t *make_chord(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool, bool);
+hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event);
+bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield);
+chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain);
+void add_chord(chain_t *chain, chord_t *chord);
 chain_t *make_chain(void);
-cycle_t *make_cycle(int, int);
-void add_chord(chain_t *, chord_t *);
-bool match_chord(chord_t *, uint8_t, xcb_keysym_t, xcb_button_t, uint16_t);
-hotkey_t *find_hotkey(xcb_keysym_t, xcb_button_t, uint16_t, uint8_t, bool *);
-hotkey_t *make_hotkey(chain_t *, char *);
-void add_hotkey(hotkey_t *);
+cycle_t *make_cycle(int delay, int period);
+hotkey_t *make_hotkey(chain_t *chain, char *command);
+void add_hotkey(hotkey_t *hk);
 void abort_chain(void);
-void destroy_chain(chain_t *);
-void destroy_chord(chord_t *);
+void destroy_chain(chain_t *chain);
+void destroy_chord(chord_t *chord);
 
 #endif
