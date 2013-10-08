@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef SXHKD_TYPES_H
+#define SXHKD_TYPES_H
 
 #include <xcb/xcb_keysyms.h>
 #include <stdbool.h>

@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef GRAB_H
-#define GRAB_H
+#ifndef SXHKD_GRAB_H
+#define SXHKD_GRAB_H
 
 #include "sxhkd.h"
 
