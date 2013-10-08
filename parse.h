@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _PARSE_H
-#define _PARSE_H
+#ifndef PARSE_H
+#define PARSE_H
 
 #include "sxhkd.h"
 

@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SXHKD_H
-#define _SXHKD_H
+#ifndef SXHKD_H
+#define SXHKD_H
 
 #include <xcb/xcb_keysyms.h>
 #include <stdio.h>

@@ -22,8 +22,8 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _HELPERS_H
-#define _HELPERS_H
+#ifndef HELPERS_H
+#define HELPERS_H
 
 #define LENGTH(x)         (sizeof(x) / sizeof(*x))
 #define MAXLEN            256
