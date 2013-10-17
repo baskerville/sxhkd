@@ -243,9 +243,9 @@ void mapping_notify(xcb_generic_event_t *evt)
     if (ignore_mapping || !running || chained)
         return;
     xcb_mapping_notify_event_t *e = (xcb_mapping_notify_event_t *) evt;
+    PRINTF("mapping notify %u %u\n", e->request, e->count);
     if (e->request == XCB_MAPPING_POINTER)
         return;
-    PRINTF("mapping notify %u %u\n", e->request, e->count);
     if (xcb_refresh_keyboard_mapping(symbols, e) == 1) {
         destroy_chord(escape_chord);
         get_lock_fields();
