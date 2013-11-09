@@ -1,0 +1,12 @@
+[Unit]
+Description=Simple X Hotkey Daemon
+Documentation=man:sxhkd(1)
+BindsTo=xorg.service
+After=xorg.service
+
+[Service]
+ExecStart=/usr/bin/sxhkd
+ExecReload=/usr/bin/kill -SIGUSR1 $MAINPID
+
+[Install]
+WantedBy=graphical.target
