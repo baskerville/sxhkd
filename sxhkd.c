@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     ignore_mapping = false;
     timeout = TIMEOUT;
 
-    while ((opt = getopt(argc, argv, "vhnt:c:r:s:")) != -1) {
+    while ((opt = getopt(argc, argv, "vhnt:c:r:s:")) != (char)-1) {
         switch (opt) {
             case 'v':
                 printf("%s\n", VERSION);
