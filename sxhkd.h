@@ -54,6 +54,8 @@ FILE *status_fifo;
 char progress[3 * MAXLEN];
 bool ignore_mapping;
 int timeout;
+double motion_interval;
+xcb_timestamp_t last_motion_time;
 
 hotkey_t *hotkeys_head, *hotkeys_tail;
 bool running, reload, bell, chained, locked;

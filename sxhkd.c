@@ -44,8 +44,11 @@ int main(int argc, char *argv[])
     config_path = NULL;
     ignore_mapping = false;
     timeout = TIMEOUT;
+    unsigned int max_freq = 0;
+    motion_interval = 0;
+    last_motion_time = 0;
 
-    while ((opt = getopt(argc, argv, "vhnt:c:r:s:")) != (char)-1) {
+    while ((opt = getopt(argc, argv, "vhnt:c:r:s:f:")) != (char)-1) {
         switch (opt) {
             case 'v':
                 printf("%s\n", VERSION);
@@ -72,6 +75,10 @@ int main(int argc, char *argv[])
             case 's':
                 fifo_path = optarg;
                 break;
+            case 'f':
+                if (sscanf(optarg, "%u", &max_freq) != 1)
+                    warn("Can't parse maximum pointer frequency.\n");
+                break;
         }
     }
 
@@ -95,6 +102,9 @@ int main(int argc, char *argv[])
         else
             warn("Couldn't open status fifo.\n");
     }
+
+    if (max_freq != 0)
+        motion_interval = 1000.0 / max_freq;
 
     signal(SIGINT, hold);
     signal(SIGHUP, hold);
@@ -221,6 +231,9 @@ void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
 {
     xcb_motion_notify_event_t *e = (xcb_motion_notify_event_t *) evt;
     /* PRINTF("motion notify %X %X %u\n", e->child, e->detail, e->state); */
+    if (motion_interval > 0 && (e->time - last_motion_time) < motion_interval)
+        return;
+    last_motion_time = e->time;
     uint16_t lockfield = num_lock | caps_lock | scroll_lock;
     uint16_t buttonfield = e->state >> 8;
     uint16_t modfield = e->state & ~lockfield & MOD_STATE_FIELD;

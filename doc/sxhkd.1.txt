@@ -45,6 +45,9 @@ Options
 *-s* _STATUS_FIFO_::
     Output status information to the given FIFO.
 
+*-f* _FREQUENCY_::
+    Set the maximum frequency for motion events.
+
 Configuration
 -------------
 
