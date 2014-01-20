@@ -57,6 +57,8 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
                 *replay_event = true;
             if (!locked && c->state->lock_chain) {
                 locked = true;
+                if (timeout > 0)
+                    alarm(0);
                 grab_chord(escape_chord);
             }
             if (c->state == c->tail) {
