@@ -39,40 +39,40 @@
 
 typedef struct chord_t chord_t;
 struct chord_t {
-    char repr[MAXLEN];
-    xcb_keysym_t keysym;
-    xcb_button_t button;
-    uint16_t modfield;
-    uint8_t event_type;
-    bool replay_event;
-    bool lock_chain;
-    chord_t *next;
-    chord_t *more;
+	char repr[MAXLEN];
+	xcb_keysym_t keysym;
+	xcb_button_t button;
+	uint16_t modfield;
+	uint8_t event_type;
+	bool replay_event;
+	bool lock_chain;
+	chord_t *next;
+	chord_t *more;
 };
 
 typedef struct {
-    chord_t *head;
-    chord_t *tail;
-    chord_t *state;
+	chord_t *head;
+	chord_t *tail;
+	chord_t *state;
 } chain_t;
 
 typedef struct {
-    int period;
-    int delay;
+	int period;
+	int delay;
 } cycle_t;
 
 typedef struct hotkey_t hotkey_t;
 struct hotkey_t {
-    chain_t *chain;
-    char command[2 * MAXLEN];
-    cycle_t *cycle;
-    hotkey_t *next;
-    hotkey_t *prev;
+	chain_t *chain;
+	char command[2 * MAXLEN];
+	cycle_t *cycle;
+	hotkey_t *next;
+	hotkey_t *prev;
 };
 
 typedef struct {
-    char *name;
-    xcb_keysym_t keysym;
+	char *name;
+	xcb_keysym_t keysym;
 } keysym_dict_t;
 
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,

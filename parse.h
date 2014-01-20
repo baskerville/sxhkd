@@ -47,13 +47,13 @@
 
 typedef struct chunk_t chunk_t;
 struct chunk_t {
-    char text[2 * MAXLEN];
-    char item[2 * MAXLEN];
-    char *advance;
-    bool sequence;
-    char range_cur;
-    char range_max;
-    chunk_t *next;
+	char text[2 * MAXLEN];
+	char item[2 * MAXLEN];
+	char *advance;
+	bool sequence;
+	char range_cur;
+	char range_max;
+	chunk_t *next;
 };
 
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
