@@ -1,0 +1,3 @@
+# Reload functions
+super + Escape
+  	. "$XDG_CONFIG_HOME"/sxhkd/functions
