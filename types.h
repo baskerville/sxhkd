@@ -46,6 +46,7 @@ struct chord_t {
 	uint8_t event_type;
 	bool replay_event;
 	bool lock_chain;
+	bool from_root;
 	chord_t *next;
 	chord_t *more;
 };
@@ -78,9 +79,9 @@ typedef struct {
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
              Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
 
-hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event);
-bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield);
-chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain);
+hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event, bool from_root);
+bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, bool from_root);
+chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain, bool from_root);
 void add_chord(chain_t *chain, chord_t *chord);
 chain_t *make_chain(void);
 cycle_t *make_cycle(int delay, int period);

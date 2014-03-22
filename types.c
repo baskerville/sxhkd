@@ -34,7 +34,7 @@
 #include "grab.h"
 #include "types.h"
 
-hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
+hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event, bool from_root)
 {
 	int num_active = 0;
 	hotkey_t *result = NULL;
@@ -43,7 +43,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 		chain_t *c = hk->chain;
 		if (chained && c->state == c->head)
 			continue;
-		if (match_chord(c->state, event_type, keysym, button, modfield)) {
+		if (match_chord(c->state, event_type, keysym, button, modfield, from_root)) {
 			if (status_fifo != NULL && num_active == 0) {
 				if (!chained) {
 					snprintf(progress, sizeof(progress), "%s", c->state->repr);
@@ -91,9 +91,9 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 	if (!chained) {
 		if (num_active > 0)
 			chained = true;
-	} else if (num_active == 0 || (locked && match_chord(escape_chord, event_type, keysym, button, modfield))) {
+	} else if (num_active == 0 || (locked && match_chord(escape_chord, event_type, keysym, button, modfield, from_root))) {
 		abort_chain();
-		return find_hotkey(keysym, button, modfield, event_type, replay_event);
+		return find_hotkey(keysym, button, modfield, event_type, replay_event, from_root);
 	}
 	if (chained && !locked && timeout > 0)
 		alarm(timeout);
@@ -102,15 +102,15 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 	return NULL;
 }
 
-bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield)
+bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, bool from_root)
 {
 	for (chord_t *c = chord; c != NULL; c = c->more)
-		if (c->event_type == event_type && c->keysym == keysym && c->button == button && c->modfield == modfield)
+		if (c->event_type == event_type && c->keysym == keysym && c->button == button && c->modfield == modfield && (!c->from_root || from_root))
 			return true;
 	return false;
 }
 
-chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain)
+chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain, bool from_root)
 {
 	chord_t *chord;
 	if (button == XCB_NONE) {
@@ -141,6 +141,7 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
 						chord->event_type = event_type;
 						chord->replay_event = replay_event;
 						chord->lock_chain = lock_chain;
+						chord->from_root = from_root;
 						if (prev != NULL)
 							prev->more = chord;
 						else
@@ -161,6 +162,7 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
 		chord->event_type = event_type;
 		chord->replay_event = replay_event;
 		chord->lock_chain = lock_chain;
+		chord->from_root = from_root;
 		chord->next = chord->more = NULL;
 		PRINTF("button chord %u %u\n", button, modfield);
 	}
