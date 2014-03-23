@@ -200,14 +200,14 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 	xcb_button_t button = XCB_NONE;
 	bool replay_event = false;
 	bool from_root = false;
+	bool evt_from_root = false;
 	uint16_t modfield = 0;
 	uint16_t lockfield = num_lock | caps_lock | scroll_lock;
-	parse_event(evt, event_type, &keysym, &button, &modfield, &from_root);
-	PRINTF("from root: %u\n", from_root);
+	parse_event(evt, event_type, &keysym, &button, &modfield, &evt_from_root);
 	modfield &= ~lockfield & MOD_STATE_FIELD;
 	if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
-		hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event, from_root);
-		if (hk != NULL) {
+		hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event, &from_root);
+		if (hk != NULL && (!from_root || evt_from_root)) {
 			run(hk->command);
 			if (status_fifo != NULL)
 				put_status(COMMAND_PREFIX, hk->command);
@@ -247,7 +247,7 @@ void motion_notify(xcb_generic_event_t *evt, uint8_t event_type)
 		buttonfield = buttonfield >> 1;
 		button++;
 	}
-	hotkey_t *hk = find_hotkey(XCB_NO_SYMBOL, button, modfield, event_type, NULL, false);
+	hotkey_t *hk = find_hotkey(XCB_NO_SYMBOL, button, modfield, event_type, NULL, NULL);
 	if (hk != NULL) {
 		char command[2 * MAXLEN];
 		snprintf(command, sizeof(command), hk->command, e->root_x, e->root_y);

@@ -34,7 +34,7 @@
 #include "grab.h"
 #include "types.h"
 
-hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event, bool from_root)
+hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event, bool *from_root)
 {
 	int num_active = 0;
 	hotkey_t *result = NULL;
@@ -43,7 +43,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 		chain_t *c = hk->chain;
 		if (chained && c->state == c->head)
 			continue;
-		if (match_chord(c->state, event_type, keysym, button, modfield, from_root)) {
+		if (match_chord(c->state, event_type, keysym, button, modfield)) {
 			if (status_fifo != NULL && num_active == 0) {
 				if (!chained) {
 					snprintf(progress, sizeof(progress), "%s", c->state->repr);
@@ -55,6 +55,8 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 			}
 			if (replay_event != NULL && c->state->replay_event)
 				*replay_event = true;
+			if (from_root != NULL && c->state->from_root)
+				*from_root = true;
 			if (!locked && c->state->lock_chain) {
 				locked = true;
 				if (timeout > 0)
@@ -91,7 +93,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 	if (!chained) {
 		if (num_active > 0)
 			chained = true;
-	} else if (num_active == 0 || (locked && match_chord(escape_chord, event_type, keysym, button, modfield, from_root))) {
+	} else if (num_active == 0 || (locked && match_chord(escape_chord, event_type, keysym, button, modfield))) {
 		abort_chain();
 		return find_hotkey(keysym, button, modfield, event_type, replay_event, from_root);
 	}
@@ -102,10 +104,10 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 	return NULL;
 }
 
-bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, bool from_root)
+bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield)
 {
 	for (chord_t *c = chord; c != NULL; c = c->more)
-		if (c->event_type == event_type && c->keysym == keysym && c->button == button && c->modfield == modfield && (!c->from_root || from_root))
+		if (c->event_type == event_type && c->keysym == keysym && c->button == button && c->modfield == modfield)
 			return true;
 	return false;
 }
