@@ -2665,7 +2665,7 @@ bool parse_chain(char *string, chain_t *chain)
 	for (outer_advance = get_token(chord, ignored, string, LNK_SEP); chord[0] != '\0'; outer_advance = get_token(chord, ignored, outer_advance, LNK_SEP)) {
 		for (inner_advance = get_token(name, NULL, chord, SYM_SEP); name[0] != '\0'; inner_advance = get_token(name, NULL, inner_advance, SYM_SEP)) {
 			int offset = 0;
-			while (offset < (MAXLEN - 1) && !isalnum(name[offset]) && name[offset] != '_') {
+			while (offset < (MAXLEN - 1) && !isalnum(name[offset]) && name[offset] != '_' && name[offset] != SEQ_BEGIN) {
 				switch (name[offset]) {
 					case RELEASE_PREFIX:
 						event_type = XCB_KEY_RELEASE;
