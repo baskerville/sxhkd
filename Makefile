@@ -41,9 +41,6 @@ uninstall:
 	rm -f "$(DESTDIR)$(BINPREFIX)"/$(NAME)
 	rm -f "$(DESTDIR)$(MANPREFIX)"/man1/$(NAME).1
 
-deps:
-	$(CC) -MM *.c > Sourcedeps
-
 doc:
 	a2x -v -d manpage -f manpage -a revnumber=$(VERSION) doc/$(NAME).1.txt
 

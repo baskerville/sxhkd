@@ -2413,31 +2413,27 @@ void load_config(const char *config_file)
 	fclose(cfg);
 }
 
-void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *keysym, xcb_button_t *button, uint16_t *modfield, bool *from_root)
+void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *keysym, xcb_button_t *button, uint16_t *modfield)
 {
 	if (event_type == XCB_KEY_PRESS) {
 		xcb_key_press_event_t *e = (xcb_key_press_event_t *) evt;
-		*from_root = (e->child == XCB_NONE);
 		xcb_keycode_t keycode = e->detail;
 		*modfield = e->state;
 		*keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
 		PRINTF("key press %u %u\n", keycode, *modfield);
 	} else if (event_type == XCB_KEY_RELEASE) {
 		xcb_key_release_event_t *e = (xcb_key_release_event_t *) evt;
-		*from_root = (e->child == XCB_NONE);
 		xcb_keycode_t keycode = e->detail;
 		*modfield = e->state & ~modfield_from_keycode(keycode);
 		*keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
 		PRINTF("key release %u %u\n", keycode, *modfield);
 	} else if (event_type == XCB_BUTTON_PRESS) {
 		xcb_button_press_event_t *e = (xcb_button_press_event_t *) evt;
-		*from_root = (e->child == XCB_NONE);
 		*button = e->detail;
 		*modfield = e->state;
 		PRINTF("button press %u %u\n", *button, *modfield);
 	} else if (event_type == XCB_BUTTON_RELEASE) {
 		xcb_button_release_event_t *e = (xcb_button_release_event_t *) evt;
-		*from_root = (e->child == XCB_NONE);
 		*button = e->detail;
 		*modfield = e->state;
 		PRINTF("button release %u %u\n", *button, *modfield);
@@ -2659,27 +2655,19 @@ bool parse_chain(char *string, chain_t *chain)
 	uint8_t event_type = XCB_KEY_PRESS;
 	bool replay_event = false;
 	bool lock_chain = false;
-	bool from_root = false;
 	char *outer_advance;
 	char *inner_advance;
 	for (outer_advance = get_token(chord, ignored, string, LNK_SEP); chord[0] != '\0'; outer_advance = get_token(chord, ignored, outer_advance, LNK_SEP)) {
 		for (inner_advance = get_token(name, NULL, chord, SYM_SEP); name[0] != '\0'; inner_advance = get_token(name, NULL, inner_advance, SYM_SEP)) {
 			int offset = 0;
-			while (offset < (MAXLEN - 1) && !isalnum(name[offset]) && name[offset] != '_' && name[offset] != SEQ_BEGIN) {
-				switch (name[offset]) {
-					case RELEASE_PREFIX:
-						event_type = XCB_KEY_RELEASE;
-						break;
-					case MOTION_PREFIX:
-						event_type = XCB_MOTION_NOTIFY;
-						break;
-					case REPLAY_PREFIX:
-						replay_event = true;
-						break;
-					case ROOT_PREFIX:
-						from_root = true;
-						break;
-				}
+			if (name[0] == RELEASE_PREFIX) {
+				event_type = XCB_KEY_RELEASE;
+				offset++;
+			} else if (name[0] == MOTION_PREFIX) {
+				event_type = XCB_MOTION_NOTIFY;
+				offset++;
+			} else if (name[0] == REPLAY_PREFIX) {
+				replay_event = true;
 				offset++;
 			}
 			char *nm = name + offset;
@@ -2692,7 +2680,7 @@ bool parse_chain(char *string, chain_t *chain)
 			lock_chain = true;
 		if (button != XCB_NONE)
 			event_type = key_to_button(event_type);
-		chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event, lock_chain, from_root);
+		chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event, lock_chain);
 		add_chord(chain, c);
 		if (status_fifo != NULL)
 			snprintf(c->repr, sizeof(c->repr), "%s", chord);
@@ -2702,7 +2690,6 @@ bool parse_chain(char *string, chain_t *chain)
 		event_type = XCB_KEY_PRESS;
 		replay_event = false;
 		lock_chain = false;
-		from_root = false;
 	}
 	return true;
 }

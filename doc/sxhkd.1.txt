@@ -64,7 +64,7 @@ HOTKEY
     COMMAND
 
 HOTKEY     := CHORD_1 ; CHORD_2 ; … ; CHORD_n
-CHORD_i    := [MODIFIER_i][@|!|~|/]KEYSYM_i
+CHORD_i    := [MODIFIER_i][@|!|~]KEYSYM_i
 MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + … + MODIFIER_ik
 ----
 
@@ -78,19 +78,11 @@ When multiple chords are separated by semicolons, the hotkey is a chord chain: t
 
 The colon character can be used instead of the semicolon to indicate that the chord chain shall not be aborted when the chain tail is reached. In which case, the _Escape_ key can be used to manually abort the chain.
 
-The previously mentioned keysym prefixes have the following effects:
+If *@* is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
 
-*@*::
-	The command will be run on key release events.
+If *!* is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the _x_ and _y_ coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: _button1_, …, _button5_).
 
-*!*::
-	The command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the _x_ and _y_ coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: _button1_, …, _button5_).
-
-*~*::
-	The captured event will be replayed for the other clients.
-
-*/*::
-	The command will only be executed if the pointer is above the root window.
+If *~* is added at the beginning of the keysym, the captured event will be replayed for the other clients.
 
 Mouse hotkeys can be defined by using one of the following special keysym names: _button1_, _button2_, _button3_, …, _button24_.
 
