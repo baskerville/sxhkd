@@ -2448,10 +2448,17 @@ void process_hotkey(char *hotkey_string, char *command_string)
 	unsigned char num_same = 0;
 	chunk_t *hk_chunks = extract_chunks(hotkey_string);
 	chunk_t *cm_chunks = extract_chunks(command_string);
-	if (hk_chunks == NULL)
-		snprintf(hotkey, sizeof(hotkey), "%s", hotkey_string);
-	if (cm_chunks == NULL)
-		snprintf(command, sizeof(command), "%s", command_string);
+
+#define CHECKCHUNK(s, c) \
+	if (c->next == NULL && !c->sequence) { \
+		snprintf(s, sizeof(s), "%s", c->text); \
+		destroy_chunks(c); \
+		c = NULL; \
+	}
+	CHECKCHUNK(hotkey, hk_chunks)
+	CHECKCHUNK(command, cm_chunks)
+#undef CHECKCHUNK
+
 	render_next(hk_chunks, hotkey);
 	render_next(cm_chunks, command);
 
@@ -2615,12 +2622,7 @@ chunk_t *extract_chunks(char *s)
 		i++;
 	}
 	c->text[j] = '\0';
-	if (num_seq == 0) {
-		destroy_chunks(head);
-		return NULL;
-	} else {
-		return head;
-	}
+	return head;
 }
 
 chunk_t *make_chunk(void)
