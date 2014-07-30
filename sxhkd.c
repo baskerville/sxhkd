@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
 	unsigned int max_freq = 0;
 	motion_interval = 0;
 	last_motion_time = 0;
+	redir_fd = -1;
 
 	while ((opt = getopt(argc, argv, "vhnt:c:r:s:f:")) != (char)-1) {
 		switch (opt) {
