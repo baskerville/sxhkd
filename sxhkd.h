@@ -56,7 +56,7 @@ int num_extra_confs;
 int redir_fd;
 FILE *status_fifo;
 char progress[3 * MAXLEN];
-bool ignore_mapping;
+int mapping_count;
 int timeout;
 double motion_interval;
 xcb_timestamp_t last_motion_time;

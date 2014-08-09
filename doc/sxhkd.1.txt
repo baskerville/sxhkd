@@ -30,8 +30,8 @@ Options
 *-v*::
     Print the version information to standard output and exit.
 
-*-n*::
-    Ignore mapping notify events.
+*-m* _COUNT_::
+    Handle the first _COUNT_ mapping notify events.
 
 *-t* _TIMEOUT_::
     Timeout in seconds for the recording of chord chains.
