@@ -105,7 +105,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield)
 {
 	for (chord_t *c = chord; c != NULL; c = c->more)
-		if (c->event_type == event_type && c->keysym == keysym && c->button == button && c->modfield == modfield)
+		if (c->event_type == event_type && c->keysym == keysym && c->button == button && (c->modfield == XCB_MOD_MASK_ANY || c->modfield == modfield))
 			return true;
 	return false;
 }

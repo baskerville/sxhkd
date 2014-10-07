@@ -55,6 +55,8 @@ void grab_chord(chord_t *chord)
 void grab_key_button(xcb_keycode_t keycode, xcb_button_t button, uint16_t modfield)
 {
 	grab_key_button_checked(keycode, button, modfield);
+	if (modfield == XCB_MOD_MASK_ANY)
+		return;
 	if (num_lock != 0)
 		grab_key_button_checked(keycode, button, modfield | num_lock);
 	if (caps_lock != 0)

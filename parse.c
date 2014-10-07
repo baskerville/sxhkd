@@ -2755,6 +2755,9 @@ bool parse_modifier(char *name, uint16_t *modfield)
 	} else if (strcmp(name, "lock") == 0) {
 		*modfield |= XCB_MOD_MASK_LOCK;
 		return true;
+	} else if (strcmp(name, "any") == 0) {
+		*modfield |= XCB_MOD_MASK_ANY;
+		return true;
 	}
 	return false;
 }
