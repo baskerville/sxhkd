@@ -82,7 +82,7 @@ HOTKEY
     COMMAND
 
 HOTKEY     := CHORD_1 ; CHORD_2 ; … ; CHORD_n
-CHORD_i    := [MODIFIER_i][@|!|~]KEYSYM_i
+CHORD_i    := [MODIFIER_i] [@|!|~]KEYSYM_i
 MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + … + MODIFIER_ik
 ----
 
