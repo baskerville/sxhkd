@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 10/07/2014
+.\"      Date: 12/29/2014
 .\"    Manual: Sxhkd Manual
 .\"    Source: Sxhkd 0.5.4
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "10/07/2014" "Sxhkd 0\&.5\&.4" "Sxhkd Manual"
+.TH "SXHKD" "1" "12/29/2014" "Sxhkd 0\&.5\&.4" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -78,6 +78,21 @@ Output status information to the given FIFO\&.
 .RS 4
 Set the maximum frequency for motion events\&.
 .RE
+.SH "BEHAVIOR"
+.sp
+\fBsxhkd\fR is a daemon that listens to keyboard events and execute commands\&.
+.sp
+It reads its configuration file from \fB$XDG_CONFIG_HOME/sxhkd/sxhkdrc\fR by default, or from the given file if the \fB\-c\fR option is used\&.
+.sp
+Additionnal configuration files can be passed as arguments\&.
+.sp
+If \fBsxhkd\fR receives a \fISIGUSR1\fR signal, it will reload its configuration file\&.
+.sp
+The commands are executed via \fBSHELL\fR \fI\-c\fR \fBCOMMAND\fR (hence you can use environment variables)\&.
+.sp
+\fBSHELL\fR will be the content of the first defined environment variable in the following list: \fBSXHKD_SHELL\fR, \fBSHELL\fR\&.
+.sp
+If you have a non\-QWERTY keyboard or a non\-standard layout configuration, you should provide a \fICOUNT\fR of \fI1\fR to the \fB\-m\fR option or \fI\-1\fR (interpreted as infinity) if you constantly switch from one layout to the other (\fBsxhkd\fR ignores all mapping notify events by default because the majority of those events are pointless)\&.
 .SH "CONFIGURATION"
 .sp
 Each line of the configuration file is interpreted as so:
@@ -156,14 +171,6 @@ The hotkey and the command may contain sequences of the form \fI{STRING_1,\&...,
 In addition, the sequences can contain ranges of the form \fIA\fR\-\fIZ\fR where \fIA\fR and \fIZ\fR are alphanumeric characters\&.
 .sp
 The underscore character represents an empty sequence element\&.
-.sp
-What is actually executed is \fBSHELL\fR \fI\-c\fR \fBCOMMAND\fR, which means you can use environment variables in \fBCOMMAND\fR\&.
-.sp
-\fBSHELL\fR will be the content of the first defined environment variable in the following list: \fBSXHKD_SHELL\fR, \fBSHELL\fR\&.
-.sp
-If \fBsxhkd\fR receives a \fISIGUSR1\fR signal, it will reload its configuration file\&.
-.sp
-If no configuration file is specified via the \fI\-c\fR option, the following is used: \fB$XDG_CONFIG_HOME/sxhkd/sxhkdrc\fR\&.
 .SH "EXAMPLE BINDINGS"
 .sp
 .if n \{\

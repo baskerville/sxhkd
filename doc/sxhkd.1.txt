@@ -48,6 +48,24 @@ Options
 *-f* _FREQUENCY_::
     Set the maximum frequency for motion events.
 
+Behavior
+--------
+
+*sxhkd* is a daemon that listens to keyboard events and execute commands.
+
+It reads its configuration file from *$XDG_CONFIG_HOME/sxhkd/sxhkdrc* by default, or from the given file if the *-c* option is used.
+
+Additionnal configuration files can be passed as arguments.
+
+If *sxhkd* receives a _SIGUSR1_ signal, it will reload its configuration file.
+
+The commands are executed via *SHELL* _-c_ *COMMAND* (hence you can use environment variables).
+
+*SHELL* will be the content of the first defined environment variable in the following list: *SXHKD_SHELL*, *SHELL*.
+
+If you have a non-QWERTY keyboard or a non-standard layout configuration, you should provide a _COUNT_ of _1_ to the *-m* option or _-1_ (interpreted as infinity) if you constantly switch from one layout to the other (*sxhkd* ignores all mapping notify events by default because the majority of those events are pointless).
+
+
 Configuration
 -------------
 
@@ -92,13 +110,6 @@ In addition, the sequences can contain ranges of the form _A_-_Z_ where _A_ and 
 
 The underscore character represents an empty sequence element.
 
-What is actually executed is *SHELL* _-c_ *COMMAND*, which means you can use environment variables in *COMMAND*.
-
-*SHELL* will be the content of the first defined environment variable in the following list: *SXHKD_SHELL*, *SHELL*.
-
-If *sxhkd* receives a _SIGUSR1_ signal, it will reload its configuration file.
-
-If no configuration file is specified via the _-c_ option, the following is used: *$XDG_CONFIG_HOME/sxhkd/sxhkdrc*.
 
 Example Bindings
 ----------------
