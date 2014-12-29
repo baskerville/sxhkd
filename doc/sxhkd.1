@@ -216,6 +216,9 @@ super + {_,shift + }{h,j,k,l}
 super + o ; {e,w,m}
     {gvim,firefox,thunderbird}
 
+super + m : {h,j,k,l}
+    xdo move {\-x \-5,\-y +5,\-y \-5,\-x +5}
+
 super + alt + control + {h,j,k,l} ; {0\-9}
     bspc window \-e {left,down,up,right} 0\&.{0\-9}
 
