@@ -94,7 +94,9 @@ Hotkeys and commands can be spread across multiple lines by ending each partial 
 
 When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only be executed after receiving each chord of the chain in consecutive order.
 
-The colon character can be used instead of the semicolon to indicate that the chord chain shall not be aborted when the chain tail is reached. In which case, the _Escape_ key can be used to manually abort the chain.
+The colon character can be used instead of the semicolon to indicate that the chord chain shall not be aborted when the chain tail is reached.
+
+The _Escape_ key can be used to abort a chord chain.
 
 If *@* is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
 

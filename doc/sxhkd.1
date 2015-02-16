@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 12/29/2014
+.\"      Date: 02/16/2015
 .\"    Manual: Sxhkd Manual
 .\"    Source: Sxhkd 0.5.4
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "12/29/2014" "Sxhkd 0\&.5\&.4" "Sxhkd Manual"
+.TH "SXHKD" "1" "02/16/2015" "Sxhkd 0\&.5\&.4" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -156,7 +156,9 @@ Hotkeys and commands can be spread across multiple lines by ending each partial 
 .sp
 When multiple chords are separated by semicolons, the hotkey is a chord chain: the command will only be executed after receiving each chord of the chain in consecutive order\&.
 .sp
-The colon character can be used instead of the semicolon to indicate that the chord chain shall not be aborted when the chain tail is reached\&. In which case, the \fIEscape\fR key can be used to manually abort the chain\&.
+The colon character can be used instead of the semicolon to indicate that the chord chain shall not be aborted when the chain tail is reached\&.
+.sp
+The \fIEscape\fR key can be used to abort a chord chain\&.
 .sp
 If \fB@\fR is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events\&.
 .sp
