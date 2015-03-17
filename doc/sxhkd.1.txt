@@ -81,9 +81,9 @@ General syntax:
 HOTKEY
     COMMAND
 
-HOTKEY     := CHORD_1 ; CHORD_2 ; … ; CHORD_n
-CHORD_i    := [MODIFIER_i] [@|!|~]KEYSYM_i
-MODIFIER_i := MODIFIER_i1 + MODIFIER_i2 + … + MODIFIER_ik
+HOTKEY      := CHORD_1 ; CHORD_2 ; … ; CHORD_n
+CHORD_i     := [MODIFIERS_i +] [@|!|~]KEYSYM_i
+MODIFIERS_i := MODIFIER_i1 + MODIFIER_i2 + … + MODIFIER_ik
 ----
 
 The valid modifier names are: _super_, _hyper_, _meta_, _alt_, _control_, _ctrl_, _shift_, _mode_switch_, _lock_, _mod1_, _mod2_, _mod3_, _mod4_, _mod5_ and _any_.
