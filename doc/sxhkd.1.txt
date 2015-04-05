@@ -42,6 +42,12 @@ Options
 *-r* _REDIR_FILE_::
     Redirect the commands output to the given file.
 
+*-o* _MOTION_SOCKET_::
+    Write motion messages to the given SOCKET.
+
+*-g* _MOTION_MSG_TPL_::
+    Motion messages template.
+
 *-s* _STATUS_FIFO_::
     Output status information to the given FIFO.
 
@@ -100,8 +106,6 @@ The _Escape_ key can be used to abort a chord chain.
 
 If *@* is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events.
 
-If *!* is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the _x_ and _y_ coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: _button1_, …, _button5_).
-
 If *~* is added at the beginning of the keysym, the captured event will be replayed for the other clients.
 
 Mouse hotkeys can be defined by using one of the following special keysym names: _button1_, _button2_, _button3_, …, _button24_.
@@ -144,8 +148,8 @@ super + {alt,ctrl,alt + ctrl} + XF86Eject
 super + button{1-3}
     bspc pointer -g {move,resize_side,resize_corner}
 
-super + !button{1-3}
-    bspc pointer -t %i %i
+super + @button{1-3}
+    bspc pointer -u
 
 super + {_,shift + }{h,j,k,l}
     bspc window {-f,-s} {left,down,up,right}

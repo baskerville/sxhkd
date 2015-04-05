@@ -2661,9 +2661,6 @@ bool parse_chain(char *string, chain_t *chain)
 			if (name[0] == RELEASE_PREFIX) {
 				event_type = XCB_KEY_RELEASE;
 				offset++;
-			} else if (name[0] == MOTION_PREFIX) {
-				event_type = XCB_MOTION_NOTIFY;
-				offset++;
 			} else if (name[0] == REPLAY_PREFIX) {
 				replay_event = true;
 				offset++;

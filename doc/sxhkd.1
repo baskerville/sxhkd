@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 03/20/2015
+.\"      Date: 04/05/2015
 .\"    Manual: Sxhkd Manual
 .\"    Source: Sxhkd 0.5.5
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "03/20/2015" "Sxhkd 0\&.5\&.5" "Sxhkd Manual"
+.TH "SXHKD" "1" "04/05/2015" "Sxhkd 0\&.5\&.5" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -67,6 +67,16 @@ Read the main configuration from the given file\&.
 \fB\-r\fR \fIREDIR_FILE\fR
 .RS 4
 Redirect the commands output to the given file\&.
+.RE
+.PP
+\fB\-o\fR \fIMOTION_SOCKET\fR
+.RS 4
+Write motion messages to the given SOCKET\&.
+.RE
+.PP
+\fB\-g\fR \fIMOTION_MSG_TPL\fR
+.RS 4
+Motion messages template\&.
 .RE
 .PP
 \fB\-s\fR \fISTATUS_FIFO\fR
@@ -162,8 +172,6 @@ The \fIEscape\fR key can be used to abort a chord chain\&.
 .sp
 If \fB@\fR is added at the beginning of the keysym, the command will be run on key release events, otherwise on key press events\&.
 .sp
-If \fB!\fR is added at the beginning of the keysym, the command will be run on motion notify events and must contain two integer conversion specifications which will be replaced by the \fIx\fR and \fIy\fR coordinates of the pointer relative to the root window referential (the only valid button keysyms for this type of hotkeys are: \fIbutton1\fR, \&..., \fIbutton5\fR)\&.
-.sp
 If \fB~\fR is added at the beginning of the keysym, the captured event will be replayed for the other clients\&.
 .sp
 Mouse hotkeys can be defined by using one of the following special keysym names: \fIbutton1\fR, \fIbutton2\fR, \fIbutton3\fR, \&..., \fIbutton24\fR\&.
@@ -206,8 +214,8 @@ super + {alt,ctrl,alt + ctrl} + XF86Eject
 super + button{1\-3}
     bspc pointer \-g {move,resize_side,resize_corner}
 
-super + !button{1\-3}
-    bspc pointer \-t %i %i
+super + @button{1\-3}
+    bspc pointer \-u
 
 super + {_,shift + }{h,j,k,l}
     bspc window {\-f,\-s} {left,down,up,right}

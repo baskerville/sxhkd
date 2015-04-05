@@ -28,6 +28,7 @@
 #include <xcb/xcb_keysyms.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <sys/un.h>
 #include "types.h"
 #include "helpers.h"
 
@@ -35,6 +36,9 @@
 #define SXHKD_SHELL_ENV  "SXHKD_SHELL"
 #define SHELL_ENV        "SHELL"
 #define CONFIG_PATH      "sxhkd/sxhkdrc"
+#define SOCKET_ENV       "BSPWM_SOCKET"
+#define SOCKET_PATH_TPL  "/tmp/bspwm%s_%i_%i-socket"
+#define MOTION_MSG_TPL   "pointer -t X Y"
 #define HOTKEY_PREFIX    'H'
 #define COMMAND_PREFIX   'C'
 #define TIMEOUT_PREFIX   'T'
@@ -51,6 +55,8 @@ char **extra_confs;
 int num_extra_confs;
 int redir_fd;
 FILE *status_fifo;
+struct sockaddr_un sock_address;
+char motion_msg_tpl[MAXLEN];
 char progress[3 * MAXLEN];
 int mapping_count;
 int timeout;
@@ -66,7 +72,7 @@ uint16_t caps_lock;
 uint16_t scroll_lock;
 
 void key_button_event(xcb_generic_event_t *evt, uint8_t event_type);
-void motion_notify(xcb_generic_event_t *evt, uint8_t event_type);
+void motion_notify(xcb_generic_event_t *evt);
 void mapping_notify(xcb_generic_event_t *evt);
 void setup(void);
 void cleanup(void);

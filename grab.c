@@ -75,7 +75,7 @@ void grab_key_button_checked(xcb_keycode_t keycode, xcb_button_t button, uint16_
 	if (button == XCB_NONE)
 		err = xcb_request_check(dpy, xcb_grab_key_checked(dpy, true, root, modfield, keycode, XCB_GRAB_MODE_ASYNC, XCB_GRAB_MODE_SYNC));
 	else
-		err = xcb_request_check(dpy, xcb_grab_button_checked(dpy, true, root, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_POINTER_MOTION, XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, button, modfield));
+		err = xcb_request_check(dpy, xcb_grab_button_checked(dpy, true, root, XCB_EVENT_MASK_BUTTON_PRESS | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_BUTTON_MOTION, XCB_GRAB_MODE_SYNC, XCB_GRAB_MODE_ASYNC, XCB_NONE, XCB_NONE, button, modfield));
 	unsigned int value = (button == XCB_NONE ? keycode : button);
 	char *type = (button == XCB_NONE ? "key" : "button");
 	if (err != NULL) {

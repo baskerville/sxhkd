@@ -28,7 +28,6 @@
 #include "sxhkd.h"
 
 #define RELEASE_PREFIX       '@'
-#define MOTION_PREFIX        '!'
 #define REPLAY_PREFIX        '~'
 #define START_COMMENT        '#'
 #define MAGIC_INHIBIT        '\\'
