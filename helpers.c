@@ -50,29 +50,38 @@ void err(char *fmt, ...)
 	exit(EXIT_FAILURE);
 }
 
-void spawn(char *cmd[])
+void run(char *command, bool sync)
+{
+	char *cmd[] = {shell, "-c", command, NULL};
+	spawn(cmd, sync);
+}
+
+void spawn(char *cmd[], bool sync)
 {
 	if (fork() == 0) {
 		if (dpy != NULL)
 			close(xcb_get_file_descriptor(dpy));
-		if (fork() == 0) {
-			setsid();
-			if (redir_fd != -1) {
-				dup2(redir_fd, STDOUT_FILENO);
-				dup2(redir_fd, STDERR_FILENO);
+		if (sync) {
+			execute(cmd);
+		} else {
+			if (fork() == 0) {
+				execute(cmd);
 			}
-			execvp(cmd[0], cmd);
-			err("Spawning failed.\n");
+			exit(EXIT_SUCCESS);
 		}
-		exit(EXIT_SUCCESS);
 	}
 	wait(NULL);
 }
 
-void run(char *command)
+void execute(char *cmd[])
 {
-	char *cmd[] = {shell, "-c", command, NULL};
-	spawn(cmd);
+	setsid();
+	if (redir_fd != -1) {
+		dup2(redir_fd, STDOUT_FILENO);
+		dup2(redir_fd, STDERR_FILENO);
+	}
+	execvp(cmd[0], cmd);
+	err("Spawning failed.\n");
 }
 
 char *lgraph(char *s)

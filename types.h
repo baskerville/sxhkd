@@ -61,6 +61,7 @@ typedef struct hotkey_t hotkey_t;
 struct hotkey_t {
 	chain_t *chain;
 	char command[2 * MAXLEN];
+	bool sync;
 	cycle_t *cycle;
 	hotkey_t *next;
 	hotkey_t *prev;

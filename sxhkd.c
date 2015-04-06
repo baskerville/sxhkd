@@ -233,7 +233,7 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 	if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
 		hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
 		if (hk != NULL) {
-			run(hk->command);
+			run(hk->command, hk->sync);
 			if (status_fifo != NULL)
 				put_status(COMMAND_PREFIX, hk->command);
 		}
