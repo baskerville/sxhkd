@@ -193,8 +193,12 @@ hotkey_t *make_hotkey(chain_t *chain, char *command)
 {
 	hotkey_t *hk = malloc(sizeof(hotkey_t));
 	hk->chain = chain;
+	hk->sync = false;
+	if (command[0] == SYNCHRONOUS_CHAR) {
+		command = lgraph(command+1);
+		hk->sync = true;
+	}
 	snprintf(hk->command, sizeof(hk->command), "%s", command);
-	hk->sync = (command[0] == ';');
 	hk->cycle = NULL;
 	hk->next = hk->prev = NULL;
 	return hk;

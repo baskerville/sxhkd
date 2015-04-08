@@ -32,6 +32,7 @@
 #define KEYSYMS_PER_KEYCODE  4
 #define MOD_STATE_FIELD      255
 #define ESCAPE_KEYSYM        0xff1b
+#define SYNCHRONOUS_CHAR     ';'
 
 typedef struct chord_t chord_t;
 struct chord_t {
