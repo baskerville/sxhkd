@@ -33,7 +33,7 @@ $(NAME): $(OBJ)
 
 install:
 	mkdir -p "$(DESTDIR)$(BINPREFIX)"
-	cp -p $(NAME) "$(DESTDIR)$(BINPREFIX)"
+	cp -pf $(NAME) "$(DESTDIR)$(BINPREFIX)"
 	mkdir -p "$(DESTDIR)$(MANPREFIX)"/man1
 	cp -p doc/$(NAME).1 "$(DESTDIR)$(MANPREFIX)"/man1
 
