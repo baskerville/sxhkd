@@ -61,7 +61,7 @@ Behavior
 
 It reads its configuration file from *$XDG_CONFIG_HOME/sxhkd/sxhkdrc* by default, or from the given file if the *-c* option is used.
 
-Additionnal configuration files can be passed as arguments.
+Additional configuration files can be passed as arguments.
 
 If *sxhkd* receives a _SIGUSR1_ signal, it will reload its configuration file.
 
