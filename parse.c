@@ -2817,7 +2817,7 @@ int16_t modfield_from_keycode(xcb_keycode_t keycode)
 	uint16_t modfield = 0;
 	xcb_keycode_t *mod_keycodes = NULL;
 	xcb_get_modifier_mapping_reply_t *reply = NULL;
-	if ((reply = xcb_get_modifier_mapping_reply(dpy, xcb_get_modifier_mapping(dpy), NULL)) != NULL) {
+	if ((reply = xcb_get_modifier_mapping_reply(dpy, xcb_get_modifier_mapping(dpy), NULL)) != NULL && reply->keycodes_per_modifier > 0) {
 		if ((mod_keycodes = xcb_get_modifier_mapping_keycodes(reply)) != NULL) {
 			unsigned int num_mod = xcb_get_modifier_mapping_keycodes_length(reply) / reply->keycodes_per_modifier;
 			for (unsigned int i = 0; i < num_mod; i++) {
