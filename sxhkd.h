@@ -64,7 +64,7 @@ double motion_interval;
 xcb_timestamp_t last_motion_time;
 
 hotkey_t *hotkeys_head, *hotkeys_tail;
-bool running, reload, bell, chained, locked;
+bool running, grabbed, toggle_grab, reload, bell, chained, locked;
 chord_t *escape_chord;
 
 uint16_t num_lock;
@@ -77,6 +77,7 @@ void mapping_notify(xcb_generic_event_t *evt);
 void setup(void);
 void cleanup(void);
 void reload_cmd(void);
+void toggle_grab_cmd(void);
 void hold(int sig);
 void put_status(char c, const char *s);
 

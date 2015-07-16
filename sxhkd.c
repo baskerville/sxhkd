@@ -46,6 +46,7 @@ int main(int argc, char *argv[])
 	config_path = NULL;
 	mapping_count = 0;
 	timeout = TIMEOUT;
+	grabbed = false;
 	sock_address.sun_family = AF_UNIX;
 	sock_address.sun_path[0] = 0;
 	snprintf(motion_msg_tpl, sizeof(motion_msg_tpl), "%s", MOTION_MSG_TPL);
@@ -140,6 +141,7 @@ int main(int argc, char *argv[])
 	signal(SIGHUP, hold);
 	signal(SIGTERM, hold);
 	signal(SIGUSR1, hold);
+	signal(SIGUSR2, hold);
 	signal(SIGALRM, hold);
 
 	setup();
@@ -156,7 +158,7 @@ int main(int argc, char *argv[])
 
 	fd_set descriptors;
 
-	reload = bell = chained = locked = false;
+	reload = toggle_grab = bell = chained = locked = false;
 	running = true;
 
 	xcb_flush(dpy);
@@ -193,6 +195,12 @@ int main(int argc, char *argv[])
 			signal(SIGUSR1, hold);
 			reload_cmd();
 			reload = false;
+		}
+
+		if (toggle_grab) {
+			signal(SIGUSR2, hold);
+			toggle_grab_cmd();
+			toggle_grab = false;
 		}
 
 		if (bell) {
@@ -352,12 +360,24 @@ void reload_cmd(void)
 	grab();
 }
 
+void toggle_grab_cmd(void)
+{
+	PUTS("toggle grab");
+	if (grabbed) {
+		ungrab();
+	} else {
+		grab();
+	}
+}
+
 void hold(int sig)
 {
 	if (sig == SIGHUP || sig == SIGINT || sig == SIGTERM)
 		running = false;
 	else if (sig == SIGUSR1)
 		reload = true;
+	else if (sig == SIGUSR2)
+		toggle_grab = true;
 	else if (sig == SIGALRM)
 		bell = true;
 }

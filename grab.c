@@ -28,8 +28,11 @@
 
 void grab(void)
 {
+	PUTS("grab");
 	for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next)
 		grab_chord(hk->chain->head);
+	xcb_flush(dpy);
+	grabbed = true;
 }
 
 void grab_chord(chord_t *chord)
@@ -95,4 +98,6 @@ void ungrab(void)
 	PUTS("ungrab");
 	xcb_ungrab_key(dpy, XCB_GRAB_ANY, root, XCB_BUTTON_MASK_ANY);
 	xcb_ungrab_button(dpy, XCB_BUTTON_INDEX_ANY, root, XCB_MOD_MASK_ANY);
+	xcb_flush(dpy);
+	grabbed = false;
 }
