@@ -28,9 +28,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <ctype.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include "sxhkd.h"
-#include "helpers.h"
 
 void warn(char *fmt, ...)
 {
