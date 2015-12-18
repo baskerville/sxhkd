@@ -1,36 +1,29 @@
 NAME    = sxhkd
-VERSION = 0.5.5
+VERSION = $(shell git describe || cat VERSION)
 
-CC      ?= gcc
-LIBS     = -lm -lxcb -lxcb-keysyms
-CFLAGS  += -std=c99 -pedantic -Wall -Wextra -I$(PREFIX)/include
-CFLAGS  += -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
-LDFLAGS += -L$(PREFIX)/lib
+CPPFLAGS += -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
+CFLAGS   += -std=c99 -pedantic -Wall -Wextra
+LDLIBS    = -lxcb -lxcb-keysyms
 
 PREFIX    ?= /usr/local
-BINPREFIX  = $(PREFIX)/bin
-MANPREFIX  = $(PREFIX)/share/man
-DOCPREFIX  = $(PREFIX)/share/doc/$(NAME)
+BINPREFIX ?= $(PREFIX)/bin
+MANPREFIX ?= $(PREFIX)/share/man
+DOCPREFIX ?= $(PREFIX)/share/doc/$(NAME)
 
 SRC = $(wildcard *.c)
 OBJ = $(SRC:.c=.o)
 
-all: CFLAGS  += -Os
-all: LDFLAGS += -s
 all: $(NAME)
 
-debug: CFLAGS += -O0 -g -DDEBUG
+debug: CFLAGS += -O0 -g
+debug: CPPFLAGS += -DDEBUG
 debug: $(NAME)
 
 include Sourcedeps
 
 $(OBJ): Makefile
 
-.c.o:
-	$(CC) $(CFLAGS) $(OPTFLAGS) -c -o $@ $<
-
 $(NAME): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(LDFLAGS) $(LIBS)
 
 install:
 	mkdir -p "$(DESTDIR)$(BINPREFIX)"
