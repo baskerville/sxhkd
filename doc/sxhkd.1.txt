@@ -172,6 +172,13 @@ super + alt + p
     bspc config focus_follows_pointer {true,false}
 ----
 
+Requirements
+------------
+To build sxhkd you need to have xcb and xcb utils installed.
+In Ubuntu/Debian run:
+
+sudo apt-get install xcb libxcb-util0-dev libxcb-keysyms1-dev
+
 Author
 ------
 
