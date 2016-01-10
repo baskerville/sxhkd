@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 12/24/2015
+.\"      Date: 01/10/2016
 .\"    Manual: Sxhkd Manual
-.\"    Source: Sxhkd 0.5.5-15-gec16f05
+.\"    Source: Sxhkd 0.5.5-16-g5693b4f
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "12/24/2015" "Sxhkd 0\&.5\&.5\-15\-gec16f05" "Sxhkd Manual"
+.TH "SXHKD" "1" "01/10/2016" "Sxhkd 0\&.5\&.5\-16\-g5693b4f" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -202,7 +202,7 @@ XF86LaunchB
     xdotool selectwindow | xsel \-bi
 
 super + {h,j,k,l}
-    bspc window \-f {left,down,up,right}
+    bspc node \-f {west,south,north,east}
 
 super + alt + {0\-9}
     mpc \-q seek {0\-9}0%
@@ -220,7 +220,7 @@ super + @button{1\-3}
     bspc pointer \-u
 
 super + {_,shift + }{h,j,k,l}
-    bspc window {\-f,\-s} {left,down,up,right}
+    bspc node \-{f,s} {west,south,north,east}
 
 {_,shift + ,super + }XF86MonBrightness{Down,Up}
     bright {\-1,\-10,min,+1,+10,max}
@@ -232,7 +232,7 @@ super + m : {h,j,k,l}
     xdo move {\-x \-5,\-y +5,\-y \-5,\-x +5}
 
 super + alt + control + {h,j,k,l} ; {0\-9}
-    bspc window \-e {left,down,up,right} 0\&.{0\-9}
+    bspc node @{west,south,north,east} \-r 0\&.{0\-9}
 
 super + alt + p
     bspc config focus_follows_pointer {true,false}
