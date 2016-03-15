@@ -1,5 +1,5 @@
-NAME    = sxhkd
-VERSION = $(shell git describe || cat VERSION)
+NAME     = sxhkd
+VERSION := $(shell git describe 2> /dev/null || cat VERSION)
 
 CPPFLAGS += -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
 CFLAGS   += -std=c99 -pedantic -Wall -Wextra
