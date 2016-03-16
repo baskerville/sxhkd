@@ -1,5 +1,6 @@
 NAME     = sxhkd
-VERSION := $(shell git describe 2> /dev/null || cat VERSION)
+VERCMD  ?= git describe 2> /dev/null
+VERSION := $(shell $(VERCMD) || cat VERSION)
 
 CPPFLAGS += -D_POSIX_C_SOURCE=200112L -DVERSION=\"$(VERSION)\"
 CFLAGS   += -std=c99 -pedantic -Wall -Wextra
@@ -10,8 +11,8 @@ BINPREFIX ?= $(PREFIX)/bin
 MANPREFIX ?= $(PREFIX)/share/man
 DOCPREFIX ?= $(PREFIX)/share/doc/$(NAME)
 
-SRC = $(wildcard *.c)
-OBJ = $(SRC:.c=.o)
+SRC := $(wildcard *.c)
+OBJ := $(SRC:.c=.o)
 
 all: $(NAME)
 
