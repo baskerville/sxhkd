@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 03/15/2016
+.\"      Date: 04/07/2016
 .\"    Manual: Sxhkd Manual
-.\"    Source: Sxhkd 0.5.6
+.\"    Source: Sxhkd 0.5.6-1-gd1214b9
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "03/15/2016" "Sxhkd 0\&.5\&.6" "Sxhkd Manual"
+.TH "SXHKD" "1" "04/07/2016" "Sxhkd 0\&.5\&.6\-1\-gd1214b9" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -69,24 +69,9 @@ Read the main configuration from the given file\&.
 Redirect the commands output to the given file\&.
 .RE
 .PP
-\fB\-o\fR \fIMOTION_SOCKET\fR
-.RS 4
-Write motion messages to the given SOCKET\&.
-.RE
-.PP
-\fB\-g\fR \fIMOTION_MSG_TPL\fR
-.RS 4
-Motion messages template\&.
-.RE
-.PP
 \fB\-s\fR \fISTATUS_FIFO\fR
 .RS 4
 Output status information to the given FIFO\&.
-.RE
-.PP
-\fB\-f\fR \fIFREQUENCY\fR
-.RS 4
-Set the maximum frequency for motion events\&.
 .RE
 .SH "BEHAVIOR"
 .sp
@@ -176,7 +161,7 @@ If \fB@\fR is added at the beginning of the keysym, the command will be run on k
 .sp
 If \fB~\fR is added at the beginning of the keysym, the captured event will be replayed for the other clients\&.
 .sp
-Mouse hotkeys can be defined by using one of the following special keysym names: \fIbutton1\fR, \fIbutton2\fR, \fIbutton3\fR, \&..., \fIbutton24\fR\&.
+Pointer hotkeys can be defined by using one of the following special keysym names: \fIbutton1\fR, \fIbutton2\fR, \fIbutton3\fR, \&..., \fIbutton24\fR\&.
 .sp
 The hotkey and the command may contain sequences of the form \fI{STRING_1,\&...,STRING_N}\fR\&.
 .sp
@@ -210,15 +195,6 @@ super + alt + {0\-9}
 super + {alt,ctrl,alt + ctrl} + XF86Eject
     sudo systemctl {suspend,reboot,poweroff}
 
-~button1
-    bspc pointer \-g focus
-
-super + button{1\-3}
-    ; bspc pointer \-g {move,resize_side,resize_corner}
-
-super + @button{1\-3}
-    bspc pointer \-u
-
 super + {_,shift + }{h,j,k,l}
     bspc node \-{f,s} {west,south,north,east}
 
@@ -227,9 +203,6 @@ super + {_,shift + }{h,j,k,l}
 
 super + o ; {e,w,m}
     {gvim,firefox,thunderbird}
-
-super + m : {h,j,k,l}
-    xdo move {\-x \-5,\-y +5,\-y \-5,\-x +5}
 
 super + alt + control + {h,j,k,l} ; {0\-9}
     bspc node @{west,south,north,east} \-r 0\&.{0\-9}

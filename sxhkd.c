@@ -29,7 +29,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
-#include <sys/socket.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -40,28 +39,21 @@ int main(int argc, char *argv[])
 {
 	char opt;
 	char *fifo_path = NULL;
-	char *socket_path = NULL;
 	status_fifo = NULL;
 	config_path = NULL;
 	mapping_count = 0;
 	timeout = TIMEOUT;
 	grabbed = false;
-	sock_address.sun_family = AF_UNIX;
-	sock_address.sun_path[0] = 0;
-	snprintf(motion_msg_tpl, sizeof(motion_msg_tpl), "%s", MOTION_MSG_TPL);
-	unsigned int max_freq = 0;
-	motion_interval = 0;
-	last_motion_time = 0;
 	redir_fd = -1;
 
-	while ((opt = getopt(argc, argv, "vhm:t:c:r:s:f:o:g:")) != (char)-1) {
+	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:")) != (char)-1) {
 		switch (opt) {
 			case 'v':
 				printf("%s\n", VERSION);
 				exit(EXIT_SUCCESS);
 				break;
 			case 'h':
-				printf("sxhkd [-h|-v|-m COUNT|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO|-o MOTION_SOCKET|-g MOTION_MSG_TPL] [EXTRA_CONFIG ...]\n");
+				printf("sxhkd [-h|-v|-m COUNT|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO] [EXTRA_CONFIG ...]\n");
 				exit(EXIT_SUCCESS);
 				break;
 			case 'm':
@@ -82,16 +74,6 @@ int main(int argc, char *argv[])
 			case 's':
 				fifo_path = optarg;
 				break;
-			case 'o':
-				socket_path = optarg;
-				break;
-			case 'g':
-				snprintf(motion_msg_tpl, sizeof(motion_msg_tpl), "%s", optarg);
-				break;
-			case 'f':
-				if (sscanf(optarg, "%u", &max_freq) != 1)
-					warn("Can't parse maximum pointer frequency.\n");
-				break;
 		}
 	}
 
@@ -108,23 +90,6 @@ int main(int argc, char *argv[])
 		snprintf(config_file, sizeof(config_file), "%s", config_path);
 	}
 
-	if (socket_path == NULL) {
-		socket_path = getenv(SOCKET_ENV);
-	}
-
-	if (socket_path == NULL) {
-		char *host = NULL;
-		int dn = 0, sn = 0;
-		if (xcb_parse_display(NULL, &host, &dn, &sn) != 0) {
-			snprintf(sock_address.sun_path, sizeof(sock_address.sun_path), SOCKET_PATH_TPL, host, dn, sn);
-		} else {
-			warn("Failed to set motion socket address.");
-		}
-		free(host);
-	} else {
-		snprintf(sock_address.sun_path, sizeof(sock_address.sun_path), "%s", socket_path);
-	}
-
 	if (fifo_path != NULL) {
 		int fifo_fd = open(fifo_path, O_RDWR | O_NONBLOCK);
 		if (fifo_fd != -1)
@@ -132,9 +97,6 @@ int main(int argc, char *argv[])
 		else
 			warn("Couldn't open status fifo.\n");
 	}
-
-	if (max_freq != 0)
-		motion_interval = 1000.0 / max_freq;
 
 	signal(SIGINT, hold);
 	signal(SIGHUP, hold);
@@ -175,9 +137,6 @@ int main(int argc, char *argv[])
 					case XCB_BUTTON_PRESS:
 					case XCB_BUTTON_RELEASE:
 						key_button_event(evt, event_type);
-						break;
-					case XCB_MOTION_NOTIFY:
-						motion_notify(evt);
 						break;
 					case XCB_MAPPING_NOTIFY:
 						mapping_notify(evt);
@@ -262,42 +221,6 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 			break;
 	}
 	xcb_flush(dpy);
-}
-
-void motion_notify(xcb_generic_event_t *evt)
-{
-	xcb_motion_notify_event_t *e = (xcb_motion_notify_event_t *) evt;
-	PRINTF("motion notify %X %X %u %i %i\n", e->child, e->detail, e->state, e->root_x, e->root_y);
-	if (motion_interval > 0 && (e->time - last_motion_time) < motion_interval)
-		return;
-	last_motion_time = e->time;
-	char msg[MAXLEN];
-	int fd = socket(AF_UNIX, SOCK_STREAM, 0);
-	if (fd == -1) {
-		return;
-	}
-	if (connect(fd, (struct sockaddr *) &sock_address, sizeof(sock_address)) == -1) {
-		close(fd);
-		return;
-	}
-	int len = sizeof(msg), i = 0;
-	for (int j = 0, c = motion_msg_tpl[j]; c && i < len; j++, c = motion_msg_tpl[j]) {
-		if (c == ' ') {
-			msg[i++] = 0;
-		} else if (c == 'X') {
-			i += snprintf(msg+i, len-i, "%i", e->root_x);
-		} else if (c == 'Y') {
-			i += snprintf(msg+i, len-i, "%i", e->root_y);
-		} else {
-			msg[i++] = c;
-		}
-	}
-	if (i >= len) {
-		i--;
-	}
-	msg[i] = 0;
-	send(fd, msg, i+1, 0);
-	close(fd);
 }
 
 void mapping_notify(xcb_generic_event_t *evt)
