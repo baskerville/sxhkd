@@ -37,7 +37,7 @@
 
 int main(int argc, char *argv[])
 {
-	char opt;
+	int opt;
 	char *fifo_path = NULL;
 	status_fifo = NULL;
 	config_path = NULL;
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 	grabbed = false;
 	redir_fd = -1;
 
-	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:")) != (char)-1) {
+	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:")) != -1) {
 		switch (opt) {
 			case 'v':
 				printf("%s\n", VERSION);
