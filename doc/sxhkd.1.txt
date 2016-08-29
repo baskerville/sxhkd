@@ -152,6 +152,12 @@ super + alt + p
     bspc config focus_follows_pointer {true,false}
 ----
 
+Vim plugin
+----------
+
+If you use vim for editing sxhkd configuration, you might be interested in
+special plugin: [sxhkd-vim](https://github.com/kovetskiy/sxhkd-vim)
+
 Author
 ------
 
