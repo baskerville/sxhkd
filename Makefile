@@ -40,7 +40,7 @@ uninstall:
 	rm -rf "$(DESTDIR)$(DOCPREFIX)"
 
 doc:
-	a2x -v -d manpage -f manpage -a revnumber=$(VERSION) doc/$(NAME).1.txt
+	a2x -v -d manpage -f manpage -a revnumber=$(VERSION) doc/$(NAME).1.asciidoc
 
 clean:
 	rm -f $(OBJ) $(NAME)

@@ -1,13 +1,13 @@
 '\" t
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
-.\" Generator: DocBook XSL Stylesheets v1.78.1 <http://docbook.sf.net/>
-.\"      Date: 04/07/2016
+.\" Generator: DocBook XSL Stylesheets v1.79.1 <http://docbook.sf.net/>
+.\"      Date: 08/29/2016
 .\"    Manual: Sxhkd Manual
-.\"    Source: Sxhkd 0.5.6-1-gd1214b9
+.\"    Source: Sxhkd 0.5.6-5-g2050470
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "04/07/2016" "Sxhkd 0\&.5\&.6\-1\-gd1214b9" "Sxhkd Manual"
+.TH "SXHKD" "1" "08/29/2016" "Sxhkd 0\&.5\&.6\-5\-g2050470" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -168,51 +168,6 @@ The hotkey and the command may contain sequences of the form \fI{STRING_1,\&...,
 In addition, the sequences can contain ranges of the form \fIA\fR\-\fIZ\fR where \fIA\fR and \fIZ\fR are alphanumeric characters\&.
 .sp
 The underscore character represents an empty sequence element\&.
-.SH "EXAMPLE BINDINGS"
-.sp
-.if n \{\
-.RS 4
-.\}
-.nf
-XF86Audio{Prev,Next}
-    mpc \-q {prev,next}
-
-@XF86LaunchA
-    scrot \-s \-e \*(Aqimage_viewer $f\*(Aq
-
-super + shift + equal
-    sxiv \-rt "$HOME/image"
-
-XF86LaunchB
-    xdotool selectwindow | xsel \-bi
-
-super + {h,j,k,l}
-    bspc node \-f {west,south,north,east}
-
-super + alt + {0\-9}
-    mpc \-q seek {0\-9}0%
-
-super + {alt,ctrl,alt + ctrl} + XF86Eject
-    sudo systemctl {suspend,reboot,poweroff}
-
-super + {_,shift + }{h,j,k,l}
-    bspc node \-{f,s} {west,south,north,east}
-
-{_,shift + ,super + }XF86MonBrightness{Down,Up}
-    bright {\-1,\-10,min,+1,+10,max}
-
-super + o ; {e,w,m}
-    {gvim,firefox,thunderbird}
-
-super + alt + control + {h,j,k,l} ; {0\-9}
-    bspc node @{west,south,north,east} \-r 0\&.{0\-9}
-
-super + alt + p
-    bspc config focus_follows_pointer {true,false}
-.fi
-.if n \{\
-.RE
-.\}
 .SH "AUTHOR"
 .sp
 Bastien Dejean <nihilhill at gmail\&.com>
