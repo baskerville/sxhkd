@@ -31,14 +31,16 @@
 #include "types.h"
 #include "helpers.h"
 
-#define CONFIG_HOME_ENV  "XDG_CONFIG_HOME"
-#define SXHKD_SHELL_ENV  "SXHKD_SHELL"
-#define SHELL_ENV        "SHELL"
-#define CONFIG_PATH      "sxhkd/sxhkdrc"
-#define HOTKEY_PREFIX    'H'
-#define COMMAND_PREFIX   'C'
-#define TIMEOUT_PREFIX   'T'
-#define TIMEOUT          3
+#define CONFIG_HOME_ENV     "XDG_CONFIG_HOME"
+#define SXHKD_SHELL_ENV     "SXHKD_SHELL"
+#define SHELL_ENV           "SHELL"
+#define CONFIG_PATH         "sxhkd/sxhkdrc"
+#define HOTKEY_PREFIX       'H'
+#define COMMAND_PREFIX      'C'
+#define BEGIN_CHAIN_PREFIX  'B'
+#define END_CHAIN_PREFIX    'E'
+#define TIMEOUT_PREFIX      'T'
+#define TIMEOUT              3
 
 xcb_connection_t *dpy;
 xcb_window_t root;

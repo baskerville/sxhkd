@@ -93,10 +93,11 @@ int main(int argc, char *argv[])
 
 	if (fifo_path != NULL) {
 		int fifo_fd = open(fifo_path, O_RDWR | O_NONBLOCK);
-		if (fifo_fd != -1)
+		if (fifo_fd != -1) {
 			status_fifo = fdopen(fifo_fd, "w");
-		else
+		} else {
 			warn("Couldn't open status fifo.\n");
+		}
 	}
 
 	signal(SIGINT, hold);
@@ -164,9 +165,8 @@ int main(int argc, char *argv[])
 
 		if (bell) {
 			signal(SIGALRM, hold);
+			put_status(TIMEOUT_PREFIX, "Timeout reached");
 			abort_chain();
-			if (status_fifo != NULL)
-				put_status(TIMEOUT_PREFIX, "Timeout reached");
 			bell = false;
 		}
 
@@ -176,10 +176,14 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	if (redir_fd != -1)
+	if (redir_fd != -1) {
 		close(redir_fd);
-	if (status_fifo != NULL)
+	}
+
+	if (status_fifo != NULL) {
 		fclose(status_fifo);
+	}
+
 	ungrab();
 	cleanup();
 	destroy_chord(escape_chord);
@@ -201,8 +205,7 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 		hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
 		if (hk != NULL) {
 			run(hk->command, hk->sync);
-			if (status_fifo != NULL)
-				put_status(COMMAND_PREFIX, hk->command);
+			put_status(COMMAND_PREFIX, hk->command);
 		}
 	}
 	switch (event_type) {
@@ -307,6 +310,9 @@ void hold(int sig)
 
 void put_status(char c, const char *s)
 {
+	if (status_fifo == NULL) {
+		return;
+	}
 	fprintf(status_fifo, "%c%s\n", c, s);
 	fflush(status_fifo);
 }

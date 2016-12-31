@@ -44,7 +44,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 				if (!chained) {
 					snprintf(progress, sizeof(progress), "%s", c->state->repr);
 				} else {
-					strncat(progress, LNK_SEP, sizeof(progress) - strlen(progress) - 1);
+					strncat(progress, ";", sizeof(progress) - strlen(progress) - 1);
 					strncat(progress, c->state->repr, sizeof(progress) - strlen(progress) - 1);
 				}
 				put_status(HOTKEY_PREFIX, progress);
@@ -86,6 +86,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 	if (!chained) {
 		if (num_active > 0) {
 			chained = true;
+			put_status(BEGIN_CHAIN_PREFIX, "Begin chain");
 			grab_chord(escape_chord);
 		}
 	} else if (num_active == 0 || match_chord(escape_chord, event_type, keysym, button, modfield)) {
@@ -218,6 +219,7 @@ void add_hotkey(hotkey_t *hk)
 void abort_chain(void)
 {
 	PUTS("abort chain");
+	put_status(END_CHAIN_PREFIX, "End chain");
 	for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next)
 		hk->chain->state = hk->chain->head;
 	chained = false;
