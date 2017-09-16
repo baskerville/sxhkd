@@ -50,3 +50,7 @@ The format of the configuration file supports a simple notation for mapping mult
 
 - [vim-sxhkdrc](https://github.com/baskerville/vim-sxhkdrc).
 - [sxhkd-vim](https://github.com/kovetskiy/sxhkd-vim).
+
+----
+
+For further information, check the `man` pages.
