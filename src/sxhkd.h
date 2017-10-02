@@ -58,7 +58,8 @@ int mapping_count;
 int timeout;
 
 hotkey_t *hotkeys_head, *hotkeys_tail;
-bool running, grabbed, toggle_grab, reload, bell, chained, locked;
+bool running, grabbed, toggle_grab, reload, bell, chained;
+hotkey_t *locked;
 chord_t *escape_chord;
 
 uint16_t num_lock;

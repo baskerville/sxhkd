@@ -37,8 +37,9 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 
 	for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next) {
 		chain_t *c = hk->chain;
-		if (chained && c->state == c->head)
+		if ((chained && c->state == c->head) || (locked != NULL && hk != locked)) {
 			continue;
+		}
 		if (match_chord(c->state, event_type, keysym, button, modfield)) {
 			if (status_fifo != NULL && num_active == 0) {
 				if (!chained) {
@@ -51,8 +52,8 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 			}
 			if (replay_event != NULL && c->state->replay_event)
 				*replay_event = true;
-			if (!locked && c->state->lock_chain) {
-				locked = true;
+			if (locked == NULL && c->state->lock_chain) {
+				locked = hk;
 				if (timeout > 0)
 					alarm(0);
 			}
@@ -64,7 +65,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 						result = hk;
 					continue;
 				}
-				if (chained && !locked)
+				if (chained && locked == NULL)
 					abort_chain();
 				return hk;
 			} else {
@@ -73,7 +74,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 				grab_chord(c->state);
 			}
 		} else if (chained) {
-			if (!locked && c->state->event_type == event_type)
+			if (locked == NULL && c->state->event_type == event_type)
 				c->state = c->head;
 			else
 				num_active++;
@@ -93,7 +94,7 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 		abort_chain();
 		return find_hotkey(keysym, button, modfield, event_type, replay_event);
 	}
-	if (chained && !locked && timeout > 0)
+	if (chained && locked == NULL && timeout > 0)
 		alarm(timeout);
 	PRINTF("num active %i\n", num_active);
 
@@ -223,7 +224,7 @@ void abort_chain(void)
 	for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next)
 		hk->chain->state = hk->chain->head;
 	chained = false;
-	locked = false;
+	locked = NULL;
 	if (timeout > 0)
 		alarm(0);
 	ungrab();
