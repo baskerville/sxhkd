@@ -121,8 +121,7 @@ int main(int argc, char *argv[])
 
 	fd_set descriptors;
 
-	reload = toggle_grab = bell = chained = false;
-	locked = NULL;
+	reload = toggle_grab = bell = chained = locked = false;
 	running = true;
 
 	xcb_flush(dpy);
