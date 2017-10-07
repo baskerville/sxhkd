@@ -33,11 +33,12 @@
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
 	int num_active = 0;
+	int num_locked = 0;
 	hotkey_t *result = NULL;
 
 	for (hotkey_t *hk = hotkeys_head; hk != NULL; hk = hk->next) {
 		chain_t *c = hk->chain;
-		if (chained && c->state == c->head)
+		if ((chained && c->state == c->head) || (locked && c->state != c->tail))
 			continue;
 		if (match_chord(c->state, event_type, keysym, button, modfield)) {
 			if (status_fifo != NULL && num_active == 0) {
@@ -51,8 +52,8 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 			}
 			if (replay_event != NULL && c->state->replay_event)
 				*replay_event = true;
-			if (!locked && c->state->lock_chain) {
-				locked = true;
+			if (c->state->lock_chain) {
+				num_locked += 1;
 				if (timeout > 0)
 					alarm(0);
 			}
@@ -82,6 +83,10 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 
 	if (result != NULL)
 		return result;
+
+	if (num_locked > 0) {
+		locked = true;
+	}
 
 	if (!chained) {
 		if (num_active > 0) {
