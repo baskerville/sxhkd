@@ -1,8 +1,8 @@
 [Unit]
 Description=Simple X Hotkey Daemon
 Documentation=man:sxhkd(1)
-BindsTo=xorg.service
-After=xorg.service
+BindsTo=display-manager.service
+After=display-manager.service
 
 [Service]
 ExecStart=/usr/bin/sxhkd
