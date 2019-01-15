@@ -92,9 +92,9 @@ hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfiel
 		if (num_active > 0) {
 			chained = true;
 			put_status(BEGIN_CHAIN_PREFIX, "Begin chain");
-			grab_chord(escape_chord);
+			grab_chord(abort_chord);
 		}
-	} else if (num_active == 0 || match_chord(escape_chord, event_type, keysym, button, modfield)) {
+	} else if (num_active == 0 || match_chord(abort_chord, event_type, keysym, button, modfield)) {
 		abort_chain();
 		return find_hotkey(keysym, button, modfield, event_type, replay_event);
 	}

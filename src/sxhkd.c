@@ -46,15 +46,16 @@ int main(int argc, char *argv[])
 	timeout = TIMEOUT;
 	grabbed = false;
 	redir_fd = -1;
+	abort_keysym = ESCAPE_KEYSYM;
 
-	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:")) != -1) {
+	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:a:")) != -1) {
 		switch (opt) {
 			case 'v':
 				printf("%s\n", VERSION);
 				exit(EXIT_SUCCESS);
 				break;
 			case 'h':
-				printf("sxhkd [-h|-v|-m COUNT|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO] [EXTRA_CONFIG ...]\n");
+				printf("sxhkd [-h|-v|-m COUNT|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO|-a ABORT_KEYSYM] [EXTRA_CONFIG ...]\n");
 				exit(EXIT_SUCCESS);
 				break;
 			case 'm':
@@ -74,6 +75,11 @@ int main(int argc, char *argv[])
 				break;
 			case 's':
 				fifo_path = optarg;
+				break;
+			case 'a':
+				if (!parse_keysym(optarg, &abort_keysym)) {
+					warn("Invalid keysym name: %s.\n", optarg);
+				}
 				break;
 		}
 	}
@@ -110,7 +116,7 @@ int main(int argc, char *argv[])
 	setup();
 	get_standard_keysyms();
 	get_lock_fields();
-	escape_chord = make_chord(ESCAPE_KEYSYM, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
+	abort_chord = make_chord(abort_keysym, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
 	load_config(config_file);
 	for (int i = 0; i < num_extra_confs; i++)
 		load_config(extra_confs[i]);
@@ -186,7 +192,7 @@ int main(int argc, char *argv[])
 
 	ungrab();
 	cleanup();
-	destroy_chord(escape_chord);
+	destroy_chord(abort_chord);
 	xcb_key_symbols_free(symbols);
 	xcb_disconnect(dpy);
 	return EXIT_SUCCESS;
@@ -236,10 +242,10 @@ void mapping_notify(xcb_generic_event_t *evt)
 	if (e->request == XCB_MAPPING_POINTER)
 		return;
 	if (xcb_refresh_keyboard_mapping(symbols, e) == 1) {
-		destroy_chord(escape_chord);
+		destroy_chord(abort_chord);
 		get_lock_fields();
 		reload_cmd();
-		escape_chord = make_chord(ESCAPE_KEYSYM, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
+		abort_chord = make_chord(abort_keysym, XCB_NONE, 0, XCB_KEY_PRESS, false, false);
 		if (mapping_count > 0)
 			mapping_count--;
 	}

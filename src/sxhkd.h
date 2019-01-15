@@ -59,7 +59,8 @@ int timeout;
 
 hotkey_t *hotkeys_head, *hotkeys_tail;
 bool running, grabbed, toggle_grab, reload, bell, chained, locked;
-chord_t *escape_chord;
+xcb_keysym_t abort_keysym;
+chord_t *abort_chord;
 
 uint16_t num_lock;
 uint16_t caps_lock;
