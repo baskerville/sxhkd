@@ -120,7 +120,7 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
 		chord_t *prev = NULL;
 		chord_t *orig = NULL;
 		xcb_keycode_t *keycodes = keycodes_from_keysym(keysym);
-		if (keycodes != NULL)
+		if (keycodes != NULL) {
 			for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++) {
 				xcb_keysym_t natural_keysym = xcb_key_symbols_get_keysym(symbols, *kc, 0);
 				for (unsigned char col = 0; col < KEYSYMS_PER_KEYCODE; col++) {
@@ -154,6 +154,9 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
 					}
 				}
 			}
+		} else {
+			warn("No keycodes found for keysym %u.\n", keysym);
+		}
 		free(keycodes);
 		chord = orig;
 	} else {

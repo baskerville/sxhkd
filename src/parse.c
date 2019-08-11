@@ -2471,7 +2471,7 @@ void process_hotkey(char *hotkey_string, char *command_string)
 			if (strcmp(hotkey, last_hotkey) == 0)
 				num_same++;
 		} else {
-			free(chain);
+			destroy_chain(chain);
 		}
 
 		if (hk_chunks == NULL && cm_chunks == NULL)
@@ -2671,7 +2671,7 @@ bool parse_chain(char *string, chain_t *chain)
 			}
 			char *nm = name + offset;
 			if (!parse_modifier(nm, &modfield) && !parse_keysym(nm, &keysym) && !parse_button(nm, &button)) {
-				warn("Unknown name: '%s'.\n", nm);
+				warn("Unknown keysym name: '%s'.\n", nm);
 				return false;
 			}
 		}
@@ -2680,6 +2680,9 @@ bool parse_chain(char *string, chain_t *chain)
 		if (button != XCB_NONE)
 			event_type = key_to_button(event_type);
 		chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event, lock_chain);
+		if (c == NULL) {
+			return false;
+		}
 		add_chord(chain, c);
 		if (status_fifo != NULL) {
 			snprintf(c->repr, sizeof(c->repr), "%s", chord);
