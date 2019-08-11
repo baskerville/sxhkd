@@ -243,6 +243,7 @@ void destroy_chain(chain_t *chain)
 		destroy_chord(c);
 		c = n;
 	}
+	free(chain);
 }
 
 void destroy_chord(chord_t *chord)
