@@ -2441,9 +2441,9 @@ void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *key
 
 void process_hotkey(char *hotkey_string, char *command_string)
 {
-	char hotkey[MAXLEN] = {0};
+	char hotkey[2 * MAXLEN] = {0};
 	char command[2 * MAXLEN] = {0};
-	char last_hotkey[MAXLEN] = {0};
+	char last_hotkey[2 * MAXLEN] = {0};
 	unsigned char num_same = 0;
 	chunk_t *hk_chunks = extract_chunks(hotkey_string);
 	chunk_t *cm_chunks = extract_chunks(command_string);
