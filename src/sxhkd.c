@@ -253,10 +253,18 @@ void mapping_notify(xcb_generic_event_t *evt)
 
 void setup(void)
 {
-	dpy = xcb_connect(NULL, NULL);
+	int screen_idx;
+	dpy = xcb_connect(NULL, &screen_idx);
 	if (xcb_connection_has_error(dpy))
 		err("Can't open display.\n");
-	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(dpy)).data;
+	xcb_screen_t *screen = NULL;
+	xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(dpy));
+	for (; screen_iter.rem; xcb_screen_next(&screen_iter), screen_idx--) {
+		if (screen_idx == 0) {
+			screen = screen_iter.data;
+			break;
+		}
+	}
 	if (screen == NULL)
 		err("Can't acquire screen.\n");
 	root = screen->root;
