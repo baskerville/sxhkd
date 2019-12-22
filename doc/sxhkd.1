@@ -86,7 +86,11 @@ It reads its configuration file from \fB$XDG_CONFIG_HOME/sxhkd/sxhkdrc\fR by def
 .sp
 Additional configuration files can be passed as arguments\&.
 .sp
-If \fBsxhkd\fR receives a \fISIGUSR1\fR (resp\&. \fISIGUSR2\fR) signal, it will reload its configuration file (resp\&. toggle the grabbing state of all its bindings)\&.
+If \fBsxhkd\fR receives a \fISIGUSR1\fR signal, it will reload its configuration file (resp\&. toggle the grabbing state of all its bindings)\&.
+.sp
+If \fBsxhkd\fR receives a \fISIGUSR2\fR signal, it will toggle the grabbing state of all its bindings\&.
+.sp
+If \fBsxhkd\fR receives a \fISIGALRM\fR signal, it will abort current chord chain\&.
 .sp
 The commands are executed via \fBSHELL\fR \fI\-c\fR \fBCOMMAND\fR (hence you can use environment variables)\&.
 .sp
