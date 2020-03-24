@@ -2669,6 +2669,16 @@ bool parse_chain(char *string, chain_t *chain)
 				event_type = XCB_KEY_RELEASE;
 				offset++;
 			}
+			
+			puts(name);
+			if(strstr(name,"0x"))
+			{
+				long keysym;
+				char *nm = name;
+				keysym = atol(nm);
+				puts("keysym code detected, bailing out..");
+				return false;
+			}
 			char *nm = name + offset;
 			if (!parse_modifier(nm, &modfield) && !parse_keysym(nm, &keysym) && !parse_button(nm, &button)) {
 				warn("Unknown keysym name: '%s'.\n", nm);
