@@ -2669,18 +2669,8 @@ bool parse_chain(char *string, chain_t *chain)
 				event_type = XCB_KEY_RELEASE;
 				offset++;
 			}
-			
-			puts(name);
-			if(strstr(name,"0x"))
-			{
-				long keysym;
-				char *nm = name;
-				keysym = atol(nm);
-				puts("keysym code detected, bailing out..");
-				return false;
-			}
 			char *nm = name + offset;
-			if (!parse_modifier(nm, &modfield) && !parse_keysym(nm, &keysym) && !parse_button(nm, &button)) {
+			if (!parse_modifier(nm, &modfield) && !parse_bindcode(nm,&keysym) && !parse_keysym(nm, &keysym) && !parse_button(nm, &button)) {
 				warn("Unknown keysym name: '%s'.\n", nm);
 				return false;
 			}
@@ -2707,6 +2697,22 @@ bool parse_chain(char *string, chain_t *chain)
 	return true;
 }
 
+
+bool parse_bindcode(char *name, xcb_keysym_t *keysym)
+{
+	for (unsigned int i = 0; i < LENGTH(nks_dict); i++) {
+		keysym_dict_t nks = nks_dict[i];
+		if(strstr(name,"0x")){
+				unsigned int intkey = (unsigned int)strtol(name, NULL, 0);
+				if(nks.keysym == intkey){
+					*keysym = nks.keysym;
+					return true;
+				}
+			}
+	}
+	return false;
+}
+	
 bool parse_keysym(char *name, xcb_keysym_t *keysym)
 {
 	for (unsigned int i = 0; i < LENGTH(nks_dict); i++) {
@@ -2715,6 +2721,15 @@ bool parse_keysym(char *name, xcb_keysym_t *keysym)
 			*keysym = nks.keysym;
 			return true;
 		}
+		else if(strstr(name,"0x")){
+				unsigned int intkey;
+				char *nm = name;
+				intkey = atoi(nm);
+				if(nks.keysym == intkey){
+				*keysym = nks.keysym;
+				return true;
+			}
+			}
 	}
 	return false;
 }
