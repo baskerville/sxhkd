@@ -2721,15 +2721,6 @@ bool parse_keysym(char *name, xcb_keysym_t *keysym)
 			*keysym = nks.keysym;
 			return true;
 		}
-		else if(strstr(name,"0x")){
-				unsigned int intkey;
-				char *nm = name;
-				intkey = atoi(nm);
-				if(nks.keysym == intkey){
-				*keysym = nks.keysym;
-				return true;
-			}
-			}
 	}
 	return false;
 }
