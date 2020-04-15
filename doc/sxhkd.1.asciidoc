@@ -107,7 +107,7 @@ If *~* is added at the beginning of the keysym, the captured event will be repla
 
 Pointer hotkeys can be defined by using one of the following special keysym names: _button1_, _button2_, _button3_, …, _button24_.
 
-The hotkey and the command may contain sequences of the form '{STRING_1,…,STRING_N}'.
+The hotkey and the command may contain sequences of the form '{STRING_1,…,STRING_N}'. This can be disabled for certain pairs of braces by escaping them: '\\{...\\}'.
 
 In addition, the sequences can contain ranges of the form _A_-_Z_ where _A_ and _Z_ are alphanumeric characters.
 
