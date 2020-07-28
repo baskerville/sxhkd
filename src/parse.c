@@ -32,6 +32,9 @@
 #include "locales.h"
 #include "parse.h"
 
+xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
+             Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
+
 keysym_dict_t nks_dict[] = {/*{{{*/
 	{"VoidSymbol"                  , 0xffffff}   ,
 #ifdef XK_MISCELLANY

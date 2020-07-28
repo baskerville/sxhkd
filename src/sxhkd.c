@@ -36,6 +36,30 @@
 #include "parse.h"
 #include "grab.h"
 
+xcb_connection_t *dpy;
+xcb_window_t root;
+xcb_key_symbols_t *symbols;
+
+char *shell;
+char config_file[MAXLEN];
+char *config_path;
+char **extra_confs;
+int num_extra_confs;
+int redir_fd;
+FILE *status_fifo;
+char progress[3 * MAXLEN];
+int mapping_count;
+int timeout;
+
+hotkey_t *hotkeys_head, *hotkeys_tail;
+bool running, grabbed, toggle_grab, reload, bell, chained, locked;
+xcb_keysym_t abort_keysym;
+chord_t *abort_chord;
+
+uint16_t num_lock;
+uint16_t caps_lock;
+uint16_t scroll_lock;
+
 int main(int argc, char *argv[])
 {
 	int opt;

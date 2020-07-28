@@ -34,6 +34,8 @@
 #define ESCAPE_KEYSYM        0xff1b
 #define SYNCHRONOUS_CHAR     ';'
 
+extern xcb_keysym_t Mode_switch;
+
 typedef struct chord_t chord_t;
 struct chord_t {
 	char repr[MAXLEN];
@@ -72,9 +74,6 @@ typedef struct {
 	char *name;
 	xcb_keysym_t keysym;
 } keysym_dict_t;
-
-xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
-             Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
 
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event);
 bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield);

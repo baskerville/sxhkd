@@ -51,9 +51,6 @@ struct chunk_t {
 	chunk_t *next;
 };
 
-xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
-             Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
-
 void load_config(const char *config_file);
 void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *keysym, xcb_button_t *button, uint16_t *modfield);
 void process_hotkey(char *hotkey_string, char *command_string);
