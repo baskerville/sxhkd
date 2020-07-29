@@ -8,3 +8,5 @@ sxhkd.o: sxhkd.c grab.h helpers.h parse.h sxhkd.h types.h
 OBJ += sxhkd.o
 types.o: types.c grab.h helpers.h parse.h sxhkd.h types.h
 OBJ += types.o
+macros.o: macros.h macros.c
+OBJ += macros.o
