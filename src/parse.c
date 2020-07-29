@@ -30,6 +30,7 @@
 #include <inttypes.h>
 #include <ctype.h>
 #include "locales.h"
+#include "macros.h"
 #include "parse.h"
 
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
@@ -2368,6 +2369,33 @@ keysym_dict_t nks_dict[] = {/*{{{*/
 #endif
 };/*}}}*/
 
+#define HASH_TABLE_SIZE 1543
+
+#define IS_DEF(x) (\
+    (x[0] == 'D' || x[0] == 'd') && \
+    (x[1] == 'E' || x[1] == 'e') && \
+    (x[2] == 'F' || x[2] == 'f') && \
+    (x[3] == ' ' || x[3] == '\t'))
+
+static inline void parse_macro(ht_t *ht, const char *macro_string, char *prefix){
+    char name[MAXLEN];
+    char value[MAXLEN];
+    size_t i = strlen(prefix) + 1; // strlen("DEF") + 1
+    size_t ni = 0; // name index
+    size_t vi = 0; // value index
+    name[0] = value[0] = '\0';
+    while(isspace(macro_string[i])) i++;
+    while(isgraph(macro_string[i]))
+       name[ni++] = macro_string[i++];
+    while(isspace(macro_string[i])) i++;
+    while(macro_string[i] != '\0')
+       value[vi++] = macro_string[i++];
+    name[ni] = '\0';
+    value[vi] = '\0';
+    PRINTF("> MACRO: '%s' -> '%s'\n", name, value);
+    ht_set_processed(ht, name, value);
+}
+
 void load_config(const char *config_file)
 {
 	PRINTF("load configuration '%s'\n", config_file);
@@ -2377,9 +2405,15 @@ void load_config(const char *config_file)
 
 	char buf[3 * MAXLEN];
 	char chain[MAXLEN] = {0};
+	char macro[2 * MAXLEN] = {0};
 	char command[2 * MAXLEN] = {0};
 	int offset = 0;
 	char first;
+    char *var_chain = NULL;
+    char *var_command = NULL;
+    bool macro_state = false;
+
+    ht_t *ht = ht_create(HASH_TABLE_SIZE);
 
 	while (fgets(buf, sizeof(buf), cfg) != NULL) {
 		first = buf[0];
@@ -2392,8 +2426,12 @@ void load_config(const char *config_file)
 			char *end = rgraph(buf);
 			*(end + 1) = '\0';
 
-			if (isgraph(first))
-				snprintf(chain + offset, sizeof(chain) - offset, "%s", start);
+            macro_state = IS_DEF(start) || macro_state;
+			if (isgraph(first) || macro_state)
+                if (macro_state)
+                    snprintf(macro + offset, sizeof(macro) - offset, "%s", start);
+                else
+                    snprintf(chain + offset, sizeof(chain) - offset, "%s", start);
 			else
 				snprintf(command + offset, sizeof(command) - offset, "%s", start);
 
@@ -2402,16 +2440,29 @@ void load_config(const char *config_file)
 				continue;
 			} else {
 				offset = 0;
+                macro_state = false;
 			}
 
+            if(strlen(macro) > 0){
+                parse_macro(ht, macro, "DEF");
+                macro[0] = '\0';
+                continue;
+            }
+
 			if (isspace(first) && strlen(chain) > 0 && strlen(command) > 0) {
-				process_hotkey(chain, command);
-				chain[0] = '\0';
-				command[0] = '\0';
+                var_chain = ht_process_macros(ht, chain);
+                var_command = ht_process_macros(ht, command);
+                process_hotkey(var_chain, var_command);
+                free(var_chain);
+                free(var_command);
+                chain[0] = '\0';
+                command[0] = '\0';
 			}
 		}
 	}
 
+
+    ht_destroy(ht);
 	fclose(cfg);
 }
 
@@ -2441,6 +2492,7 @@ void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *key
 		PRINTF("button release %u %u\n", *button, *modfield);
 	}
 }
+
 
 void process_hotkey(char *hotkey_string, char *command_string)
 {
