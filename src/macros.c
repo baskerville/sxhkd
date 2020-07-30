@@ -92,15 +92,15 @@ static FORCE_INLINE uint32_t hash_to_index(const ht_t *ht, uint32_t h) {
 // Trim a string left and right and return its new length
 static FORCE_INLINE size_t str_trim(char *src){
     size_t i = 0;
-    size_t j = safe_strlen(src);
     size_t ts = 0;
-    if(src != NULL){
-        while(i < j && !isgraph(src[i])) i++;
-        while(!isgraph(src[j])) j--;
-        ts = j - i + 1;
-        memcpy(src, src+i, ts);
-        src[ts] = '\0';
-    }
+    size_t j = safe_strlen(src) - 1;
+    if(src == NULL || j <= 0)
+        return 0;
+    while(j > 0 && isspace(src[j])) j--;
+    while(i <= j && isspace(src[i])) i++;
+    ts = j - i + 1;
+    memcpy(src, src+i, ts);
+    src[ts] = '\0';
     return ts;
 }
 
