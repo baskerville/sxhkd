@@ -33,6 +33,9 @@ typedef struct{
 
 // Hash Table for Macros {{{
 // MurMur3 hash function
+// Adapted from:
+// https://github.com/stephane-martin/cycapture/blob/master/cycapture/murmur.c
+// Credit: Stephane Martin
 static FORCE_INLINE uint32_t hash(const void *data, size_t nbytes) {
     if (data == NULL || nbytes == 0)
         return 0;
