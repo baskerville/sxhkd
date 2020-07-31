@@ -45,7 +45,7 @@ static FORCE_INLINE uint32_t hash(const void *data, size_t nbytes) {
 
     const int nblocks = nbytes / 4;
     const uint32_t *blocks = (const uint32_t *) (data);
-    const uint8_t *tail = (const uint8_t *) (data + (nblocks * 4));
+    const uint8_t *tail = (const uint8_t *) data + nblocks * 4;
 
     uint32_t h = 0;
 
