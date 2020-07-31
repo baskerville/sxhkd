@@ -68,8 +68,10 @@ static FORCE_INLINE uint32_t hash(const void *data, size_t nbytes)
 	switch (nbytes & 3) {
 		case 3:
 			k ^= tail[2] << 16;
+			/* FALLTHRU */
 		case 2:
 			k ^= tail[1] << 8;
+			/* FALLTHRU */
 		case 1:
 			k ^= tail[0];
 			k *= c1;
