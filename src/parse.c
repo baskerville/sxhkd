@@ -2372,28 +2372,29 @@ keysym_dict_t nks_dict[] = {/*{{{*/
 #define HASH_TABLE_SIZE 1543
 
 #define IS_DEF(x) (\
-    (x[0] == 'D' || x[0] == 'd') && \
-    (x[1] == 'E' || x[1] == 'e') && \
-    (x[2] == 'F' || x[2] == 'f') && \
-    (x[3] == ' ' || x[3] == '\t'))
+	(x[0] == 'D' || x[0] == 'd') && \
+	(x[1] == 'E' || x[1] == 'e') && \
+	(x[2] == 'F' || x[2] == 'f') && \
+	(x[3] == ' ' || x[3] == '\t'))
 
-static inline void parse_macro(ht_t *ht, const char *macro_string, char *prefix){
-    char name[MAXLEN];
-    char value[MAXLEN];
-    size_t i = strlen(prefix) + 1; // strlen("DEF") + 1
-    size_t ni = 0; // name index
-    size_t vi = 0; // value index
-    name[0] = value[0] = '\0';
-    while(isspace(macro_string[i])) i++;
-    while(isgraph(macro_string[i]))
-       name[ni++] = macro_string[i++];
-    while(isspace(macro_string[i])) i++;
-    while(macro_string[i] != '\0')
-       value[vi++] = macro_string[i++];
-    name[ni] = '\0';
-    value[vi] = '\0';
-    PRINTF("> MACRO: '%s' -> '%s'\n", name, value);
-    ht_set_processed(ht, name, value);
+static inline void parse_macro(ht_t *ht, const char *macro_string, char *prefix)
+{
+	char name[MAXLEN];
+	char value[MAXLEN];
+	size_t i = strlen(prefix) + 1; // strlen("DEF") + 1
+	size_t ni = 0; // name index
+	size_t vi = 0; // value index
+	name[0] = value[0] = '\0';
+	while(isspace(macro_string[i])) i++;
+	while(isgraph(macro_string[i]))
+	   name[ni++] = macro_string[i++];
+	while(isspace(macro_string[i])) i++;
+	while(macro_string[i] != '\0')
+	   value[vi++] = macro_string[i++];
+	name[ni] = '\0';
+	value[vi] = '\0';
+	PRINTF("> MACRO: '%s' -> '%s'\n", name, value);
+	ht_set_processed(ht, name, value);
 }
 
 void load_config(const char *config_file)
@@ -2409,11 +2410,11 @@ void load_config(const char *config_file)
 	char command[2 * MAXLEN] = {0};
 	int offset = 0;
 	char first;
-    char *var_chain = NULL;
-    char *var_command = NULL;
-    bool macro_state = false;
+	char *var_chain = NULL;
+	char *var_command = NULL;
+	bool macro_state = false;
 
-    ht_t *ht = ht_create(HASH_TABLE_SIZE);
+	ht_t *ht = ht_create(HASH_TABLE_SIZE);
 
 	while (fgets(buf, sizeof(buf), cfg) != NULL) {
 		first = buf[0];
@@ -2426,12 +2427,12 @@ void load_config(const char *config_file)
 			char *end = rgraph(buf);
 			*(end + 1) = '\0';
 
-            macro_state = IS_DEF(start) || macro_state;
+			macro_state = IS_DEF(start) || macro_state;
 			if (isgraph(first) || macro_state)
-                if (macro_state)
-                    snprintf(macro + offset, sizeof(macro) - offset, "%s", start);
-                else
-                    snprintf(chain + offset, sizeof(chain) - offset, "%s", start);
+				if (macro_state)
+					snprintf(macro + offset, sizeof(macro) - offset, "%s", start);
+				else
+					snprintf(chain + offset, sizeof(chain) - offset, "%s", start);
 			else
 				snprintf(command + offset, sizeof(command) - offset, "%s", start);
 
@@ -2440,29 +2441,28 @@ void load_config(const char *config_file)
 				continue;
 			} else {
 				offset = 0;
-                macro_state = false;
+				macro_state = false;
 			}
 
-            if(strlen(macro) > 0){
-                parse_macro(ht, macro, "DEF");
-                macro[0] = '\0';
-                continue;
-            }
+			if(strlen(macro) > 0){
+				parse_macro(ht, macro, "DEF");
+				macro[0] = '\0';
+				continue;
+			}
 
 			if (isspace(first) && strlen(chain) > 0 && strlen(command) > 0) {
-                var_chain = ht_process_macros(ht, chain);
-                var_command = ht_process_macros(ht, command);
-                process_hotkey(var_chain, var_command);
-                free(var_chain);
-                free(var_command);
-                chain[0] = '\0';
-                command[0] = '\0';
+				var_chain = ht_process_macros(ht, chain);
+				var_command = ht_process_macros(ht, command);
+				process_hotkey(var_chain, var_command);
+				free(var_chain);
+				free(var_command);
+				chain[0] = '\0';
+				command[0] = '\0';
 			}
 		}
 	}
 
-
-    ht_destroy(ht);
+	ht_destroy(ht);
 	fclose(cfg);
 }
 

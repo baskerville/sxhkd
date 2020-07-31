@@ -3,16 +3,16 @@
 
 // Macros Hash Table
 typedef struct {
-    void *key;
-    void *value;
-    size_t k_len;
-    size_t v_len;
+	void *key;
+	void *value;
+	size_t k_len;
+	size_t v_len;
 } macro_t;
 
 // A Hash Table is a dynamically allocated array of macros.
 typedef struct{
-    macro_t *entries;
-    size_t size;
+	macro_t *entries;
+	size_t size;
 } ht_t;
 
 ht_t *ht_create(const size_t size);
