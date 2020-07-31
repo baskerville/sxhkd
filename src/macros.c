@@ -231,7 +231,7 @@ char *ht_process_macros(const ht_t *ht, const char * restrict src){
     size_t ch_count = 0;
     size_t src_len = safe_strlen(src);
     txt_chunk chunks[MAX_CHUNKS];
-    char def[CHUNK_MAX_LEN];
+    char def[CHUNK_MAX_LEN] = {0};
     char *result = NULL;
 
     if(src_len == 0){
