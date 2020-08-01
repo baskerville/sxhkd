@@ -2629,7 +2629,7 @@ chunk_t *extract_chunks(char *s)
 
 chunk_t *make_chunk(void)
 {
-	chunk_t *c = malloc(sizeof(chunk_t));
+	chunk_t *c = calloc(1, sizeof(chunk_t));
 	c->sequence = false;
 	c->advance = NULL;
 	c->next = NULL;
