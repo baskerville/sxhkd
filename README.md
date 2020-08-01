@@ -44,6 +44,16 @@ The format of the configuration file supports a simple notation for mapping mult
 	super + alt + p
 		bspc config focus_follows_pointer {true,false}
 
+	# Smart resize, will grow or shrink depending on location.
+	# Will always grow for floating nodes.
+	super + ctrl + alt + {Left,Down,Up,Right}
+	  n=10; \
+	  { d1=left;   d2=right;  dx=-$n; dy=0;   \
+	  , d1=bottom; d2=top;    dx=0;   dy=$n;  \
+	  , d1=top;    d2=bottom; dx=0;   dy=-$n; \
+	  , d1=right;  d2=left;   dx=$n;  dy=0;   \
+	  } \
+	  bspc node --resize $d1 $dx $dy || bspc node --resize $d2 $dx $dy
 ## Macros
 
 The configuration file _may_ contain a set of macros to ease bindings
