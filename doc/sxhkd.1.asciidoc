@@ -58,7 +58,11 @@ It reads its configuration file from *$XDG_CONFIG_HOME/sxhkd/sxhkdrc* by default
 
 Additional configuration files can be passed as arguments.
 
-If *sxhkd* receives a _SIGUSR1_ (resp. _SIGUSR2_) signal, it will reload its configuration file (resp. toggle the grabbing state of all its bindings).
+If *sxhkd* receives a _SIGUSR1_ signal, it will reload its configuration file.
+
+If *sxhkd* receives a _SIGUSR2_ signal, it will toggle the grabbing state of all its bindings.
+
+If *sxhkd* receives a _SIGALRM_ signal, it will abort its current chord chain.
 
 The commands are executed via *SHELL* _-c_ *COMMAND* (hence you can use environment variables).
 
