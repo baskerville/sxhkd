@@ -118,8 +118,8 @@ bool chains_interfere(chain_t* a, chain_t* b) {
 	chord_t* j = b->head;
 	for (; i && j; i = i->next, j = j->next) {
 		bool match = false;
-		for (chord_t* u = i, *v = j; u && v; u = u->more, v = v->more) {
-			if (u->event_type == v->event_type && u->keysym == v->keysym && u->button == v->button && u->modfield == v->modfield) {
+		for (chord_t* k = i; k; k = k->more) {
+			if (match_chord(j, k->event_type, k->keysym, k->button, k->modfield)) {
 				match = true;
 				break;
 			}
