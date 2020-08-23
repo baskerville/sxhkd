@@ -113,6 +113,25 @@ bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_bu
 	return false;
 }
 
+bool chains_interfere(chain_t* a, chain_t* b) {
+	chord_t* i = a->head;
+	chord_t* j = b->head;
+	for (; i && j; i = i->next, j = j->next) {
+		bool match = false;
+		for (chord_t* k = i; k; k = k->more) {
+			if (match_chord(j, k->event_type, k->keysym, k->button, k->modfield)) {
+				match = true;
+				break;
+			}
+		}
+		if (!match) {
+			break;
+		}
+	}
+	bool result = !i || !j;
+	return result;
+}
+
 chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain)
 {
 	chord_t *chord;
