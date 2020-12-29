@@ -113,6 +113,8 @@ In addition, the sequences can contain ranges of the form _A_-_Z_ where _A_ and 
 
 The underscore character represents an empty sequence element.
 
+Multiple hotkeys can be provided to execute the same command. Each hotkey should be on a separate line with no indentation.
+
 Author
 ------
 
