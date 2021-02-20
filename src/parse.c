@@ -32,6 +32,9 @@
 #include "locales.h"
 #include "parse.h"
 
+xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
+             Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
+
 keysym_dict_t nks_dict[] = {/*{{{*/
 	{"VoidSymbol"                  , 0xffffff}   ,
 #ifdef XK_MISCELLANY
@@ -2441,9 +2444,9 @@ void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *key
 
 void process_hotkey(char *hotkey_string, char *command_string)
 {
-	char hotkey[MAXLEN] = {0};
+	char hotkey[2 * MAXLEN] = {0};
 	char command[2 * MAXLEN] = {0};
-	char last_hotkey[MAXLEN] = {0};
+	char last_hotkey[2 * MAXLEN] = {0};
 	unsigned char num_same = 0;
 	chunk_t *hk_chunks = extract_chunks(hotkey_string);
 	chunk_t *cm_chunks = extract_chunks(command_string);
@@ -2471,7 +2474,7 @@ void process_hotkey(char *hotkey_string, char *command_string)
 			if (strcmp(hotkey, last_hotkey) == 0)
 				num_same++;
 		} else {
-			free(chain);
+			destroy_chain(chain);
 		}
 
 		if (hk_chunks == NULL && cm_chunks == NULL)
@@ -2626,7 +2629,7 @@ chunk_t *extract_chunks(char *s)
 
 chunk_t *make_chunk(void)
 {
-	chunk_t *c = malloc(sizeof(chunk_t));
+	chunk_t *c = calloc(1, sizeof(chunk_t));
 	c->sequence = false;
 	c->advance = NULL;
 	c->next = NULL;
@@ -2671,7 +2674,7 @@ bool parse_chain(char *string, chain_t *chain)
 			}
 			char *nm = name + offset;
 			if (!parse_modifier(nm, &modfield) && !parse_keysym(nm, &keysym) && !parse_button(nm, &button)) {
-				warn("Unknown name: '%s'.\n", nm);
+				warn("Unknown keysym name: '%s'.\n", nm);
 				return false;
 			}
 		}
@@ -2680,6 +2683,9 @@ bool parse_chain(char *string, chain_t *chain)
 		if (button != XCB_NONE)
 			event_type = key_to_button(event_type);
 		chord_t *c = make_chord(keysym, button, modfield, event_type, replay_event, lock_chain);
+		if (c == NULL) {
+			return false;
+		}
 		add_chord(chain, c);
 		if (status_fifo != NULL) {
 			snprintf(c->repr, sizeof(c->repr), "%s", chord);

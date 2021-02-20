@@ -36,6 +36,30 @@
 #include "parse.h"
 #include "grab.h"
 
+xcb_connection_t *dpy;
+xcb_window_t root;
+xcb_key_symbols_t *symbols;
+
+char *shell;
+char config_file[MAXLEN];
+char *config_path;
+char **extra_confs;
+int num_extra_confs;
+int redir_fd;
+FILE *status_fifo;
+char progress[3 * MAXLEN];
+int mapping_count;
+int timeout;
+
+hotkey_t *hotkeys_head, *hotkeys_tail;
+bool running, grabbed, toggle_grab, reload, bell, chained, locked;
+xcb_keysym_t abort_keysym;
+chord_t *abort_chord;
+
+uint16_t num_lock;
+uint16_t caps_lock;
+uint16_t scroll_lock;
+
 int main(int argc, char *argv[])
 {
 	int opt;
@@ -253,10 +277,18 @@ void mapping_notify(xcb_generic_event_t *evt)
 
 void setup(void)
 {
-	dpy = xcb_connect(NULL, NULL);
+	int screen_idx;
+	dpy = xcb_connect(NULL, &screen_idx);
 	if (xcb_connection_has_error(dpy))
 		err("Can't open display.\n");
-	xcb_screen_t *screen = xcb_setup_roots_iterator(xcb_get_setup(dpy)).data;
+	xcb_screen_t *screen = NULL;
+	xcb_screen_iterator_t screen_iter = xcb_setup_roots_iterator(xcb_get_setup(dpy));
+	for (; screen_iter.rem; xcb_screen_next(&screen_iter), screen_idx--) {
+		if (screen_idx == 0) {
+			screen = screen_iter.data;
+			break;
+		}
+	}
 	if (screen == NULL)
 		err("Can't acquire screen.\n");
 	root = screen->root;

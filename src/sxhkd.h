@@ -42,29 +42,29 @@
 #define TIMEOUT_PREFIX      'T'
 #define TIMEOUT              3
 
-xcb_connection_t *dpy;
-xcb_window_t root;
-xcb_key_symbols_t *symbols;
+extern xcb_connection_t *dpy;
+extern xcb_window_t root;
+extern xcb_key_symbols_t *symbols;
 
-char *shell;
-char config_file[MAXLEN];
-char *config_path;
-char **extra_confs;
-int num_extra_confs;
-int redir_fd;
-FILE *status_fifo;
-char progress[3 * MAXLEN];
-int mapping_count;
-int timeout;
+extern char *shell;
+extern char config_file[MAXLEN];
+extern char *config_path;
+extern char **extra_confs;
+extern int num_extra_confs;
+extern int redir_fd;
+extern FILE *status_fifo;
+extern char progress[3 * MAXLEN];
+extern int mapping_count;
+extern int timeout;
 
-hotkey_t *hotkeys_head, *hotkeys_tail;
-bool running, grabbed, toggle_grab, reload, bell, chained, locked;
-xcb_keysym_t abort_keysym;
-chord_t *abort_chord;
+extern hotkey_t *hotkeys_head, *hotkeys_tail;
+extern bool running, grabbed, toggle_grab, reload, bell, chained, locked;
+extern xcb_keysym_t abort_keysym;
+extern chord_t *abort_chord;
 
-uint16_t num_lock;
-uint16_t caps_lock;
-uint16_t scroll_lock;
+extern uint16_t num_lock;
+extern uint16_t caps_lock;
+extern uint16_t scroll_lock;
 
 void key_button_event(xcb_generic_event_t *evt, uint8_t event_type);
 void mapping_notify(xcb_generic_event_t *evt);
