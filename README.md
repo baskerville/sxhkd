@@ -62,6 +62,10 @@ The format of the configuration file supports a simple notation for mapping mult
 - [vim-sxhkdrc](https://github.com/baskerville/vim-sxhkdrc).
 - [sxhkd-vim](https://github.com/kovetskiy/sxhkd-vim).
 
+### VS Code
+
+- [sxhkdrc-syntax](https://github.com/mosbasik/sxhkdrc-syntax).
+
 ----
 
 For further information, check the `man` pages.
