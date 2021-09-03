@@ -58,7 +58,7 @@ extern int mapping_count;
 extern int timeout;
 
 extern hotkey_t *hotkeys_head, *hotkeys_tail;
-extern bool running, grabbed, toggle_grab, reload, bell, chained, locked;
+extern bool running, grabbed, toggle_grab, reload, bell, chained, locked, print_hotkeys_mode;
 extern xcb_keysym_t abort_keysym;
 extern chord_t *abort_chord;
 
@@ -74,5 +74,7 @@ void reload_cmd(void);
 void toggle_grab_cmd(void);
 void hold(int sig);
 void put_status(char c, const char *s);
+void print_chord(chord_t *chord);
+void print_hotkeys(hotkey_t *head, hotkey_t *tail);
 
 #endif

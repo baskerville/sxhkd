@@ -48,6 +48,9 @@ Options
 *-a* _ABORT_KEYSYM_::
     Name of the keysym used for aborting chord chains.
 
+*-p*::
+    Print hotkeys and associated commands read from config files to stdout.
+
 
 Behavior
 --------
