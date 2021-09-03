@@ -52,7 +52,7 @@ int mapping_count;
 int timeout;
 
 hotkey_t *hotkeys_head, *hotkeys_tail;
-bool running, grabbed, toggle_grab, reload, bell, chained, locked;
+bool running, grabbed, toggle_grab, reload, bell, chained, locked, print_hotkeys_mode;
 xcb_keysym_t abort_keysym;
 chord_t *abort_chord;
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 	redir_fd = -1;
 	abort_keysym = ESCAPE_KEYSYM;
 
-	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:a:")) != -1) {
+	while ((opt = getopt(argc, argv, "hvpm:t:c:r:s:a:")) != -1) {
 		switch (opt) {
 			case 'v':
 				printf("%s\n", VERSION);
@@ -105,6 +105,9 @@ int main(int argc, char *argv[])
 					warn("Invalid keysym name: %s.\n", optarg);
 				}
 				break;
+		        case 'p':
+			        print_hotkeys_mode = 1;
+		                break;
 		}
 	}
 
@@ -144,6 +147,12 @@ int main(int argc, char *argv[])
 	load_config(config_file);
 	for (int i = 0; i < num_extra_confs; i++)
 		load_config(extra_confs[i]);
+
+	if (print_hotkeys_mode) {
+	  print_hotkeys(hotkeys_head, hotkeys_tail);
+	  exit(0);
+	}
+
 	grab();
 
 	xcb_generic_event_t *evt;
@@ -353,4 +362,24 @@ void put_status(char c, const char *s)
 	}
 	fprintf(status_fifo, "%c%s\n", c, s);
 	fflush(status_fifo);
+}
+
+void print_chain(chain_t *chain)
+{
+  chord_t *c = chain->head;
+  printf("%s", c->repr);
+  while (c != chain->tail) {
+    c = c->next;
+    printf(" ; %s", c->repr);
+  }
+  printf(" | ");
+}
+
+void print_hotkeys(hotkey_t *head, hotkey_t *tail)
+{
+  hotkey_t *h;
+  for (h = head; h != tail; h = h->next) {
+    print_chain(h->chain);
+    printf("%s\n", h->command);
+  }
 }
