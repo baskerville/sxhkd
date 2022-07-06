@@ -69,6 +69,5 @@ void get_standard_keysyms(void);
 void get_lock_fields(void);
 int16_t modfield_from_keysym(xcb_keysym_t keysym);
 int16_t modfield_from_keycode(xcb_keycode_t keycode);
-xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t keysym);
 
 #endif
