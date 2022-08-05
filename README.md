@@ -58,13 +58,14 @@ The format of the configuration file supports a simple notation for mapping mult
 ## Editor Plugins
 
 ### Vim
-
 - [vim-sxhkdrc](https://github.com/baskerville/vim-sxhkdrc).
 - [sxhkd-vim](https://github.com/kovetskiy/sxhkd-vim).
 
 ### VS Code
-
 - [sxhkdrc-syntax](https://github.com/mosbasik/sxhkdrc-syntax).
+
+### Emacs
+- [sxhkd-mode](https://github.com/xFA25E/sxhkd-mode)
 
 ----
 
