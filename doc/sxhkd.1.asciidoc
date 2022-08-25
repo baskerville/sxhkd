@@ -60,9 +60,13 @@ Additional configuration files can be passed as arguments.
 
 If *sxhkd* receives a _SIGUSR1_ (resp. _SIGUSR2_) signal, it will reload its configuration file (resp. toggle the grabbing state of all its bindings).
 
+If *sxhkd* recieves a _SIGALRM_ signal, it will break the current chain if there is one in progress.
+
 The commands are executed via *SHELL* _-c_ *COMMAND* (hence you can use environment variables).
 
 *SHELL* will be the content of the first defined environment variable in the following list: *SXHKD_SHELL*, *SHELL*.
+
+*SXHKD_PID* will be automatically set to the pid of *sxhkd* in processes spawned by *sxhkd*, which may be used by the child process to send easily signals such as _SIGALRM_ to the correct instance of *sxhkd*.
 
 If you have a non-QWERTY keyboard or a non-standard layout configuration, you should provide a _COUNT_ of _1_ to the *-m* option or _-1_ (interpreted as infinity) if you constantly switch from one layout to the other (*sxhkd* ignores all mapping notify events by default because the majority of those events are pointless).
 
