@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 08/26/2022
+.\"      Date: 11/19/2022
 .\"    Manual: Sxhkd Manual
-.\"    Source: Sxhkd 0.6.2-1-ga232f60
+.\"    Source: Sxhkd 0.6.2-3-g56d3377
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "08/26/2022" "Sxhkd 0\&.6\&.2\-1\-ga232f60" "Sxhkd Manual"
+.TH "SXHKD" "1" "11/19/2022" "Sxhkd 0\&.6\&.2\-3\-g56d3377" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -172,7 +172,7 @@ If \fB~\fR is added at the beginning of the keysym, the captured event will be r
 .sp
 Pointer hotkeys can be defined by using one of the following special keysym names: \fIbutton1\fR, \fIbutton2\fR, \fIbutton3\fR, \&..., \fIbutton24\fR\&.
 .sp
-The hotkey and the command may contain sequences of the form \fI{STRING_1,\&...,STRING_N}\fR\&.
+The hotkey and the command may contain sequences of the form \fI{STRING_1,\&...,STRING_N}\fR\&. Braces can be escaped with \fB\e\fR\&.
 .sp
 In addition, the sequences can contain ranges of the form \fIA\fR\-\fIZ\fR where \fIA\fR and \fIZ\fR are alphanumeric characters\&.
 .sp
