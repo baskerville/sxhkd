@@ -2376,7 +2376,8 @@ void load_config(const char *config_file)
 		err("Can't open configuration file: '%s'.\n", config_file);
 
 	char buf[3 * MAXLEN];
-	char chain[MAXLEN] = {0};
+	char **chains = 0;
+	int nchains = 0;
 	char command[2 * MAXLEN] = {0};
 	int offset = 0;
 	char first;
@@ -2392,10 +2393,22 @@ void load_config(const char *config_file)
 			char *end = rgraph(buf);
 			*(end + 1) = '\0';
 
-			if (isgraph(first))
-				snprintf(chain + offset, sizeof(chain) - offset, "%s", start);
-			else
+			if (isgraph(first)) {
+				char **chain;
+				size_t chain_len = end - start + offset + 2;
+				if (offset == 0) {
+					chains = realloc(chains, ++nchains * sizeof(char *));
+					chain = &chains[nchains - 1];
+					*chain = malloc(chain_len);
+				} else {
+					chain = &chains[nchains - 1];
+					*chain = realloc(*chain, chain_len);
+				}
+
+				snprintf(*chain + offset, chain_len - offset, "%s", start);
+			} else {
 				snprintf(command + offset, sizeof(command) - offset, "%s", start);
+			}
 
 			if (*end == PARTIAL_LINE) {
 				offset += end - start;
@@ -2404,12 +2417,24 @@ void load_config(const char *config_file)
 				offset = 0;
 			}
 
-			if (isspace(first) && strlen(chain) > 0 && strlen(command) > 0) {
-				process_hotkey(chain, command);
-				chain[0] = '\0';
+			if (isspace(first) && nchains > 0 && strlen(command) > 0) {
+				for (int i = 0; i < nchains; i++) {
+					process_hotkey(chains[i], command);
+					free(chains[i]);
+				}
+				free(chains);
+				chains = 0;
+				nchains = 0;
 				command[0] = '\0';
 			}
 		}
+	}
+
+	if (chains) {
+		for (int i = 0; i < nchains; i++) {
+			free(chains[i]);
+		}
+		free(chains);
 	}
 
 	fclose(cfg);

@@ -20,6 +20,7 @@ The format of the configuration file supports a simple notation for mapping mult
 	XF86LaunchB
 		xdotool selectwindow | xsel -bi
 
+	super + {Left,Down,Up,Right}
 	super + {h,j,k,l}
 		bspc node -f {west,south,north,east}
 
@@ -29,6 +30,7 @@ The format of the configuration file supports a simple notation for mapping mult
 	super + {alt,ctrl,alt + ctrl} + XF86Eject
 		sudo systemctl {suspend,reboot,poweroff}
 
+	super + {_,shift + }{Left,Down,Up,Right}
 	super + {_,shift + }{h,j,k,l}
 		bspc node -{f,s} {west,south,north,east}
 
