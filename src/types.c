@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include "parse.h"
 #include "grab.h"
+#include "keys.h"
 
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
@@ -134,18 +135,24 @@ bool chains_interfere(chain_t* a, chain_t* b) {
 
 chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool replay_event, bool lock_chain)
 {
-	chord_t *chord;
+	chord_t *chord = NULL;
 	if (button == XCB_NONE) {
 		chord_t *prev = NULL;
 		chord_t *orig = NULL;
-		xcb_keycode_t *keycodes = keycodes_from_keysym(keysym);
-		if (keycodes != NULL) {
-			for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++) {
-				xcb_keysym_t natural_keysym = xcb_key_symbols_get_keysym(symbols, *kc, 0);
-				for (unsigned char col = 0; col < KEYSYMS_PER_KEYCODE; col++) {
-					xcb_keysym_t ks = xcb_key_symbols_get_keysym(symbols, *kc, col);
-					if (ks == keysym) {
-						uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? modfield_from_keysym(Mode_switch) : 0);
+		// TODO:
+		// - again turning keysym into keycodes and back
+		// - why?
+		struct keycode_array keycodes = keycodes_from_keysym(kb_keymap, keysym);
+		if (keycodes.data != NULL) {
+			for (xkb_keycode_t const* kc = keycodes.data; kc != keycodes.data + keycodes.count; ++kc) {
+				xcb_keysym_t natural_keysym = keycode_to_keysym(kb_keymap, *kc);
+				struct keysym_array keysyms = keycode_to_keysyms(kb_keymap, *kc);
+				for (xkb_keysym_t const* ks = keysyms.data; ks != keysyms.data + keysyms.count; ++ks) {
+					if (*ks == keysym) {
+						// TODO:
+						// - this seems to consider modified versions of a keysym, i.e. a -> {a, A}
+						//uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? modfield_from_keysym(Mode_switch) : 0);
+						uint16_t implicit_modfield = 0;
 						uint16_t explicit_modfield = modfield | implicit_modfield;
 						chord = malloc(sizeof(chord_t));
 						bool unique = true;
@@ -176,7 +183,7 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
 		} else {
 			warn("No keycodes found for keysym %u.\n", keysym);
 		}
-		free(keycodes);
+		keycode_array_free(&keycodes);
 		chord = orig;
 	} else {
 		chord = malloc(sizeof(chord_t));
@@ -270,6 +277,8 @@ void destroy_chain(chain_t *chain)
 
 void destroy_chord(chord_t *chord)
 {
+	if(chord == NULL)
+		return;
 	chord_t *c = chord->more;
 	while (c != NULL) {
 		chord_t *n = c->more;

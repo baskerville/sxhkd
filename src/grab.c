@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include "parse.h"
 #include "grab.h"
+#include "keys.h"
 
 void grab(void)
 {
@@ -40,12 +41,16 @@ void grab_chord(chord_t *chord)
 {
 	for (chord_t *c = chord; c != NULL; c = c->more) {
 		if (c->button == XCB_NONE) {
-			xcb_keycode_t *keycodes = keycodes_from_keysym(c->keysym);
-			if (keycodes != NULL)
-				for (xcb_keycode_t *kc = keycodes; *kc != XCB_NO_SYMBOL; kc++)
-					if (c->keysym == xcb_key_symbols_get_keysym(symbols, *kc, 0))
+			// TODO:
+			// - this code seems to compute from c->keysym all keysyms that
+			//   correspond to the same keycode as itself
+			// - why do this?
+			struct keycode_array keycodes = keycodes_from_keysym(kb_keymap, c->keysym);
+			if (keycodes.data != NULL)
+				for (xkb_keycode_t const* kc = keycodes.data; kc != keycodes.data + keycodes.count; ++kc)
+					if (c->keysym == keycode_to_keysym(kb_keymap, *kc))
 						grab_key_button(*kc, c->button, c->modfield);
-			free(keycodes);
+			keycode_array_free(&keycodes);
 		} else {
 			grab_key_button(XCB_NONE, c->button, c->modfield);
 		}

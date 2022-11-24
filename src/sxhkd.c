@@ -38,7 +38,9 @@
 
 xcb_connection_t *dpy;
 xcb_window_t root;
-xcb_key_symbols_t *symbols;
+int32_t             kb_device  = -1;
+struct xkb_context* kb_context = NULL;
+struct xkb_keymap*  kb_keymap  = NULL;
 
 char *shell;
 char config_file[MAXLEN];
@@ -219,7 +221,8 @@ int main(int argc, char *argv[])
 	ungrab();
 	cleanup();
 	destroy_chord(abort_chord);
-	xcb_key_symbols_free(symbols);
+	xkb_keymap_unref(kb_keymap);
+	xkb_context_unref(kb_context);
 	xcb_disconnect(dpy);
 	return EXIT_SUCCESS;
 }
@@ -259,6 +262,23 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 	xcb_flush(dpy);
 }
 
+static bool refresh_keymap(void)
+{
+	struct xkb_keymap* keymap
+		= xkb_x11_keymap_new_from_device( kb_context
+		                                , dpy
+		                                , kb_device
+		                                , XKB_KEYMAP_COMPILE_NO_FLAGS);
+
+	if(keymap == NULL)
+		return false;
+
+	xkb_keymap_unref(kb_keymap);
+	kb_keymap = keymap;
+
+	return true;
+}
+
 void mapping_notify(xcb_generic_event_t *evt)
 {
 	if (!mapping_count)
@@ -267,7 +287,8 @@ void mapping_notify(xcb_generic_event_t *evt)
 	PRINTF("mapping notify %u %u\n", e->request, e->count);
 	if (e->request == XCB_MAPPING_POINTER)
 		return;
-	if (xcb_refresh_keyboard_mapping(symbols, e) == 1) {
+
+	if (refresh_keymap()) {
 		destroy_chord(abort_chord);
 		get_lock_fields();
 		reload_cmd();
@@ -296,7 +317,17 @@ void setup(void)
 	root = screen->root;
 	if ((shell = getenv(SXHKD_SHELL_ENV)) == NULL && (shell = getenv(SHELL_ENV)) == NULL)
 		err("The '%s' environment variable is not defined.\n", SHELL_ENV);
-	symbols = xcb_key_symbols_alloc(dpy);
+
+	// TODO:
+	// - Allow specifying keymap on the command line.
+	xcb_xkb_use_extension(dpy, XCB_XKB_MAJOR_VERSION, XCB_XKB_MINOR_VERSION);
+	if(NULL == (kb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS)))
+		err("Failed to allocate xkb context.\n");
+	if(-1 == (kb_device  = xkb_x11_get_core_keyboard_device_id(dpy)))
+		err("Failed to retrieve keyboard device.\n");
+	if(! refresh_keymap())
+		err("Failed to retrieve keymap.\n");
+
 	hotkeys_head = hotkeys_tail = NULL;
 	progress[0] = '\0';
 

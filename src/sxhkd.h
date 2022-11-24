@@ -26,6 +26,9 @@
 #define SXHKD_SXHKD_H
 
 #include <xcb/xcb_keysyms.h>
+#include <xcb/xkb.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-x11.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include "types.h"
@@ -44,7 +47,9 @@
 
 extern xcb_connection_t *dpy;
 extern xcb_window_t root;
-extern xcb_key_symbols_t *symbols;
+extern int32_t kb_device;
+extern struct xkb_context* kb_context;
+extern struct xkb_keymap*  kb_keymap;
 
 extern char *shell;
 extern char config_file[MAXLEN];

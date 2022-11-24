@@ -31,6 +31,7 @@
 #include <ctype.h>
 #include "locales.h"
 #include "parse.h"
+#include "keys.h"
 
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
              Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
@@ -2421,13 +2422,13 @@ void parse_event(xcb_generic_event_t *evt, uint8_t event_type, xcb_keysym_t *key
 		xcb_key_press_event_t *e = (xcb_key_press_event_t *) evt;
 		xcb_keycode_t keycode = e->detail;
 		*modfield = e->state;
-		*keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
+		*keysym = keycode_to_keysym(kb_keymap, keycode);
 		PRINTF("key press %u %u\n", keycode, *modfield);
 	} else if (event_type == XCB_KEY_RELEASE) {
 		xcb_key_release_event_t *e = (xcb_key_release_event_t *) evt;
 		xcb_keycode_t keycode = e->detail;
 		*modfield = e->state & ~modfield_from_keycode(keycode);
-		*keysym = xcb_key_symbols_get_keysym(symbols, keycode, 0);
+		*keysym = keycode_to_keysym(kb_keymap, keycode);
 		PRINTF("key release %u %u\n", keycode, *modfield);
 	} else if (event_type == XCB_BUTTON_PRESS) {
 		xcb_button_press_event_t *e = (xcb_button_press_event_t *) evt;
@@ -2819,12 +2820,12 @@ void get_lock_fields(void)
 int16_t modfield_from_keysym(xcb_keysym_t keysym)
 {
 	uint16_t modfield = 0;
-	xcb_keycode_t *keycodes = NULL;
-	if ((keycodes = keycodes_from_keysym(keysym)) != NULL) {
-		for (xcb_keycode_t *k = keycodes; *k != XCB_NO_SYMBOL; k++)
-			modfield |= modfield_from_keycode(*k);
+	struct keycode_array keycodes = keycodes_from_keysym(kb_keymap, keysym);
+	if (keycodes.data != NULL) {
+		for (xkb_keycode_t const* kc = keycodes.data; kc != keycodes.data + keycodes.count; ++kc)
+			modfield |= modfield_from_keycode(*kc);
 	}
-	free(keycodes);
+	keycode_array_free(&keycodes);
 	return modfield;
 }
 
@@ -2850,37 +2851,4 @@ int16_t modfield_from_keycode(xcb_keycode_t keycode)
 	}
 	free(reply);
 	return modfield;
-}
-
-xcb_keycode_t *keycodes_from_keysym(xcb_keysym_t keysym)
-{
-	xcb_setup_t const *setup;
-	unsigned int num = 0;
-	xcb_keycode_t *result = NULL, *result_np = NULL;
-
-	if ((setup = xcb_get_setup(dpy)) != NULL) {
-		xcb_keycode_t min_kc = setup->min_keycode;
-		xcb_keycode_t max_kc = setup->max_keycode;
-
-		/* We must choose a type for kc other than xcb_keycode_t whose size
-		 * is 1, otherwise, since max_kc will most likely be 255, if kc == 255,
-		 * kc++ would be 0 and the outer loop would start over ad infinitum */
-		for(unsigned int kc = min_kc; kc <= max_kc; kc++)
-			for(unsigned int col = 0; col < KEYSYMS_PER_KEYCODE; col++) {
-				xcb_keysym_t ks = xcb_key_symbols_get_keysym(symbols, kc, col);
-				if (ks == keysym) {
-					num++;
-					result_np = realloc(result, sizeof(xcb_keycode_t) * (num + 1));
-					if (result_np == NULL) {
-						free(result);
-						return NULL;
-					}
-					result = result_np;
-					result[num - 1] = kc;
-					result[num] = XCB_NO_SYMBOL;
-					break;
-				}
-			}
-	}
-	return result;
 }
