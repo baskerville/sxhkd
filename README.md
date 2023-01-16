@@ -66,6 +66,7 @@ The format of the configuration file supports a simple notation for mapping mult
 
 ### Emacs
 - [sxhkd-mode](https://github.com/xFA25E/sxhkd-mode)
+- [sxhkdrc-mode](https://github.com/protesilaos/sxhkdrc-mode)
 
 ----
 
