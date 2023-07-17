@@ -34,8 +34,6 @@
 #define ESCAPE_KEYSYM        0xff1b
 #define SYNCHRONOUS_CHAR     ';'
 
-extern xcb_keysym_t Mode_switch;
-
 typedef struct chord_t chord_t;
 struct chord_t {
 	char repr[MAXLEN];

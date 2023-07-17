@@ -33,7 +33,7 @@
 #include "parse.h"
 
 xcb_keysym_t Alt_L, Alt_R, Super_L, Super_R, Hyper_L, Hyper_R,
-             Meta_L, Meta_R, Mode_switch, Num_Lock, Scroll_Lock;
+             Meta_L, Meta_R, Num_Lock, Scroll_Lock;
 
 keysym_dict_t nks_dict[] = {/*{{{*/
 	{"VoidSymbol"                  , 0xffffff}   ,
@@ -2744,7 +2744,7 @@ bool parse_modifier(char *name, uint16_t *modfield)
 		*modfield |= (modfield_from_keysym(Meta_L) | modfield_from_keysym(Meta_R));
 		return true;
 	} else if (strcmp(name, "mode_switch") == 0) {
-		*modfield |= modfield_from_keysym(Mode_switch);
+		*modfield |= XCB_MOD_MASK_5;
 		return true;
 	} else if (strcmp(name, "mod1") == 0) {
 		*modfield |= XCB_MOD_MASK_1;
@@ -2802,7 +2802,6 @@ void get_standard_keysyms(void)
 	GETKS(Super_R)
 	GETKS(Hyper_L)
 	GETKS(Hyper_R)
-	GETKS(Mode_switch)
 	GETKS(Num_Lock)
 	GETKS(Scroll_Lock)
 #undef GETKS
