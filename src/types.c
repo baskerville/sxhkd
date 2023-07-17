@@ -145,7 +145,7 @@ chord_t *make_chord(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield,
 				for (unsigned char col = 0; col < KEYSYMS_PER_KEYCODE; col++) {
 					xcb_keysym_t ks = xcb_key_symbols_get_keysym(symbols, *kc, col);
 					if (ks == keysym) {
-						uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? modfield_from_keysym(Mode_switch) : 0);
+						uint16_t implicit_modfield = (col & 1 ? XCB_MOD_MASK_SHIFT : 0) | (col & 2 ? XCB_MOD_MASK_5 : 0);
 						uint16_t explicit_modfield = modfield | implicit_modfield;
 						chord = malloc(sizeof(chord_t));
 						bool unique = true;
