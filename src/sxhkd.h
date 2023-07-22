@@ -74,5 +74,6 @@ void reload_cmd(void);
 void toggle_grab_cmd(void);
 void hold(int sig);
 void put_status(char c, const char *s);
+bool debounce(xcb_keysym_t keysym, uint8_t event_type);
 
 #endif
