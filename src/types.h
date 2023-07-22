@@ -27,6 +27,7 @@
 
 #include <xcb/xcb_keysyms.h>
 #include <stdbool.h>
+#include <sys/time.h>
 #include "helpers.h"
 
 #define KEYSYMS_PER_KEYCODE  4
@@ -75,6 +76,13 @@ typedef struct {
 	xcb_keysym_t keysym;
 } keysym_dict_t;
 
+typedef struct evt_record evt_record;
+struct evt_record {
+	xcb_keysym_t keysym;
+	uint8_t event_type;
+	struct timeval timestamp;
+};
+
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event);
 bool match_chord(chord_t *chord, uint8_t event_type, xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield);
 bool chains_interfere(chain_t* a, chain_t* b);
@@ -87,5 +95,6 @@ void add_hotkey(hotkey_t *hk);
 void abort_chain(void);
 void destroy_chain(chain_t *chain);
 void destroy_chord(chord_t *chord);
+evt_record *make_record();
 
 #endif

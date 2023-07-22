@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include "parse.h"
 #include "grab.h"
+#include "types.h"
 
 hotkey_t *find_hotkey(xcb_keysym_t keysym, xcb_button_t button, uint16_t modfield, uint8_t event_type, bool *replay_event)
 {
@@ -277,4 +278,14 @@ void destroy_chord(chord_t *chord)
 		c = n;
 	}
 	free(chord);
+}
+
+evt_record *make_record()
+{
+	evt_record *record = malloc(sizeof(struct evt_record));
+	record->keysym = XCB_NO_SYMBOL;
+	record->event_type = 0;
+	record->timestamp.tv_sec = 0;
+	record->timestamp.tv_usec = 0;
+	return record;
 }

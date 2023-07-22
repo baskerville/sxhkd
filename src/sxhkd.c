@@ -35,6 +35,7 @@
 #include <stdbool.h>
 #include "parse.h"
 #include "grab.h"
+#include "types.h"
 
 xcb_connection_t *dpy;
 xcb_window_t root;
@@ -50,6 +51,8 @@ FILE *status_fifo;
 char progress[3 * MAXLEN];
 int mapping_count;
 int timeout;
+int ms_debounce;
+evt_record *record;
 
 char sxhkd_pid[MAXLEN];
 
@@ -74,14 +77,14 @@ int main(int argc, char *argv[])
 	redir_fd = -1;
 	abort_keysym = ESCAPE_KEYSYM;
 
-	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:a:")) != -1) {
+	while ((opt = getopt(argc, argv, "hvm:t:c:r:s:a:d:")) != -1) {
 		switch (opt) {
 			case 'v':
 				printf("%s\n", VERSION);
 				exit(EXIT_SUCCESS);
 				break;
 			case 'h':
-				printf("sxhkd [-h|-v|-m COUNT|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO|-a ABORT_KEYSYM] [EXTRA_CONFIG ...]\n");
+				printf("sxhkd [-h|-v|-m COUNT|-t TIMEOUT|-c CONFIG_FILE|-r REDIR_FILE|-s STATUS_FIFO|-a ABORT_KEYSYM|-d MS_DEBOUNCE] [EXTRA_CONFIG ...]\n");
 				exit(EXIT_SUCCESS);
 				break;
 			case 'm':
@@ -106,6 +109,9 @@ int main(int argc, char *argv[])
 				if (!parse_keysym(optarg, &abort_keysym)) {
 					warn("Invalid keysym name: %s.\n", optarg);
 				}
+				break;
+			case 'd':
+				ms_debounce = atoi(optarg);
 				break;
 		}
 	}
@@ -233,7 +239,7 @@ void key_button_event(xcb_generic_event_t *evt, uint8_t event_type)
 	uint16_t lockfield = num_lock | caps_lock | scroll_lock;
 	parse_event(evt, event_type, &keysym, &button, &modfield);
 	modfield &= ~lockfield & MOD_STATE_FIELD;
-	if (keysym != XCB_NO_SYMBOL || button != XCB_NONE) {
+	if ((keysym != XCB_NO_SYMBOL || button != XCB_NONE) && debounce(keysym, event_type)) {
 		hotkey_t *hk = find_hotkey(keysym, button, modfield, event_type, &replay_event);
 		if (hk != NULL) {
 			run(hk->command, hk->sync);
@@ -299,6 +305,7 @@ void setup(void)
 	symbols = xcb_key_symbols_alloc(dpy);
 	hotkeys_head = hotkeys_tail = NULL;
 	progress[0] = '\0';
+	record = make_record();
 
 	snprintf(sxhkd_pid, MAXLEN, "%i", getpid());
 	setenv("SXHKD_PID", sxhkd_pid, 1);
@@ -358,4 +365,25 @@ void put_status(char c, const char *s)
 	}
 	fprintf(status_fifo, "%c%s\n", c, s);
 	fflush(status_fifo);
+}
+
+
+bool debounce(xcb_keysym_t keysym, uint8_t event_type) {
+	if (!ms_debounce)
+		return true;
+	bool result = true;
+	struct timeval current_time;
+	gettimeofday(&current_time, NULL);
+	if (keysym == record->keysym && event_type == XCB_KEY_PRESS && record->event_type == XCB_KEY_RELEASE) {
+		double elapsed_secs = (current_time.tv_sec - record->timestamp.tv_sec);
+		double elapsed_usecs = (current_time.tv_usec - record->timestamp.tv_usec);
+		double elapsed_ms = elapsed_secs * 1000.0 + elapsed_usecs / 1000.0;
+		if (elapsed_ms < ms_debounce)
+			result = false;
+	}
+	record->keysym = keysym;
+	record->event_type = event_type;
+	record->timestamp.tv_sec = current_time.tv_sec;
+	record->timestamp.tv_usec = current_time.tv_usec;
+	return result;
 }

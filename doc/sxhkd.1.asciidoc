@@ -48,6 +48,9 @@ Options
 *-a* _ABORT_KEYSYM_::
     Name of the keysym used for aborting chord chains.
 
+*-d* _MS_DEBOUNCE_::
+    Debounce time between key release and keypress events.
+
 
 Behavior
 --------
@@ -69,6 +72,8 @@ The commands are executed via *SHELL* _-c_ *COMMAND* (hence you can use environm
 *SXHKD_PID* will be automatically set to the pid of *sxhkd* in processes spawned by *sxhkd*, which may be used by the child process to send easily signals such as _SIGALRM_ to the correct instance of *sxhkd*.
 
 If you have a non-QWERTY keyboard or a non-standard layout configuration, you should provide a _COUNT_ of _1_ to the *-m* option or _-1_ (interpreted as infinity) if you constantly switch from one layout to the other (*sxhkd* ignores all mapping notify events by default because the majority of those events are pointless).
+
+Keeping a key pressed for a long time may cause the key to be released and pressed again, which causes a chord chain break. You can use the *-d* option to set a debounce time between key release and keypress events.
 
 
 Configuration

@@ -2,12 +2,12 @@
 .\"     Title: sxhkd
 .\"    Author: [see the "Author" section]
 .\" Generator: DocBook XSL Stylesheets vsnapshot <http://docbook.sf.net/>
-.\"      Date: 11/19/2022
+.\"      Date: 07/22/2023
 .\"    Manual: Sxhkd Manual
-.\"    Source: Sxhkd 0.6.2-3-g56d3377
+.\"    Source: Sxhkd 0.6.2
 .\"  Language: English
 .\"
-.TH "SXHKD" "1" "11/19/2022" "Sxhkd 0\&.6\&.2\-3\-g56d3377" "Sxhkd Manual"
+.TH "SXHKD" "1" "07/22/2023" "Sxhkd 0\&.6\&.2" "Sxhkd Manual"
 .\" -----------------------------------------------------------------
 .\" * Define some portability stuff
 .\" -----------------------------------------------------------------
@@ -78,6 +78,11 @@ Output status information to the given FIFO\&.
 .RS 4
 Name of the keysym used for aborting chord chains\&.
 .RE
+.PP
+\fB\-d\fR \fIMS_DEBOUNCE\fR
+.RS 4
+Debounce time between key release and keypress events\&.
+.RE
 .SH "BEHAVIOR"
 .sp
 \fBsxhkd\fR is a daemon that listens to keyboard events and execute commands\&.
@@ -97,6 +102,8 @@ The commands are executed via \fBSHELL\fR \fI\-c\fR \fBCOMMAND\fR (hence you can
 \fBSXHKD_PID\fR will be automatically set to the pid of \fBsxhkd\fR in processes spawned by \fBsxhkd\fR, which may be used by the child process to send easily signals such as \fISIGALRM\fR to the correct instance of \fBsxhkd\fR\&.
 .sp
 If you have a non\-QWERTY keyboard or a non\-standard layout configuration, you should provide a \fICOUNT\fR of \fI1\fR to the \fB\-m\fR option or \fI\-1\fR (interpreted as infinity) if you constantly switch from one layout to the other (\fBsxhkd\fR ignores all mapping notify events by default because the majority of those events are pointless)\&.
+.sp
+Keeping a key pressed for a long time may cause the key to be released and pressed again, which causes a chord chain break\&. You can use the \fB\-d\fR option to set a debounce time between key release and keypress events\&.
 .SH "CONFIGURATION"
 .sp
 Each line of the configuration file is interpreted as so:
