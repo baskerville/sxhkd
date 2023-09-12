@@ -1,12 +1,47 @@
+# sxhkd
+
 ## Description
 
-*sxhkd* is an X daemon that reacts to input events by executing commands.
+`sxhkd` is an X daemon that reacts to input events by executing commands.
 
-Its configuration file is a series of bindings that define the associations between the input events and the commands.
+## Installation
+
+### Ubuntu/Debian
+
+First, install the dependencies:
+
+```
+sudo apt-get install xcb libxcb-keysyms1-dev libxcb-util0-dev
+```
+
+Then, install from source (see below).
+
+### Install from source
+
+```
+git clone git@github.com:baskerville/sxhkd.git
+cd sxhkd
+make
+sudo make install
+```
+
+## Usage
+
+To start the daemon in the foreground:
+
+```
+sxhkd
+```
+
+You can ensure that the daemon is always running by putting `sxkhd &` in your bashrc (or similar).
+
+## Configuration
+
+The configuration file used by `sxhkd` is a series of bindings that define the associations between the input events and the commands.
 
 The format of the configuration file supports a simple notation for mapping multiple shortcuts to multiple commands in parallel.
 
-## Example Bindings
+### Example Bindings
 
 	XF86Audio{Prev,Next}
 		mpc -q {prev,next}
@@ -55,16 +90,17 @@ The format of the configuration file supports a simple notation for mapping mult
 	  } \
 	  bspc node --resize $d1 $dx $dy || bspc node --resize $d2 $dx $dy
 
-## Editor Plugins
+### Editor Plugins
 
-### Vim
+#### Vim
+
 - [vim-sxhkdrc](https://github.com/baskerville/vim-sxhkdrc).
 - [sxhkd-vim](https://github.com/kovetskiy/sxhkd-vim).
 
-### VS Code
+#### VS Code
 - [sxhkdrc-syntax](https://github.com/mosbasik/sxhkdrc-syntax).
 
-### Emacs
+#### Emacs
 - [sxhkd-mode](https://github.com/xFA25E/sxhkd-mode)
 
 ----
