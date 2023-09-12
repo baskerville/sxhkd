@@ -2470,6 +2470,11 @@ void process_hotkey(char *hotkey_string, char *command_string)
 		chain_t *chain = make_chain();
 		if (parse_chain(hotkey, chain)) {
 			hotkey_t *hk = make_hotkey(chain, command);
+			for (hotkey_t* i = hotkeys_head; i; i = i->next) {
+				if (chains_interfere(i->chain, hk->chain)) {
+					warn("Hotkey interference found and may not be matched: '%s' (from '%s').\n", hotkey, hotkey_string);
+				}
+			}
 			add_hotkey(hk);
 			if (strcmp(hotkey, last_hotkey) == 0)
 				num_same++;

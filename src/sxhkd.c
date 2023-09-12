@@ -51,6 +51,8 @@ char progress[3 * MAXLEN];
 int mapping_count;
 int timeout;
 
+char sxhkd_pid[MAXLEN];
+
 hotkey_t *hotkeys_head, *hotkeys_tail;
 bool running, grabbed, toggle_grab, reload, bell, chained, locked;
 xcb_keysym_t abort_keysym;
@@ -297,6 +299,9 @@ void setup(void)
 	symbols = xcb_key_symbols_alloc(dpy);
 	hotkeys_head = hotkeys_tail = NULL;
 	progress[0] = '\0';
+
+	snprintf(sxhkd_pid, MAXLEN, "%i", getpid());
+	setenv("SXHKD_PID", sxhkd_pid, 1);
 }
 
 void cleanup(void)
