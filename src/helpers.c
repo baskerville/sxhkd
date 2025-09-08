@@ -79,6 +79,7 @@ void execute(char *cmd[])
 	if (redir_fd != -1) {
 		dup2(redir_fd, STDOUT_FILENO);
 		dup2(redir_fd, STDERR_FILENO);
+		close(redir_fd);
 	}
 	execvp(cmd[0], cmd);
 	err("Spawning failed.\n");
