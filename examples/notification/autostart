@@ -1,3 +1,3 @@
-#! /bin/sh
+#!/usr/bin/env sh
 
 sxhkd_notify "$SXHKD_FIFO" &
